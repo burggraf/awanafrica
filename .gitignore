@@ -25,4 +25,4 @@ dist-ssr
 
 # PocketBase
 bin/pocketbase
-pb_data
+bin/pb_data
