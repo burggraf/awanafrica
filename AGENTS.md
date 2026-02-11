@@ -1,4 +1,4 @@
-# Agent Documentation for AfricAwana
+# Agent Documentation for AwanAfrica
 
 This file provides instructions and context for AI agents working on this project.
 

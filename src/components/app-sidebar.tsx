@@ -69,7 +69,7 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">AfricAwana</span>
+                  <span className="truncate font-semibold">AwanAfrica</span>
                   <span className="truncate text-xs">Community</span>
                 </div>
               </a>
