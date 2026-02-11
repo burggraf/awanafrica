@@ -22,12 +22,10 @@ export function LanguageToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton tooltip={t('Language')}>
-          <div className="flex items-center gap-2">
-            <span className="text-lg leading-none" role="img" aria-label={t('Language')}>
-              {flags[currentLanguage as keyof typeof flags] || <Languages className="h-[1.2rem] w-[1.2rem]" />}
-            </span>
-            <span>{t('Language')}</span>
-          </div>
+          <span className="text-lg leading-none" role="img" aria-label={t('Language')}>
+            {flags[currentLanguage as keyof typeof flags] || <Languages className="h-[1.2rem] w-[1.2rem]" />}
+          </span>
+          <span>{t('Language')}</span>
         </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

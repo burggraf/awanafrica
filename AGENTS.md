@@ -38,7 +38,27 @@ The app uses a classic iOS-style layout:
 - Use the `object-cover` class on `AvatarImage` to prevent distortion.
 - Custom fields in the `users` collection: `displayName` (text), `bio` (text).
 
-### 4. PocketBase Migrations
+### 4. Light/Dark Mode
+- The app supports Light, Dark, and System modes using `next-themes` (or a custom `ThemeProvider`).
+- **EVERY** new component or screen must be verified in both light and dark modes.
+- Use Tailwind's `dark:` modifier for theme-specific styling.
+- Ensure text contrast and component visibility are maintained in both modes.
+
+### 5. Internationalization (i18n) & Localization (l10n)
+- **ALL** text tokens must be translated using `react-i18next`'s `t()` function.
+- Do not hardcode strings in the UI.
+- Translations are managed in `src/lib/i18n.ts`.
+
+#### Language vs. Locale
+- **Language** and **Locale** are managed separately.
+- **Language**: The spoken language (e.g., English, Swahili). Affects labels and text content.
+- **Locale**: The geographic region (e.g., Tanzania, Kenya, Zambia, Zimbabwe). Affects:
+  - Currency formatting (e.g., TZS, KES, ZMW, ZWL).
+  - Date and time formatting.
+  - Numeric formatting (decimal separators, etc.).
+- The UI should provide separate settings for Language and Locale, both using flags for selection.
+
+### 6. PocketBase Migrations
 When adding new collections or fields, create a new file in `/pb_migrations/`.
 Example snippet for adding fields:
 ```javascript

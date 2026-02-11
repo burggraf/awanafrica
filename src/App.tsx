@@ -11,6 +11,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { AuthModal } from "@/components/auth-modal"
 import { ProfileScreen } from "@/components/profile-screen"
 import { ThemeProvider } from "@/components/theme-provider"
+import { LocaleProvider } from "@/lib/locale-context"
 import { Button } from "@/components/ui/button"
 import { Toaster } from "@/components/ui/toaster"
 import { 
@@ -18,6 +19,7 @@ import {
   SheetContent, 
   SheetTrigger,
   SheetTitle,
+  SheetDescription,
 } from "@/components/ui/sheet"
 import { 
   DropdownMenu, 
@@ -88,6 +90,9 @@ function MainContent() {
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-72 transition-transform duration-500 ease-in-out">
               <SheetTitle className="sr-only">Menu</SheetTitle>
+              <SheetDescription className="sr-only">
+                Navigation menu for AwanAfrica app.
+              </SheetDescription>
               <SidebarProvider>
                 <AppSidebar 
                   onProfileClick={() => {
@@ -180,7 +185,9 @@ function MainContent() {
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="app-theme">
-      <MainContent />
+      <LocaleProvider>
+        <MainContent />
+      </LocaleProvider>
     </ThemeProvider>
   )
 }

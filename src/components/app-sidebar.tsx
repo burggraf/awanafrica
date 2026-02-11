@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next"
 import { NavUser } from "@/components/nav-user"
 import { ModeToggle } from "@/components/mode-toggle"
 import { LanguageToggle } from "@/components/language-toggle"
+import { RegionToggle } from "@/components/region-toggle"
 import {
   Sidebar,
   SidebarContent,
@@ -88,14 +89,13 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex gap-2 px-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:px-0">
-              <div className="flex-1">
-                <ModeToggle />
-              </div>
-              <div className="flex-1">
-                <LanguageToggle />
-              </div>
-            </div>
+            <ModeToggle />
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <LanguageToggle />
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <RegionToggle />
           </SidebarMenuItem>
         </SidebarMenu>
         <SidebarSeparator />

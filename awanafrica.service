@@ -1,0 +1,17 @@
+[Unit]
+Description=PocketBase for AwanAfrica
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/root/awanafrica
+ExecStart=/root/awanafrica/pocketbase serve --http=awanafrica.org:80 --https=awanafrica.org:443
+Restart=always
+RestartSec=3
+StandardOutput=append:/root/awanafrica/pb_data/errors.log
+StandardError=append:/root/awanafrica/pb_data/errors.log
+
+[Install]
+WantedBy=multi-user.target

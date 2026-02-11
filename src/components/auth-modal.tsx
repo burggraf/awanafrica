@@ -119,6 +119,9 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogTitle className="sr-only">Authentication</DialogTitle>
+        <DialogDescription className="sr-only">
+          Sign in or create an account to access AwanAfrica.
+        </DialogDescription>
         <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">{t("Log in")}</TabsTrigger>

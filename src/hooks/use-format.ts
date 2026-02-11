@@ -1,33 +1,18 @@
+import { useLocale } from '@/lib/locale-context';
 import { useTranslation } from 'react-i18next';
 
 export function useFormat() {
+  const { region, formatCurrency, formatDate, formatNumber } = useLocale();
   const { i18n } = useTranslation();
-  const locale = i18n.language === 'sw' ? 'sw-TZ' : 'en-US';
-  const currency = i18n.language === 'sw' ? 'TZS' : 'USD';
 
-  const formatNumber = (value: number, options?: Intl.NumberFormatOptions) => {
-    return new Intl.NumberFormat(locale, options).format(value);
-  };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: currency,
-    }).format(value);
-  };
-
-  const formatDate = (date: Date | string | number, options?: Intl.DateTimeFormatOptions) => {
-    const d = new Date(date);
-    return new Intl.DateTimeFormat(locale, options || {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }).format(d);
+  const getFullLocale = () => {
+    const lang = i18n.language.split('-')[0];
+    return `${lang}-${region}`;
   };
 
   const formatDateTime = (date: Date | string | number) => {
     const d = new Date(date);
-    return new Intl.DateTimeFormat(locale, {
+    return new Intl.DateTimeFormat(getFullLocale(), {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -36,11 +21,20 @@ export function useFormat() {
     }).format(d);
   };
 
+  const customFormatDate = (date: Date | string | number, options?: Intl.DateTimeFormatOptions) => {
+    const d = new Date(date);
+    return new Intl.DateTimeFormat(getFullLocale(), options || {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(d);
+  };
+
   return {
     formatNumber,
     formatCurrency,
-    formatDate,
+    formatDate: customFormatDate,
     formatDateTime,
-    locale,
+    locale: getFullLocale(),
   };
 }
