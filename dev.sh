@@ -19,4 +19,4 @@ cleanup() {
 trap cleanup EXIT
 
 # Start the frontend
-npm run dev
+pnpm run dev
