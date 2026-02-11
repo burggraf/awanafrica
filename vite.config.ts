@@ -8,11 +8,19 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "pocketbase": path.resolve(__dirname, "./node_modules/pocketbase"),
+      "pocketbase": path.resolve(__dirname, "node_modules/pocketbase/dist/pocketbase.es.mjs"),
     },
   },
   define: {
     '__APP_VERSION__': JSON.stringify(pkg.version),
     '__APP_NAME__': JSON.stringify(pkg.title || pkg.name),
   },
+  optimizeDeps: {
+    exclude: ['pocketbase'] 
+  },
+  server: {
+    watch: {
+      ignored: ['**/pocketbase', '**/pb_data/**']
+    }
+  }
 })
