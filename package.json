@@ -1,6 +1,7 @@
 {
-  "name": "pi-test-2",
-  "title": "My Super App",
+  "name": "africawana",
+  "title": "AfricAwana",
+  "appId": "com.dmarie.africawana",
   "private": true,
   "version": "0.0.0",
   "type": "module",

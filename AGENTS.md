@@ -1,4 +1,4 @@
-# Agent Documentation for My Super App
+# Agent Documentation for AfricAwana
 
 This file provides instructions and context for AI agents working on this project.
 
