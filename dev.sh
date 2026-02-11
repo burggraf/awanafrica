@@ -1,22 +1,29 @@
 #!/bin/bash
 
+# Function to kill background processes on exit
+cleanup() {
+    if [ -n "$PB_PID" ]; then
+        echo "Stopping PocketBase (PID: $PB_PID)..."
+        # Check if process exists before killing
+        if kill -0 $PB_PID 2>/dev/null; then
+            kill $PB_PID
+        fi
+    fi
+}
+
+# Trap EXIT and common signals
+trap cleanup EXIT INT TERM
+
 # Kill any existing pocketbase process on this port if it exists
 pkill -f "pocketbase serve" || true
 
-# Start pocketbase in the background
+# Start pocketbase in the background, redirecting output slightly if needed 
+# but keeping it visible for debugging
 ./pocketbase serve &
-
-# Store the background process ID
 PB_PID=$!
 
-# Function to kill PB when the script exits
-cleanup() {
-    echo "Stopping PocketBase..."
-    kill $PB_PID
-}
-
-# Trap signals to ensure cleanup
-trap cleanup EXIT
+# Wait a moment for PB to initialize
+sleep 1
 
 # Start the frontend
 pnpm run dev
