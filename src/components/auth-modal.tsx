@@ -21,12 +21,15 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 
+import { useTranslation } from "react-i18next"
+
 interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState<"login" | "register" | "forgot">("login")
   const { toast } = useToast()
 
@@ -103,15 +106,15 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       <DialogContent className="sm:max-w-[425px]">
         <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="register">Register</TabsTrigger>
+            <TabsTrigger value="login">{t("Log in")}</TabsTrigger>
+            <TabsTrigger value="register">{t("Register")}</TabsTrigger>
           </TabsList>
           
           <TabsContent value="login">
             <DialogHeader>
-              <DialogTitle>Login</DialogTitle>
+              <DialogTitle>{t("Log in")}</DialogTitle>
               <DialogDescription>
-                Enter your credentials to access your account.
+                {t("Enter your credentials to access your account.")}
               </DialogDescription>
             </DialogHeader>
             <Form {...loginForm}>
@@ -121,7 +124,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t("Email")}</FormLabel>
                       <FormControl>
                         <Input placeholder="email@example.com" {...field} />
                       </FormControl>
@@ -134,7 +137,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>{t("Password")}</FormLabel>
                       <FormControl>
                         <Input type="password" {...field} />
                       </FormControl>
@@ -143,14 +146,14 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   )}
                 />
                 <div className="flex flex-col gap-2">
-                  <Button type="submit" className="w-full">Login</Button>
+                  <Button type="submit" className="w-full">{t("Log in")}</Button>
                   <Button 
                     type="button" 
                     variant="link" 
                     className="px-0 font-normal"
                     onClick={() => setActiveTab("forgot")}
                   >
-                    Forgot password?
+                    {t("Forgot password?")}
                   </Button>
                 </div>
               </form>
@@ -159,9 +162,9 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
           <TabsContent value="register">
             <DialogHeader>
-              <DialogTitle>Create an account</DialogTitle>
+              <DialogTitle>{t("Create an account")}</DialogTitle>
               <DialogDescription>
-                Fill in the details below to create your account.
+                {t("Fill in the details below to create your account.")}
               </DialogDescription>
             </DialogHeader>
             <Form {...registerForm}>
@@ -171,7 +174,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>{t("Full Name")}</FormLabel>
                       <FormControl>
                         <Input placeholder="John Doe" {...field} />
                       </FormControl>
@@ -184,7 +187,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t("Email")}</FormLabel>
                       <FormControl>
                         <Input placeholder="email@example.com" {...field} />
                       </FormControl>
@@ -197,7 +200,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>{t("Password")}</FormLabel>
                       <FormControl>
                         <Input type="password" {...field} />
                       </FormControl>
@@ -210,7 +213,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   name="passwordConfirm"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
+                      <FormLabel>{t("Confirm Password")}</FormLabel>
                       <FormControl>
                         <Input type="password" {...field} />
                       </FormControl>
@@ -218,16 +221,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full">Register</Button>
+                <Button type="submit" className="w-full">{t("Register")}</Button>
               </form>
             </Form>
           </TabsContent>
 
           <TabsContent value="forgot">
             <DialogHeader>
-              <DialogTitle>Reset password</DialogTitle>
+              <DialogTitle>{t("Reset password")}</DialogTitle>
               <DialogDescription>
-                Enter your email address and we'll send you a link to reset your password.
+                {t("Enter your email address and we'll send you a link to reset your password.")}
               </DialogDescription>
             </DialogHeader>
             <Form {...forgotForm}>
@@ -237,7 +240,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t("Email")}</FormLabel>
                       <FormControl>
                         <Input placeholder="email@example.com" {...field} />
                       </FormControl>
@@ -246,13 +249,13 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   )}
                 />
                 <div className="flex flex-col gap-2">
-                  <Button type="submit" className="w-full">Send Reset Link</Button>
+                  <Button type="submit" className="w-full">{t("Send Reset Link")}</Button>
                   <Button 
                     type="button" 
                     variant="link" 
                     onClick={() => setActiveTab("login")}
                   >
-                    Back to login
+                    {t("Back to login")}
                   </Button>
                 </div>
               </form>

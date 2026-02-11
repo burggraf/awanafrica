@@ -31,6 +31,8 @@ import {
 import { useAuth } from "@/lib/use-auth"
 import { pb } from "@/lib/pb"
 
+import { useTranslation } from "react-i18next"
+
 interface NavUserProps {
   onProfileClick: () => void
   onAuthClick: () => void
@@ -39,6 +41,7 @@ interface NavUserProps {
 export function NavUser({ onProfileClick, onAuthClick }: NavUserProps) {
   const { isMobile } = useSidebar()
   const { user, logout } = useAuth()
+  const { t } = useTranslation()
 
   if (!user) {
     return (
@@ -49,8 +52,8 @@ export function NavUser({ onProfileClick, onAuthClick }: NavUserProps) {
               <UserIcon className="size-4" />
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold">Sign In</span>
-              <span className="truncate text-xs">Access your account</span>
+              <span className="truncate font-semibold">{t("Sign In")}</span>
+              <span className="truncate text-xs">{t("Access your account")}</span>
             </div>
           </SidebarMenuButton>
         </SidebarMenuItem>
@@ -108,17 +111,17 @@ export function NavUser({ onProfileClick, onAuthClick }: NavUserProps) {
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={onProfileClick}>
                 <BadgeCheck className="mr-2 size-4" />
-                Account
+                {t("Account")}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell className="mr-2 size-4" />
-                Notifications
+                {t("Notifications")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout}>
               <LogOut className="mr-2 size-4" />
-              Log out
+              {t("Log out")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

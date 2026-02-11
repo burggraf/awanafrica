@@ -18,9 +18,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useToast } from "@/hooks/use-toast"
 import { Camera, Trash2, Loader2 } from "lucide-react"
 
+import { useTranslation } from "react-i18next"
+
 export function ProfileScreen() {
   const { user } = useAuth()
   const { toast } = useToast()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -35,7 +38,7 @@ export function ProfileScreen() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-4">
-        <p className="text-muted-foreground">Please log in to view your profile.</p>
+        <p className="text-muted-foreground">{t("Please log in to view your profile.")}</p>
       </div>
     )
   }
@@ -145,7 +148,7 @@ export function ProfileScreen() {
             disabled={loading}
           >
             <Trash2 className="w-4 h-4 mr-2" />
-            Remove Avatar
+            {t("Remove Avatar")}
           </Button>
         )}
       </div>
@@ -157,7 +160,7 @@ export function ProfileScreen() {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel>{t("Full Name")}</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -170,11 +173,11 @@ export function ProfileScreen() {
             name="displayName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Display Name</FormLabel>
+                <FormLabel>{t("Display Name")}</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
-                <FormDescription>This is how others will see you.</FormDescription>
+                <FormDescription>{t("This is how others will see you.")}</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -184,9 +187,9 @@ export function ProfileScreen() {
             name="bio"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Bio</FormLabel>
+                <FormLabel>{t("Bio")}</FormLabel>
                 <FormControl>
-                  <Textarea {...field} placeholder="Tell us about yourself" />
+                  <Textarea {...field} placeholder={t("Tell us about yourself")} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -194,7 +197,7 @@ export function ProfileScreen() {
           />
           <Button type="submit" disabled={loading} className="w-full">
             {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Save Changes
+            {t("Save Changes")}
           </Button>
         </form>
       </Form>

@@ -25,10 +25,16 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
 
+import { useTranslation } from "react-i18next"
+
+import { useFormat } from "@/hooks/use-format"
+
 const APP_VERSION = __APP_VERSION__
 const APP_NAME = __APP_NAME__
 
 function MainContent() {
+  const { t } = useTranslation()
+  const { formatCurrency, formatDateTime } = useFormat()
   const [activePage, setActivePage] = useState("Dashboard")
   const [isAuthOpen, setIsAuthOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -40,11 +46,20 @@ function MainContent() {
       case "Dashboard":
         return (
           <div className="p-4 space-y-4">
-            <h2 className="text-2xl font-bold">Welcome to Dashboard</h2>
+            <h2 className="text-2xl font-bold">{t("Welcome to Dashboard")}</h2>
+            <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
+              <div>
+                <p className="text-xs text-muted-foreground uppercase font-semibold">{t("Balance")}</p>
+                <p className="text-xl font-bold">{formatCurrency(1250.50)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase font-semibold">{t("Last Login")}</p>
+                <p className="text-sm font-medium">{formatDateTime(new Date())}</p>
+              </div>
+            </div>
             {Array.from({ length: 20 }).map((_, i) => (
               <p key={i} className="text-muted-foreground">
-                This is some scrollable content to demonstrate the scrolling behavior. 
-                Item {i + 1} of 20.
+                {t("scrollable content", { index: i + 1 })}
               </p>
             ))}
           </div>
@@ -52,8 +67,8 @@ function MainContent() {
       default:
         return (
           <div className="p-4">
-            <h2 className="text-2xl font-bold">{activePage}</h2>
-            <p className="text-muted-foreground">This page is under construction.</p>
+            <h2 className="text-2xl font-bold">{t(activePage)}</h2>
+            <p className="text-muted-foreground">{t("under construction")}</p>
           </div>
         )
     }
@@ -92,7 +107,7 @@ function MainContent() {
         </div>
         
         <div className="flex-1 flex justify-center">
-          <h1 className="font-semibold text-lg truncate">{activePage === "Profile" ? "User Profile" : activePage}</h1>
+          <h1 className="font-semibold text-lg truncate">{activePage === "Profile" ? t("User Profile") : t(activePage)}</h1>
         </div>
 
         <div className="flex-1 flex justify-end">
@@ -104,10 +119,10 @@ function MainContent() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setActivePage("Dashboard")}>
-                Refresh
+                {t("Refresh")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setIsAuthOpen(true)}>
-                Switch Account
+                {t("Switch Account")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -138,13 +153,13 @@ function MainContent() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setActivePage("Settings")}>
-                App Settings
+                {t("App Settings")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setIsAuthOpen(true)}>
-                Account Settings
+                {t("Account Settings")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => window.location.reload()}>
-                Restart App
+                {t("Restart App")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
