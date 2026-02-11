@@ -17,6 +17,7 @@ import {
   Sheet, 
   SheetContent, 
   SheetTrigger,
+  SheetTitle,
 } from "@/components/ui/sheet"
 import { 
   DropdownMenu, 
@@ -86,6 +87,7 @@ function MainContent() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-72 transition-transform duration-500 ease-in-out">
+              <SheetTitle className="sr-only">Menu</SheetTitle>
               <SidebarProvider>
                 <AppSidebar 
                   onProfileClick={() => {
@@ -140,7 +142,10 @@ function MainContent() {
           v{APP_VERSION}
         </div>
         
-        <div className="flex-1 flex justify-center">
+        <div className="flex-1 flex justify-center items-center gap-2">
+          <div className="size-6 flex items-center justify-center rounded-sm overflow-hidden bg-white shrink-0">
+            <img src="/logo.svg" alt="Logo" className="size-full object-cover" />
+          </div>
           <span className="font-medium text-sm">{APP_NAME}</span>
         </div>
 

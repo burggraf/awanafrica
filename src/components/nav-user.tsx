@@ -62,7 +62,7 @@ export function NavUser({ onProfileClick, onAuthClick }: NavUserProps) {
   }
 
   const avatarUrl = user.avatar 
-    ? pb.files.getUrl(user, user.avatar, { thumb: '50x50' })
+    ? pb.files.getURL(user, user.avatar, { thumb: '50x50' })
     : ""
 
   return (

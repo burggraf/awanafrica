@@ -44,7 +44,7 @@ export function ProfileScreen() {
   }
 
   const avatarUrl = user.avatar 
-    ? pb.files.getUrl(user, user.avatar, { thumb: '100x100' })
+    ? pb.files.getURL(user, user.avatar, { thumb: '100x100' })
     : ""
 
   async function onSubmit(data: any) {

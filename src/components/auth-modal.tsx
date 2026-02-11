@@ -118,6 +118,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
+        <DialogTitle className="sr-only">Authentication</DialogTitle>
         <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">{t("Log in")}</TabsTrigger>
