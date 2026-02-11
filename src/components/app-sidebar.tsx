@@ -2,7 +2,6 @@ import * as React from "react"
 import {
   BookOpen,
   Bot,
-  Command,
   Settings2,
   SquareTerminal,
 } from "lucide-react"
@@ -65,8 +64,8 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Command className="size-4" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden bg-white">
+                  <img src="/logo.svg" alt="AwanAfrica Logo" className="size-full object-cover" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">AwanAfrica</span>
