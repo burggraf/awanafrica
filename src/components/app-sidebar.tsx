@@ -9,6 +9,7 @@ import { NavUser } from "@/components/nav-user"
 import { ModeToggle } from "@/components/mode-toggle"
 import { LanguageToggle } from "@/components/language-toggle"
 import { RegionToggle } from "@/components/region-toggle"
+import { ClubSwitcher } from "@/components/club-switcher"
 import {
   Sidebar,
   SidebarContent,
@@ -65,6 +66,9 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props
                 </div>
               </a>
             </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <ClubSwitcher />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
