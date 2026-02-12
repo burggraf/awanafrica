@@ -6,6 +6,7 @@ import {
   Globe,
   Map,
   School,
+  Users,
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
@@ -65,6 +66,12 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props
       url: "/admin/regions",
       icon: Map,
       visible: isGlobalAdmin || isCountryAdmin,
+    },
+    {
+      title: t("Users"),
+      url: "/admin/users",
+      icon: Users,
+      visible: isAdmin,
     },
     {
       title: t("Clubs"),

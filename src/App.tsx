@@ -22,6 +22,7 @@ import { DashboardScreen } from "@/components/dashboard-screen"
 import { CountryManagement } from "@/components/admin/country-management"
 import { RegionManagement } from "@/components/admin/region-management"
 import { ClubManagement } from "@/components/admin/club-management"
+import { UserManagement } from "@/components/admin/user-management"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LocaleProvider } from "@/lib/locale-context"
 import { ClubProvider } from "@/lib/club-context"
@@ -167,6 +168,7 @@ function MainContent() {
           {(isGlobalAdmin || isCountryAdmin) && (
             <Route path="/admin/regions" element={<RegionManagement />} />
           )}
+          <Route path="/admin/users" element={<UserManagement />} />
           <Route path="/admin/clubs" element={<ClubManagement />} />
           
           <Route path="*" element={

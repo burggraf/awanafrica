@@ -29,7 +29,13 @@ There is a naming collision between the `pocketbase` executable in the root and 
 - **NEVER** remove `optimizeDeps.exclude: ['pocketbase']` from `vite.config.ts`. This prevents Vite from trying to parse the binary as JavaScript.
 - Internal client imports should use `@/lib/pb`.
 
-### 2. UI Layout
+### 2. PocketBase Auto-Cancellation
+PocketBase JS SDK automatically cancels previous pending requests if a new request is made to the same collection (even with different parameters).
+- **ALWAYS** provide a unique `requestKey` in the request options when making multiple concurrent requests or requests that shouldn't be cancelled (e.g., `pb.collection('...').getFullList({ requestKey: 'unique_key' })`).
+- **ALWAYS** check for `error.isAbort` in `catch` blocks to avoid logging or showing error toasts for intentional/automatic cancellations.
+- Setting `requestKey: null` completely disables auto-cancellation for a specific request.
+
+### 3. UI Layout
 The app uses a classic iOS-style layout:
 - **Header**: `h-12`, sticky, backdrop-blur. Contains sidebar trigger, page title, and "more" menu. **Content is customizable per page** via `useLayout()`.
 - **Footer**: `h-14`, sticky, backdrop-blur. Contains version, app name, and settings. **Optional per page** (off by default) and **content is customizable per page** via `useLayout()`.
@@ -47,18 +53,18 @@ Use the `useLayout()` hook in page components to customize the header and footer
 - **Sidebar**: A Shadcn `Sheet` component with a **1s (1000ms) slow transition**.
 - **Main Content**: Scrollable container between the header and footer.
 
-### 3. User Profile & Avatars
+### 4. User Profile & Avatars
 - Avatars are stored in PocketBase and limited to **5MB**.
 - Use the `object-cover` class on `AvatarImage` to prevent distortion.
 - Custom fields in the `users` collection: `displayName` (text), `bio` (text).
 
-### 4. Light/Dark Mode
+### 5. Light/Dark Mode
 - The app supports Light, Dark, and System modes using `next-themes` (or a custom `ThemeProvider`).
 - **EVERY** new component or screen must be verified in both light and dark modes.
 - Use Tailwind's `dark:` modifier for theme-specific styling.
 - Ensure text contrast and component visibility are maintained in both modes.
 
-### 5. Internationalization (i18n) & Localization (l10n)
+### 6. Internationalization (i18n) & Localization (l10n)
 - **ALL** text tokens must be translated using `react-i18next`'s `t()` function.
 - Do not hardcode strings in the UI.
 - Translations are managed in `src/lib/i18n.ts`.
@@ -72,7 +78,7 @@ Use the `useLayout()` hook in page components to customize the header and footer
   - Numeric formatting (decimal separators, etc.).
 - The UI should provide separate settings for Language and Locale, both using flags for selection.
 
-### 6. PocketBase Migrations
+### 7. PocketBase Migrations
 When adding new collections or fields, create a new file in `/pb_migrations/`.
 Note: PocketBase Go-based migrations (used in this project) require explicit `new Field()` and `new Collection()` constructors for adding elements to schema collections.
 
@@ -88,7 +94,7 @@ migrate((app) => {
 })
 ```
 
-### 7. Build Verification
+### 8. Build Verification
 - **ALWAYS** run `pnpm run build` to verify the application after making significant changes or adding new features.
 - This ensures that TypeScript errors, unused imports, or bundling issues are caught before code is pushed.
 
