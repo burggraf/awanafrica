@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { AuthModal } from "@/components/auth-modal"
+import { OnboardingModal } from "@/components/onboarding-modal"
 import { ProfileScreen } from "@/components/profile-screen"
 import { DashboardScreen } from "@/components/dashboard-screen"
 import { CountryManagement } from "@/components/admin/country-management"
@@ -225,6 +226,7 @@ function MainContent() {
       )}
 
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+      <OnboardingModal />
       <Toaster />
     </div>
   )

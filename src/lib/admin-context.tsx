@@ -3,7 +3,7 @@ import { pb } from './pb';
 
 interface AdminRole {
   id: string;
-  role: 'Global' | 'Country' | 'Region';
+  role: 'Global' | 'Country' | 'Region' | 'Pending';
   country?: string;
   region?: string;
   expand?: {

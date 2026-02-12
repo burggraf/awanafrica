@@ -46,7 +46,7 @@ interface UserRecord {
 interface AdminRole {
   id: string;
   user: string;
-  role: 'Global' | 'Country' | 'Region';
+  role: 'Global' | 'Country' | 'Region' | 'Pending';
   country?: string;
   region?: string;
   expand?: {
@@ -90,7 +90,7 @@ export function UserManagement() {
   const [regions, setRegions] = useState<Region[]>([]);
   
   const [newRoleData, setNewRoleData] = useState<{
-    role: 'Global' | 'Country' | 'Region';
+    role: 'Global' | 'Country' | 'Region' | 'Pending';
     country: string;
     region: string;
   }>({
@@ -371,12 +371,18 @@ export function UserManagement() {
                   userRoles.map((role) => (
                     <div key={role.id} className="flex items-center justify-between p-2 border rounded-md bg-muted/30">
                       <div className="flex flex-col">
-                        <Badge variant={role.role === 'Global' ? 'destructive' : role.role === 'Country' ? 'default' : 'secondary'}>
+                        <Badge variant={role.role === 'Global' ? 'destructive' : role.role === 'Pending' ? 'outline' : role.role === 'Country' ? 'default' : 'secondary'}>
                           {t(role.role)}
                         </Badge>
                         <span className="text-xs text-muted-foreground mt-1">
                           {role.role === 'Country' && role.expand?.country?.name}
                           {role.role === 'Region' && role.expand?.region?.name}
+                          {role.role === 'Pending' && (
+                            <>
+                              {role.expand?.country?.name || t("Global Scope")}
+                              {role.expand?.region?.name ? ` > ${role.expand?.region?.name}` : ""}
+                            </>
+                          )}
                         </span>
                       </div>
                       <Button 
@@ -411,6 +417,7 @@ export function UserManagement() {
                         <SelectItem value="Country">{t("Country")}</SelectItem>
                       )}
                       <SelectItem value="Region">{t("Region")}</SelectItem>
+                      {isGlobalAdmin && <SelectItem value="Pending">{t("Pending")}</SelectItem>}
                     </SelectContent>
                   </Select>
                 </div>
@@ -432,6 +439,49 @@ export function UserManagement() {
                       </SelectContent>
                     </Select>
                   </div>
+                )}
+
+                {newRoleData.role === 'Pending' && (
+                  <>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="pending-country" className="text-right">{t("Country")}</Label>
+                      <Select 
+                        value={newRoleData.country} 
+                        onValueChange={(val) => {
+                          setNewRoleData({...newRoleData, country: val === "none" ? "" : val, region: ""});
+                        }}
+                      >
+                        <SelectTrigger className="col-span-3">
+                          <SelectValue placeholder={t("Global Scope")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">{t("Global / No specific country")}</SelectItem>
+                          {countries.map(c => (
+                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="pending-region" className="text-right">{t("Region")}</Label>
+                      <Select 
+                        value={newRoleData.region} 
+                        onValueChange={(val) => setNewRoleData({...newRoleData, region: val === "none" ? "" : val})}
+                        disabled={!newRoleData.country}
+                      >
+                        <SelectTrigger className="col-span-3">
+                          <SelectValue placeholder={newRoleData.country ? t("Country-wide Scope") : t("Select country first")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">{t("Country-wide")}</SelectItem>
+                          {regions.filter(r => r.country === newRoleData.country).map(r => (
+                            <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
                 )}
 
                 {newRoleData.role === 'Region' && (
