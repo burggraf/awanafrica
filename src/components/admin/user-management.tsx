@@ -106,7 +106,7 @@ export function UserManagement() {
 
   const fetchCountriesAndRegions = async () => {
     try {
-      const [countriesList, regionsList] = await Promise.all([
+      const [countriesList, regionsList, myRoleData] = await Promise.all([
         pb.collection("countries").getFullList<Country>({ 
           sort: "name",
           requestKey: "user_mgmt_countries"
@@ -115,10 +115,31 @@ export function UserManagement() {
           sort: "name", 
           expand: "country",
           requestKey: "user_mgmt_regions"
+        }),
+        pb.collection("admin_roles").getFullList<AdminRole>({
+          filter: `user = "${pb.authStore.record?.id}"`,
+          expand: "region",
+          requestKey: "user_mgmt_my_roles"
         })
       ]);
       setCountries(countriesList);
       setRegions(regionsList);
+
+      // Enhance myRoles with country info from regions if missing
+      const enhancedRoles = myRoles.map(role => {
+        if (role.role === 'Region' && !role.country) {
+          const matchingMyRole = myRoleData.find(r => r.id === role.id);
+          const regionInfo = regionsList.find(reg => reg.id === matchingMyRole?.region);
+          if (regionInfo) {
+            return { ...role, country: regionInfo.country };
+          }
+        }
+        return role;
+      });
+      
+      // Note: We don't setAdminRoles here as it's managed by AdminProvider,
+      // but we use the derived info for availableCountries.
+      
     } catch (error: any) {
       if (error.isAbort) return;
       console.error("Failed to fetch reference data:", error);
@@ -157,6 +178,8 @@ export function UserManagement() {
 
   const openRolesDialog = async (user: UserRecord) => {
     setSelectedUser(user);
+    setSelectedCountryId(""); // Reset country selection for new user
+    setNewRoleData({ role: 'Region', country: "", region: "" }); // Reset form
     setIsRolesDialogOpen(true);
     fetchUserRoles(user.id);
   };
@@ -222,8 +245,29 @@ export function UserManagement() {
   // Filter countries and regions based on current user's scope
   const availableCountries = countries.filter(c => {
     if (isGlobalAdmin) return true;
-    return myRoles.some(r => r.role === 'Country' && r.country === c.id);
+    
+    // Check if any of my roles (Country or Region) allow access to this country
+    return myRoles.some(r => {
+      // Direct country match for Country Admin
+      if (r.role === 'Country' && r.country === c.id) return true;
+      
+      // For Region Admin, we need to know if the region belongs to this country.
+      // We look up the region in our fetched regions list.
+      if (r.role === 'Region') {
+        const regionInfo = regions.find(reg => reg.id === r.region);
+        return regionInfo?.country === c.id;
+      }
+      
+      return false;
+    });
   });
+
+  // Auto-select country if user only has access to one
+  useEffect(() => {
+    if (isRolesDialogOpen && availableCountries.length === 1 && !selectedCountryId) {
+      setSelectedCountryId(availableCountries[0].id);
+    }
+  }, [availableCountries, selectedCountryId, isRolesDialogOpen]);
 
   const availableRegions = regions.filter(r => {
     if (isGlobalAdmin) {
