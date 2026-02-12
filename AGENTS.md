@@ -28,8 +28,19 @@ There is a naming collision between the `pocketbase` executable in the root and 
 
 ### 2. UI Layout
 The app uses a classic iOS-style layout:
-- **Header**: `h-12`, sticky, backdrop-blur. Contains sidebar trigger, page title, and "more" menu.
-- **Footer**: `h-14`, sticky, backdrop-blur. Contains version, app name, and settings.
+- **Header**: `h-12`, sticky, backdrop-blur. Contains sidebar trigger, page title, and "more" menu. **Content is customizable per page** via `useLayout()`.
+- **Footer**: `h-14`, sticky, backdrop-blur. Contains version, app name, and settings. **Optional per page** (off by default) and **content is customizable per page** via `useLayout()`.
+
+### Layout Management
+Use the `useLayout()` hook in page components to customize the header and footer:
+- `setShowFooter(boolean)`: Toggle footer visibility.
+- `setHeaderTitle(ReactNode)`: Override the header title.
+- `setHeaderLeft(ReactNode)`: Override the sidebar trigger area.
+- `setHeaderRight(ReactNode)`: Override the "more" menu area.
+- `setFooterLeft(ReactNode)`: Override the version area.
+- `setFooterCenter(ReactNode)`: Override the logo/app name area.
+- `setFooterRight(ReactNode)`: Override the settings menu area.
+- `resetLayout()`: Resets all layout overrides to defaults (called automatically on page changes in `App.tsx`).
 - **Sidebar**: A Shadcn `Sheet` component with a **1s (1000ms) slow transition**.
 - **Main Content**: Scrollable container between the header and footer.
 

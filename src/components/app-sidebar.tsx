@@ -28,6 +28,9 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   onPageChange: (page: string) => void
 }
 
+const APP_VERSION = __APP_VERSION__
+const APP_NAME = __APP_NAME__
+
 export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props }: AppSidebarProps) {
   const { t } = useTranslation()
 
@@ -99,6 +102,10 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props
           </SidebarMenuItem>
         </SidebarMenu>
         <SidebarSeparator />
+        <div className="px-4 py-2 flex items-center justify-between text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+          <span>{APP_NAME}</span>
+          <span>v{APP_VERSION}</span>
+        </div>
         <NavUser onProfileClick={onProfileClick} onAuthClick={onAuthClick} />
       </SidebarFooter>
     </Sidebar>
