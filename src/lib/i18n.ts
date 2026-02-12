@@ -112,6 +112,10 @@ const resources = {
       "Region/Country": "Region/Country",
       "This club has related data (members, programs, etc.) and cannot be deleted. Consider marking it as inactive instead.": "This club has related data (members, programs, etc.) and cannot be deleted. Consider marking it as inactive instead.",
       "Are you sure you want to delete this club?": "Are you sure you want to delete this club?",
+      "Are you sure?": "Are you sure?",
+      "This action cannot be undone.": "This action cannot be undone.",
+      "Delete": "Delete",
+      "Cancel": "Cancel",
     }
   },
   sw: {
@@ -223,6 +227,10 @@ const resources = {
       "Region/Country": "Mkoa/Nchi",
       "This club has related data (members, programs, etc.) and cannot be deleted. Consider marking it as inactive instead.": "Klabu hii ina data zinazohusiana (wanachama, programu, nk) na haiwezi kufutwa. Fikiria kuiweka kama sio hai badala yake.",
       "Are you sure you want to delete this club?": "Je, una uhakika unataka kufuta klabu hii?",
+      "Are you sure?": "Je, una uhakika?",
+      "This action cannot be undone.": "Kitendo hiki hakiwezi kubatilishwa.",
+      "Delete": "Futa",
+      "Cancel": "Ghairi",
     }
   }
 };

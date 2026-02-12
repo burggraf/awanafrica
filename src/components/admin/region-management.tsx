@@ -21,6 +21,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -56,6 +66,7 @@ export function RegionManagement() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRegion, setEditingRegion] = useState<Region | null>(null);
   const [formData, setFormData] = useState({ name: "", country: "" });
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
 
   // Get countries the user can manage regions for
   const managedCountryIds = adminRoles
@@ -165,13 +176,25 @@ export function RegionManagement() {
         return;
       }
 
-      if (confirm(t("Are you sure you want to delete this region?"))) {
-        await pb.collection("regions").delete(editingRegion.id);
-        toast({ title: t("Success"), description: t("Region deleted successfully") });
-        setIsDialogOpen(false);
-        setEditingRegion(null);
-        fetchData();
-      }
+      setIsAlertOpen(true);
+    } catch (error: any) {
+      toast({
+        title: t("Error"),
+        description: error.message || t("Failed to check constraints"),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!editingRegion) return;
+    try {
+      await pb.collection("regions").delete(editingRegion.id);
+      toast({ title: t("Success"), description: t("Region deleted successfully") });
+      setIsDialogOpen(false);
+      setIsAlertOpen(false);
+      setEditingRegion(null);
+      fetchData();
     } catch (error: any) {
       toast({
         title: t("Error"),
@@ -299,6 +322,26 @@ export function RegionManagement() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("Are you sure?")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("This action cannot be undone.")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("Delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -21,6 +21,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -72,6 +82,7 @@ export function ClubManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClub, setEditingClub] = useState<Club | null>(null);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
   
   const [formData, setFormData] = useState<{
     name: string;
@@ -261,13 +272,25 @@ export function ClubManagement() {
         return;
       }
 
-      if (confirm(t("Are you sure you want to delete this club?"))) {
-        await pb.collection("clubs").delete(editingClub.id);
-        toast({ title: t("Success"), description: t("Club deleted successfully") });
-        setIsDialogOpen(false);
-        setEditingClub(null);
-        fetchData();
-      }
+      setIsAlertOpen(true);
+    } catch (error: any) {
+      toast({
+        title: t("Error"),
+        description: error.message || t("Failed to check constraints"),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!editingClub) return;
+    try {
+      await pb.collection("clubs").delete(editingClub.id);
+      toast({ title: t("Success"), description: t("Club deleted successfully") });
+      setIsDialogOpen(false);
+      setIsAlertOpen(false);
+      setEditingClub(null);
+      fetchData();
     } catch (error: any) {
       toast({
         title: t("Error"),
@@ -516,6 +539,26 @@ export function ClubManagement() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("Are you sure?")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("This action cannot be undone.")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("Delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
