@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Plus, Pencil, Trash2, Building2 } from "lucide-react";
 import { pb } from "@/lib/pb";
@@ -64,7 +64,7 @@ export function ClubManagement() {
   const { t } = useTranslation();
   const { setHeaderTitle } = useLayout();
   const { toast } = useToast();
-  const { isGlobalAdmin, adminRoles } = useAdmin();
+  const { isGlobalAdmin, adminRoles, isLoading: isAdminLoading } = useAdmin();
   
   const [clubs, setClubs] = useState<Club[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
@@ -91,25 +91,20 @@ export function ClubManagement() {
     active: true,
   });
 
-  // Get regions the user can manage clubs for
-  const managedRegionIds = adminRoles
-    .filter(r => r.role === 'Region')
-    .map(r => r.region)
-    .filter(Boolean) as string[];
-
-  const managedCountryIds = adminRoles
-    .filter(r => r.role === 'Country')
-    .map(r => r.country)
-    .filter(Boolean) as string[];
-
-  useEffect(() => {
-    setHeaderTitle(t("Club Management"));
-    fetchData();
-  }, [setHeaderTitle, t]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
+      // Get regions the user can manage clubs for
+      const managedRegionIds = adminRoles
+        .filter(r => r.role === 'Region')
+        .map(r => r.region)
+        .filter(Boolean) as string[];
+
+      const managedCountryIds = adminRoles
+        .filter(r => r.role === 'Country')
+        .map(r => r.country)
+        .filter(Boolean) as string[];
+
       // Filter clubs based on roles
       let clubFilter = undefined;
       if (!isGlobalAdmin) {
@@ -190,7 +185,14 @@ export function ClubManagement() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [adminRoles, isGlobalAdmin, t, toast]);
+
+  useEffect(() => {
+    setHeaderTitle(t("Club Management"));
+    if (!isAdminLoading) {
+      fetchData();
+    }
+  }, [setHeaderTitle, t, isAdminLoading, fetchData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -507,4 +509,3 @@ export function ClubManagement() {
     </div>
   );
 }
-
