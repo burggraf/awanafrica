@@ -16,6 +16,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -316,11 +317,13 @@ export function UserManagement() {
               <Shield className="h-5 w-5 text-primary" />
               {t("Manage Permissions")}
             </DialogTitle>
-            {selectedUser && (
-              <p className="text-sm text-muted-foreground">
-                {selectedUser.displayName || selectedUser.email}
-              </p>
-            )}
+            <DialogDescription>
+              {selectedUser ? (
+                t("Modify administrative roles for {{name}}.", { name: selectedUser.displayName || selectedUser.email })
+              ) : (
+                t("Manage user administrative roles and permissions.")
+              )}
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 py-4">

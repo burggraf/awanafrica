@@ -137,6 +137,8 @@ const resources = {
       "Email hidden": "Email hidden",
       "Showing first 50 results of {{count}}. Please refine your search for better results.": "Showing first 50 results of {{count}}. Please refine your search for better results.",
       "Select country first": "Select country first",
+      "Modify administrative roles for {{name}}.": "Modify administrative roles for {{name}}.",
+      "Manage user administrative roles and permissions.": "Manage user administrative roles and permissions.",
     }
   },
   sw: {
@@ -273,6 +275,8 @@ const resources = {
       "Email hidden": "Barua pepe imefichwa",
       "Showing first 50 results of {{count}}. Please refine your search for better results.": "Inaonyesha matokeo 50 ya kwanza kati ya {{count}}. Tafadhali kaza utafutaji wako kwa matokeo bora.",
       "Select country first": "Chagua nchi kwanza",
+      "Modify administrative roles for {{name}}.": "Badilisha majukumu ya kiutawala ya {{name}}.",
+      "Manage user administrative roles and permissions.": "Simamia majukumu ya kiutawala na ruhusa za mtumiaji.",
     }
   }
 };
