@@ -1,7 +1,5 @@
 import * as React from "react"
 import {
-  BookOpen,
-  Bot,
   Settings2,
   SquareTerminal,
 } from "lucide-react"
@@ -37,23 +35,13 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props
   const navMain = [
     {
       title: t("Dashboard"),
-      url: "#",
+      url: "/dashboard",
       icon: SquareTerminal,
       isActive: true,
     },
     {
-      title: t("Models"),
-      url: "#",
-      icon: Bot,
-    },
-    {
-      title: t("Documentation"),
-      url: "#",
-      icon: BookOpen,
-    },
-    {
       title: t("Settings"),
-      url: "#",
+      url: "/settings",
       icon: Settings2,
     },
   ]
@@ -64,7 +52,10 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <a href="/dashboard" onClick={(e) => {
+                e.preventDefault()
+                onPageChange("dashboard")
+              }}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden bg-white">
                   <img src="/logo.svg" alt="AwanAfrica Logo" className="size-full object-cover" />
                 </div>
@@ -81,7 +72,10 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props
         <SidebarMenu>
           {navMain.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title} onClick={() => onPageChange(item.title)}>
+              <SidebarMenuButton 
+                tooltip={item.title} 
+                onClick={() => onPageChange(item.url.substring(1))}
+              >
                 {item.icon && <item.icon />}
                 <span>{item.title}</span>
               </SidebarMenuButton>

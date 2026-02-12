@@ -1,9 +1,17 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { 
   Menu, 
   MoreVertical, 
   Settings, 
 } from "lucide-react"
+import { 
+  BrowserRouter,
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+  Navigate
+} from "react-router-dom"
 import { 
   SidebarProvider, 
 } from "@/components/ui/sidebar"
@@ -38,6 +46,8 @@ const APP_NAME = __APP_NAME__
 
 function MainContent() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
+  const location = useLocation()
   const { 
     showFooter, 
     headerTitle,
@@ -48,30 +58,21 @@ function MainContent() {
     footerRight,
     resetLayout 
   } = useLayout()
-  const [activePage, setActivePage] = useState("Dashboard")
+  
   const [isAuthOpen, setIsAuthOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+
+  // Derive active page title from location for the header
+  const activePageTitle = useMemo(() => {
+    const path = location.pathname.substring(1) || "Dashboard"
+    // Capitalize first letter for the title
+    return path.charAt(0).toUpperCase() + path.slice(1)
+  }, [location.pathname])
 
   // Reset layout on page change
   useEffect(() => {
     resetLayout()
-  }, [activePage, resetLayout])
-
-  const renderPage = () => {
-    switch (activePage) {
-      case "Profile":
-        return <ProfileScreen />
-      case "Dashboard":
-        return <DashboardScreen />
-      default:
-        return (
-          <div className="p-4">
-            <h2 className="text-2xl font-bold">{t(activePage)}</h2>
-            <p className="text-muted-foreground">{t("under construction")}</p>
-          </div>
-        )
-    }
-  }
+  }, [location.pathname, resetLayout])
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background">
@@ -93,7 +94,7 @@ function MainContent() {
                 <SidebarProvider>
                   <AppSidebar 
                     onProfileClick={() => {
-                      setActivePage("Profile")
+                      navigate("/profile")
                       setIsSidebarOpen(false)
                     }} 
                     onAuthClick={() => {
@@ -101,7 +102,9 @@ function MainContent() {
                       setIsSidebarOpen(false)
                     }}
                     onPageChange={(page) => {
-                      setActivePage(page)
+                      // page here comes from the sidebar title, we should probably change how sidebar works
+                      // but for now let's just lowercase it
+                      navigate(`/${page.toLowerCase()}`)
                       setIsSidebarOpen(false)
                     }}
                   />
@@ -113,7 +116,7 @@ function MainContent() {
         
         <div className="flex-1 flex justify-center">
           <h1 className="font-semibold text-lg truncate">
-            {headerTitle || (activePage === "Profile" ? t("User Profile") : t(activePage))}
+            {headerTitle || (activePageTitle === "Profile" ? t("User Profile") : t(activePageTitle))}
           </h1>
         </div>
 
@@ -126,7 +129,7 @@ function MainContent() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setActivePage("Dashboard")}>
+                <DropdownMenuItem onClick={() => navigate(0)}>
                   {t("Refresh")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setIsAuthOpen(true)}>
@@ -140,7 +143,17 @@ function MainContent() {
 
       {/* Scrollable Content */}
       <main className="flex-1 overflow-y-auto pt-safe pb-safe">
-        {renderPage()}
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<DashboardScreen />} />
+          <Route path="/profile" element={<ProfileScreen />} />
+          <Route path="*" element={
+            <div className="p-4">
+              <h2 className="text-2xl font-bold">{t(activePageTitle)}</h2>
+              <p className="text-muted-foreground">{t("under construction")}</p>
+            </div>
+          } />
+        </Routes>
       </main>
 
       {/* iOS Style Footer */}
@@ -170,7 +183,7 @@ function MainContent() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setActivePage("Settings")}>
+                  <DropdownMenuItem onClick={() => navigate("/settings")}>
                     {t("App Settings")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setIsAuthOpen(true)}>
@@ -197,7 +210,9 @@ function App() {
     <ThemeProvider defaultTheme="dark" storageKey="app-theme">
       <LocaleProvider>
         <LayoutProvider>
-          <MainContent />
+          <BrowserRouter>
+            <MainContent />
+          </BrowserRouter>
         </LayoutProvider>
       </LocaleProvider>
     </ThemeProvider>
