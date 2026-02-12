@@ -80,6 +80,10 @@ migrate((app) => {
 })
 ```
 
+### 7. Build Verification
+- **ALWAYS** run `pnpm run build` to verify the application after making significant changes or adding new features.
+- This ensures that TypeScript errors, unused imports, or bundling issues are caught before code is pushed.
+
 ## Common Tasks
 - **Starting Dev**: Run `./dev.sh`.
 - **Building**: Run `pnpm build`.
