@@ -138,17 +138,13 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props
         )}
       </SidebarContent>
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
+        <div className="px-2 mb-2">
+          <div className="flex items-center justify-around bg-muted/50 rounded-lg p-1 gap-1">
             <ModeToggle />
-          </SidebarMenuItem>
-          <SidebarMenuItem>
             <LanguageToggle />
-          </SidebarMenuItem>
-          <SidebarMenuItem>
             <CountryToggle />
-          </SidebarMenuItem>
-        </SidebarMenu>
+          </div>
+        </div>
         <SidebarSeparator />
         <div className="px-4 py-2 flex items-center justify-between text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
           <span>{APP_NAME}</span>

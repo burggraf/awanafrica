@@ -16,11 +16,13 @@ export function CountryToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <SidebarMenuButton tooltip={t('Country')}>
-          <span className="text-lg leading-none" role="img" aria-label={t('Country')}>
+        <SidebarMenuButton tooltip={t('Country')} className="w-fit px-2">
+          <span className="text-lg leading-none shrink-0" role="img" aria-label={t('Country')}>
             {countries[country].flag}
           </span>
-          <span>{t('Country')}</span>
+          <span className="text-[10px] text-muted-foreground font-mono ml-1">
+            {country}
+          </span>
         </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

@@ -13,30 +13,30 @@ export function LanguageToggle() {
 
   const currentLanguage = i18n.language.startsWith('sw') ? 'sw' : 'en'
 
-  const flags = {
-    en: "🇺🇸",
-    sw: "🇹🇿"
+  const languages = {
+    en: { name: t('English'), flag: "🇺🇸", short: "ENG" },
+    sw: { name: t('Swahili'), flag: "🇹🇿", short: "SWA" }
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <SidebarMenuButton tooltip={t('Language')}>
-          <span className="text-lg leading-none" role="img" aria-label={t('Language')}>
-            {flags[currentLanguage as keyof typeof flags] || <Languages className="h-[1.2rem] w-[1.2rem]" />}
+        <SidebarMenuButton tooltip={t('Language')} className="w-fit px-2">
+          <span className="text-lg leading-none shrink-0" role="img" aria-label={t('Language')}>
+            {languages[currentLanguage as keyof typeof languages]?.flag || <Languages className="h-4 w-4" />}
           </span>
-          <span>{t('Language')}</span>
+          <span className="text-[10px] text-muted-foreground font-mono ml-1">
+            {languages[currentLanguage as keyof typeof languages]?.short}
+          </span>
         </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => i18n.changeLanguage('en')} className="gap-2">
-          <span className="text-lg">🇺🇸</span>
-          {t('English')}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => i18n.changeLanguage('sw')} className="gap-2">
-          <span className="text-lg">🇹🇿</span>
-          {t('Swahili')}
-        </DropdownMenuItem>
+        {Object.entries(languages).map(([code, { name, flag }]) => (
+          <DropdownMenuItem key={code} onClick={() => i18n.changeLanguage(code)} className="gap-2">
+            <span className="text-lg">{flag}</span>
+            {name}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
