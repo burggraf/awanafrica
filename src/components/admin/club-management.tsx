@@ -33,14 +33,17 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 
+interface Country {
+  id: string;
+  name: string;
+}
+
 interface Region {
   id: string;
   name: string;
   country: string;
   expand?: {
-    country: {
-      name: string;
-    }
+    country: Country;
   }
 }
 
@@ -65,6 +68,7 @@ export function ClubManagement() {
   
   const [clubs, setClubs] = useState<Club[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
+  const [countries, setCountries] = useState<Country[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClub, setEditingClub] = useState<Club | null>(null);
@@ -72,6 +76,7 @@ export function ClubManagement() {
   const [formData, setFormData] = useState<{
     name: string;
     type: "church" | "school" | "other";
+    country: string;
     region: string;
     address: string;
     timezone: string;
@@ -79,6 +84,7 @@ export function ClubManagement() {
   }>({
     name: "",
     type: "church",
+    country: "",
     region: "",
     address: "",
     timezone: "UTC",
@@ -140,7 +146,7 @@ export function ClubManagement() {
         }
       }
 
-      const [clubRecords, regionRecords] = await Promise.all([
+      const [clubRecords, regionRecords, countryRecords] = await Promise.all([
         pb.collection("clubs").getFullList<Club>({
           sort: "name",
           expand: "region.country",
@@ -153,10 +159,26 @@ export function ClubManagement() {
           filter: regionFilter,
           requestKey: "region_dropdown_list",
         }),
+        pb.collection("countries").getFullList<Country>({
+          sort: "name",
+          requestKey: "country_dropdown_list",
+        }),
       ]);
       
       setClubs(clubRecords);
       setRegions(regionRecords);
+
+      // Filter countries based on what regions/countries the user has access to
+      if (isGlobalAdmin) {
+        setCountries(countryRecords);
+      } else {
+        const accessibleCountryIds = new Set(managedCountryIds);
+        // Also add countries from managed regions
+        regionRecords.forEach(r => {
+          if (r.country) accessibleCountryIds.add(r.country);
+        });
+        setCountries(countryRecords.filter(c => accessibleCountryIds.has(c.id)));
+      }
     } catch (error: any) {
       if (error.isAbort) return;
       console.error("Error fetching data:", error);
@@ -182,11 +204,12 @@ export function ClubManagement() {
     }
 
     try {
+      const { country, ...submitData } = formData;
       if (editingClub) {
-        await pb.collection("clubs").update(editingClub.id, formData);
+        await pb.collection("clubs").update(editingClub.id, submitData);
         toast({ title: t("Success"), description: t("Club updated successfully") });
       } else {
-        await pb.collection("clubs").create(formData);
+        await pb.collection("clubs").create(submitData);
         toast({ title: t("Success"), description: t("Club created successfully") });
       }
       setIsDialogOpen(false);
@@ -194,6 +217,7 @@ export function ClubManagement() {
       setFormData({
         name: "",
         type: "church",
+        country: "",
         region: "",
         address: "",
         timezone: "UTC",
@@ -270,6 +294,7 @@ export function ClubManagement() {
       setFormData({
         name: club.name,
         type: club.type,
+        country: club.expand?.region?.country || "",
         region: club.region,
         address: club.address || "",
         timezone: club.timezone || "UTC",
@@ -280,6 +305,7 @@ export function ClubManagement() {
       setFormData({
         name: "",
         type: "church",
+        country: "",
         region: "",
         address: "",
         timezone: "UTC",
@@ -288,6 +314,8 @@ export function ClubManagement() {
     }
     setIsDialogOpen(true);
   };
+
+  const filteredRegions = regions.filter(r => !formData.country || r.country === formData.country);
 
   return (
     <div className="p-4 space-y-4">
@@ -385,20 +413,41 @@ export function ClubManagement() {
               />
             </div>
             
+            <div className="space-y-2">
+              <Label htmlFor="type">{t("Type")}</Label>
+              <Select
+                value={formData.type}
+                onValueChange={(value: any) => setFormData({ ...formData, type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="church">{t("Church")}</SelectItem>
+                  <SelectItem value="school">{t("School")}</SelectItem>
+                  <SelectItem value="other">{t("Other")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="type">{t("Type")}</Label>
+                <Label htmlFor="country">{t("Country")}</Label>
                 <Select
-                  value={formData.type}
-                  onValueChange={(value: any) => setFormData({ ...formData, type: value })}
+                  value={formData.country}
+                  onValueChange={(value) => {
+                    setFormData({ ...formData, country: value, region: "" });
+                  }}
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder={t("Select Country")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="church">{t("Church")}</SelectItem>
-                    <SelectItem value="school">{t("School")}</SelectItem>
-                    <SelectItem value="other">{t("Other")}</SelectItem>
+                    {countries.map((country) => (
+                      <SelectItem key={country.id} value={country.id}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -408,14 +457,15 @@ export function ClubManagement() {
                 <Select
                   value={formData.region}
                   onValueChange={(value) => setFormData({ ...formData, region: value })}
+                  disabled={!formData.country}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={t("Select Region")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {regions.map((region) => (
+                    {filteredRegions.map((region) => (
                       <SelectItem key={region.id} value={region.id}>
-                        {region.name} ({region.expand?.country?.name})
+                        {region.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -457,3 +507,4 @@ export function ClubManagement() {
     </div>
   );
 }
+
