@@ -21,6 +21,7 @@ import { ProfileScreen } from "@/components/profile-screen"
 import { DashboardScreen } from "@/components/dashboard-screen"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LocaleProvider } from "@/lib/locale-context"
+import { ClubProvider } from "@/lib/club-context"
 import { Button } from "@/components/ui/button"
 import { Toaster } from "@/components/ui/toaster"
 import { 
@@ -209,11 +210,13 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="app-theme">
       <LocaleProvider>
-        <LayoutProvider>
-          <BrowserRouter>
-            <MainContent />
-          </BrowserRouter>
-        </LayoutProvider>
+        <ClubProvider>
+          <LayoutProvider>
+            <BrowserRouter>
+              <MainContent />
+            </BrowserRouter>
+          </LayoutProvider>
+        </ClubProvider>
       </LocaleProvider>
     </ThemeProvider>
   )
