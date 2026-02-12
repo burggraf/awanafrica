@@ -18,6 +18,9 @@ This file provides instructions and context for AI agents working on this projec
 - `/pb_migrations/`: PocketBase database schema migrations (JS).
 - `./dev.sh`: Primary development script (starts PocketBase + Vite).
 
+## Documentation Reference
+- `docs/data-schema.md`: Comprehensive reference for the database schema, multi-tenancy structure, and geographical hierarchy. Refer to this before creating new collections or implementing data-fetching logic.
+
 ## Crucial Implementation Details
 
 ### 1. Vite & PocketBase Conflict
