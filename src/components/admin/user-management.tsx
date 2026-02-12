@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 interface UserRecord {
   id: string;
@@ -82,6 +83,8 @@ export function UserManagement() {
   const [selectedUser, setSelectedUser] = useState<UserRecord | null>(null);
   const [userRoles, setUserRoles] = useState<AdminRole[]>([]);
   const [isRolesDialogOpen, setIsRolesDialogOpen] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState<string | null>(null);
   
   const [countries, setCountries] = useState<Country[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
@@ -106,7 +109,7 @@ export function UserManagement() {
 
   const fetchCountriesAndRegions = async () => {
     try {
-      const [countriesList, regionsList, myRoleData] = await Promise.all([
+      const [countriesList, regionsList] = await Promise.all([
         pb.collection("countries").getFullList<Country>({ 
           sort: "name",
           requestKey: "user_mgmt_countries"
@@ -115,30 +118,10 @@ export function UserManagement() {
           sort: "name", 
           expand: "country",
           requestKey: "user_mgmt_regions"
-        }),
-        pb.collection("admin_roles").getFullList<AdminRole>({
-          filter: `user = "${pb.authStore.record?.id}"`,
-          expand: "region",
-          requestKey: "user_mgmt_my_roles"
         })
       ]);
       setCountries(countriesList);
       setRegions(regionsList);
-
-      // Enhance myRoles with country info from regions if missing
-      const enhancedRoles = myRoles.map(role => {
-        if (role.role === 'Region' && !role.country) {
-          const matchingMyRole = myRoleData.find(r => r.id === role.id);
-          const regionInfo = regionsList.find(reg => reg.id === matchingMyRole?.region);
-          if (regionInfo) {
-            return { ...role, country: regionInfo.country };
-          }
-        }
-        return role;
-      });
-      
-      // Note: We don't setAdminRoles here as it's managed by AdminProvider,
-      // but we use the derived info for availableCountries.
       
     } catch (error: any) {
       if (error.isAbort) return;
@@ -228,11 +211,19 @@ export function UserManagement() {
     }
   };
 
-  const handleDeleteRole = async (roleId: string) => {
+  const handleDeleteRole = (roleId: string) => {
+    setRoleToDelete(roleId);
+    setIsConfirmOpen(true);
+  };
+
+  const confirmDeleteRole = async () => {
+    if (!roleToDelete) return;
     try {
-      await pb.collection("admin_roles").delete(roleId);
+      await pb.collection("admin_roles").delete(roleToDelete);
       toast({ title: t("Success"), description: t("Role removed successfully") });
       if (selectedUser) fetchUserRoles(selectedUser.id);
+      setIsConfirmOpen(false);
+      setRoleToDelete(null);
     } catch (error: any) {
       toast({
         title: t("Error"),
@@ -500,6 +491,14 @@ export function UserManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog
+        isOpen={isConfirmOpen}
+        onOpenChange={setIsConfirmOpen}
+        onConfirm={confirmDeleteRole}
+        title={t("Remove Permission")}
+        description={t("Are you sure you want to remove this administrative permission?")}
+        confirmText={t("Remove")}
+      />
     </div>
   );
 }

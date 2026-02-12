@@ -139,6 +139,9 @@ const resources = {
       "Select country first": "Select country first",
       "Modify administrative roles for {{name}}.": "Modify administrative roles for {{name}}.",
       "Manage user administrative roles and permissions.": "Manage user administrative roles and permissions.",
+      "Remove Permission": "Remove Permission",
+      "Are you sure you want to remove this administrative permission?": "Are you sure you want to remove this administrative permission?",
+      "Remove": "Remove",
     }
   },
   sw: {
@@ -277,6 +280,9 @@ const resources = {
       "Select country first": "Chagua nchi kwanza",
       "Modify administrative roles for {{name}}.": "Badilisha majukumu ya kiutawala ya {{name}}.",
       "Manage user administrative roles and permissions.": "Simamia majukumu ya kiutawala na ruhusa za mtumiaji.",
+      "Remove Permission": "Ondoa Ruhusa",
+      "Are you sure you want to remove this administrative permission?": "Je, una uhakika unataka kuondoa ruhusa hii ya kiutawala?",
+      "Remove": "Ondoa",
     }
   }
 };
