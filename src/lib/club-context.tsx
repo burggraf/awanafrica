@@ -35,20 +35,49 @@ export function ClubProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (pb.authStore.isValid) {
-      pb.collection('club_memberships').getFullList({ expand: 'club' })
-        .then((list) => {
+    const fetchMemberships = async () => {
+      if (pb.authStore.isValid) {
+        setIsLoading(true);
+        try {
+          const list = await pb.collection('club_memberships').getFullList({ expand: 'club' });
           setMemberships(list);
-          if (!currentClub && list.length > 0) {
-            const defaultClub = { id: list[0].expand?.club.id, name: list[0].expand?.club.name };
-            setCurrentClub(defaultClub);
-          }
-        })
-        .finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
-    }
+        } catch (error) {
+          console.error('Failed to fetch memberships:', error);
+          setMemberships([]);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setMemberships([]);
+        setCurrentClub(null);
+        setCurrentYear(null);
+        setIsLoading(false);
+      }
+    };
+
+    fetchMemberships();
+
+    return pb.authStore.onChange(() => {
+      fetchMemberships();
+    });
   }, []);
+
+  useEffect(() => {
+    if (isLoading || !pb.authStore.isValid) return;
+
+    if (currentClub) {
+      const isStillMember = memberships.some((m) => m.expand?.club?.id === currentClub.id);
+      if (!isStillMember) {
+        setCurrentClub(null);
+        setCurrentYear(null);
+      }
+    } else if (memberships.length > 0) {
+      const firstClub = memberships[0].expand?.club;
+      if (firstClub) {
+        setCurrentClub({ id: firstClub.id, name: firstClub.name });
+      }
+    }
+  }, [memberships, currentClub, isLoading]);
 
   useEffect(() => {
     if (currentClub) localStorage.setItem('active-club', JSON.stringify(currentClub));
