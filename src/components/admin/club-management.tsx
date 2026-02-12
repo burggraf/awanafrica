@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Pencil, Trash2, Building2 } from "lucide-react";
+import { Plus, Trash2, Building2 } from "lucide-react";
 import { pb } from "@/lib/pb";
 import { useLayout } from "@/lib/layout-context";
 import { useAdmin } from "@/lib/admin-context";
@@ -235,16 +235,18 @@ export function ClubManagement() {
     }
   };
 
-  const handleDelete = async (clubId: string) => {
+  const handleDelete = async () => {
+    if (!editingClub) return;
+    
     try {
       // Check for related data as per user request
       // We need to check memberships, programs, years, students, events
       const checks = [
-        pb.collection("club_memberships").getList(1, 1, { filter: `club = "${clubId}"` }),
-        pb.collection("programs").getList(1, 1, { filter: `club = "${clubId}"` }),
-        pb.collection("club_years").getList(1, 1, { filter: `club = "${clubId}"` }),
-        pb.collection("students").getList(1, 1, { filter: `club = "${clubId}"` }),
-        pb.collection("events").getList(1, 1, { filter: `club = "${clubId}"` }),
+        pb.collection("club_memberships").getList(1, 1, { filter: `club = "${editingClub.id}"` }),
+        pb.collection("programs").getList(1, 1, { filter: `club = "${editingClub.id}"` }),
+        pb.collection("club_years").getList(1, 1, { filter: `club = "${editingClub.id}"` }),
+        pb.collection("students").getList(1, 1, { filter: `club = "${editingClub.id}"` }),
+        pb.collection("events").getList(1, 1, { filter: `club = "${editingClub.id}"` }),
       ];
 
       const results = await Promise.all(checks);
@@ -260,8 +262,10 @@ export function ClubManagement() {
       }
 
       if (confirm(t("Are you sure you want to delete this club?"))) {
-        await pb.collection("clubs").delete(clubId);
+        await pb.collection("clubs").delete(editingClub.id);
         toast({ title: t("Success"), description: t("Club deleted successfully") });
+        setIsDialogOpen(false);
+        setEditingClub(null);
         fetchData();
       }
     } catch (error: any) {
@@ -332,7 +336,7 @@ export function ClubManagement() {
         </Button>
       </div>
 
-      <div className="border rounded-md">
+      <div className="border rounded-md overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -340,25 +344,28 @@ export function ClubManagement() {
               <TableHead>{t("Type")}</TableHead>
               <TableHead>{t("Region/Country")}</TableHead>
               <TableHead>{t("Status")}</TableHead>
-              <TableHead className="w-[100px]">{t("Actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+                <TableCell colSpan={4} className="text-center py-8">
                   {t("Loading...")}
                 </TableCell>
               </TableRow>
             ) : clubs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                   {t("No clubs found")}
                 </TableCell>
               </TableRow>
             ) : (
               clubs.map((club) => (
-                <TableRow key={club.id} className={!club.active ? "opacity-60" : ""}>
+                <TableRow 
+                  key={club.id} 
+                  className={`cursor-pointer hover:bg-muted/50 transition-colors ${!club.active ? "opacity-60" : ""}`}
+                  onClick={() => openDialog(club)}
+                >
                   <TableCell className="font-medium">
                     {club.name}
                     {!club.active && (
@@ -374,22 +381,12 @@ export function ClubManagement() {
                       ({club.expand?.region?.expand?.country?.name})
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-2">
                       <Switch 
                         checked={club.active} 
                         onCheckedChange={() => toggleActive(club)}
                       />
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => openDialog(club)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(club.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -404,7 +401,7 @@ export function ClubManagement() {
           <DialogHeader>
             <DialogTitle>{editingClub ? t("Edit Club") : t("Add Club")}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
             <div className="space-y-2">
               <Label htmlFor="name">{t("Club Name")}</Label>
               <Input
@@ -497,11 +494,24 @@ export function ClubManagement() {
               />
             </div>
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                {t("Cancel")}
-              </Button>
-              <Button type="submit">{t("Save")}</Button>
+            <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
+              {editingClub && (
+                <Button 
+                  type="button" 
+                  variant="destructive" 
+                  onClick={handleDelete}
+                  className="sm:mr-auto"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {t("Delete")}
+                </Button>
+              )}
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  {t("Cancel")}
+                </Button>
+                <Button type="submit">{t("Save")}</Button>
+              </div>
             </DialogFooter>
           </form>
         </DialogContent>

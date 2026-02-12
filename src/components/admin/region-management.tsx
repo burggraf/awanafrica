@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Pencil, Trash2, Map } from "lucide-react";
+import { Plus, Trash2, Map } from "lucide-react";
 import { pb } from "@/lib/pb";
 import { useLayout } from "@/lib/layout-context";
 import { useAdmin } from "@/lib/admin-context";
@@ -147,11 +147,13 @@ export function RegionManagement() {
     }
   };
 
-  const handleDelete = async (regionId: string) => {
+  const handleDelete = async () => {
+    if (!editingRegion) return;
+    
     try {
       // Check for clubs
       const clubs = await pb.collection("clubs").getList(1, 1, {
-        filter: `region = "${regionId}"`,
+        filter: `region = "${editingRegion.id}"`,
       });
 
       if (clubs.totalItems > 0) {
@@ -164,8 +166,10 @@ export function RegionManagement() {
       }
 
       if (confirm(t("Are you sure you want to delete this region?"))) {
-        await pb.collection("regions").delete(regionId);
+        await pb.collection("regions").delete(editingRegion.id);
         toast({ title: t("Success"), description: t("Region deleted successfully") });
+        setIsDialogOpen(false);
+        setEditingRegion(null);
         fetchData();
       }
     } catch (error: any) {
@@ -201,43 +205,36 @@ export function RegionManagement() {
         </Button>
       </div>
 
-      <div className="border rounded-md">
+      <div className="border rounded-md overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>{t("Name")}</TableHead>
               <TableHead>{t("Country")}</TableHead>
-              <TableHead className="w-[100px]">{t("Actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-8">
+                <TableCell colSpan={2} className="text-center py-8">
                   {t("Loading...")}
                 </TableCell>
               </TableRow>
             ) : regions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={2} className="text-center py-8 text-muted-foreground">
                   {t("No regions found")}
                 </TableCell>
               </TableRow>
             ) : (
               regions.map((region) => (
-                <TableRow key={region.id}>
+                <TableRow 
+                  key={region.id} 
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => openDialog(region)}
+                >
                   <TableCell className="font-medium">{region.name}</TableCell>
                   <TableCell>{region.expand?.country?.name || t("Unknown")}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => openDialog(region)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(region.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -250,7 +247,7 @@ export function RegionManagement() {
           <DialogHeader>
             <DialogTitle>{editingRegion ? t("Edit Region") : t("Add Region")}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
             <div className="space-y-2">
               <Label htmlFor="name">{t("Region Name")}</Label>
               <Input
@@ -279,11 +276,25 @@ export function RegionManagement() {
                 </SelectContent>
               </Select>
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                {t("Cancel")}
-              </Button>
-              <Button type="submit">{t("Save")}</Button>
+            
+            <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
+              {editingRegion && (
+                <Button 
+                  type="button" 
+                  variant="destructive" 
+                  onClick={handleDelete}
+                  className="sm:mr-auto"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {t("Delete")}
+                </Button>
+              )}
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  {t("Cancel")}
+                </Button>
+                <Button type="submit">{t("Save")}</Button>
+              </div>
             </DialogFooter>
           </form>
         </DialogContent>

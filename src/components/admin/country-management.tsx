@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Pencil, Trash2, Globe } from "lucide-react";
+import { Plus, Trash2, Globe } from "lucide-react";
 import { pb } from "@/lib/pb";
 import { useLayout } from "@/lib/layout-context";
 import { Button } from "@/components/ui/button";
@@ -88,11 +88,13 @@ export function CountryManagement() {
     }
   };
 
-  const handleDelete = async (countryId: string) => {
+  const handleDelete = async () => {
+    if (!editingCountry) return;
+    
     try {
       // Check for regions
       const regions = await pb.collection("regions").getList(1, 1, {
-        filter: `country = "${countryId}"`,
+        filter: `country = "${editingCountry.id}"`,
       });
 
       if (regions.totalItems > 0) {
@@ -105,8 +107,10 @@ export function CountryManagement() {
       }
 
       if (confirm(t("Are you sure you want to delete this country?"))) {
-        await pb.collection("countries").delete(countryId);
+        await pb.collection("countries").delete(editingCountry.id);
         toast({ title: t("Success"), description: t("Country deleted successfully") });
+        setIsDialogOpen(false);
+        setEditingCountry(null);
         fetchCountries();
       }
     } catch (error: any) {
@@ -142,43 +146,36 @@ export function CountryManagement() {
         </Button>
       </div>
 
-      <div className="border rounded-md">
+      <div className="border rounded-md overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>{t("Name")}</TableHead>
               <TableHead>{t("ISO Code")}</TableHead>
-              <TableHead className="w-[100px]">{t("Actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-8">
+                <TableCell colSpan={2} className="text-center py-8">
                   {t("Loading...")}
                 </TableCell>
               </TableRow>
             ) : countries.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={2} className="text-center py-8 text-muted-foreground">
                   {t("No countries found")}
                 </TableCell>
               </TableRow>
             ) : (
               countries.map((country) => (
-                <TableRow key={country.id}>
+                <TableRow 
+                  key={country.id} 
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => openDialog(country)}
+                >
                   <TableCell className="font-medium">{country.name}</TableCell>
                   <TableCell>{country.isoCode}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => openDialog(country)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(country.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -191,7 +188,7 @@ export function CountryManagement() {
           <DialogHeader>
             <DialogTitle>{editingCountry ? t("Edit Country") : t("Add Country")}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
             <div className="space-y-2">
               <Label htmlFor="name">{t("Country Name")}</Label>
               <Input
@@ -211,11 +208,25 @@ export function CountryManagement() {
                 placeholder="e.g. KE"
               />
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                {t("Cancel")}
-              </Button>
-              <Button type="submit">{t("Save")}</Button>
+            
+            <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
+              {editingCountry && (
+                <Button 
+                  type="button" 
+                  variant="destructive" 
+                  onClick={handleDelete}
+                  className="sm:mr-auto"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {t("Delete")}
+                </Button>
+              )}
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  {t("Cancel")}
+                </Button>
+                <Button type="submit">{t("Save")}</Button>
+              </div>
             </DialogFooter>
           </form>
         </DialogContent>
