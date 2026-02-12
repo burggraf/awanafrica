@@ -1,4 +1,3 @@
-import { Globe } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import {
   DropdownMenu,

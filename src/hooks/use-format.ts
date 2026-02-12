@@ -2,7 +2,7 @@ import { useLocale } from '@/lib/locale-context';
 import { useTranslation } from 'react-i18next';
 
 export function useFormat() {
-  const { region, formatCurrency, formatDate, formatNumber } = useLocale();
+  const { region, formatCurrency, formatNumber } = useLocale();
   const { i18n } = useTranslation();
 
   const getFullLocale = () => {

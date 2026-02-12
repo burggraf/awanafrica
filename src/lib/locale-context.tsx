@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import i18n from './i18n';
 
 export type Region = 'TZ' | 'KE' | 'ZM' | 'ZW' | 'US';
@@ -28,7 +28,7 @@ interface LocaleContextType {
 
 const LocaleContext = createContext<LocaleContextType | undefined>(undefined);
 
-export const LocaleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const LocaleProvider = ({ children }: { children: React.ReactNode }) => {
   const [region, setRegionState] = useState<Region>(() => {
     return (localStorage.getItem('app-region') as Region) || 'TZ';
   });
