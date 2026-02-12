@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
+import { cn } from "@/lib/utils"
 import { NavUser } from "@/components/nav-user"
 import { useAdmin } from "@/lib/admin-context"
 import { ModeToggle } from "@/components/mode-toggle"
@@ -36,7 +37,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 const APP_VERSION = __APP_VERSION__
 const APP_NAME = __APP_NAME__
 
-export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props }: AppSidebarProps) {
+export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, className, ...props }: AppSidebarProps) {
   const { t } = useTranslation()
   const { isAdmin, isGlobalAdmin, isCountryAdmin } = useAdmin()
 
@@ -82,7 +83,7 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props
   ].filter(item => item.visible)
 
   return (
-    <Sidebar variant="inset" {...props}>
+    <Sidebar variant="inset" collapsible="none" className={cn("h-full w-full", className)} {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
