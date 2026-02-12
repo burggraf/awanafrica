@@ -291,23 +291,6 @@ export function ClubManagement() {
     }
   };
 
-  const toggleActive = async (club: Club) => {
-    try {
-      await pb.collection("clubs").update(club.id, { active: !club.active });
-      toast({ 
-        title: t("Success"), 
-        description: club.active ? t("Club deactivated") : t("Club activated") 
-      });
-      fetchData();
-    } catch (error: any) {
-      toast({
-        title: t("Error"),
-        description: error.message || t("Failed to update status"),
-        variant: "destructive",
-      });
-    }
-  };
-
   const openDialog = (club?: Club) => {
     if (club) {
       setEditingClub(club);
@@ -395,13 +378,12 @@ export function ClubManagement() {
                       ({club.expand?.region?.expand?.country?.name})
                     </span>
                   </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center gap-2">
-                      <Switch 
-                        checked={club.active} 
-                        onCheckedChange={() => toggleActive(club)}
-                      />
-                    </div>
+                  <TableCell>
+                    {club.active ? (
+                      <span className="text-green-600 dark:text-green-400 font-medium">{t("Active")}</span>
+                    ) : (
+                      <span className="text-muted-foreground font-medium">{t("Inactive")}</span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
@@ -495,7 +477,7 @@ export function ClubManagement() {
               />
             </div>
 
-            <div className="flex items-center justify-between border p-3 rounded-md">
+            <div className="flex items-center justify-between border p-3 rounded-md bg-muted/30">
               <div className="space-y-0.5">
                 <Label className="text-base">{t("Active Status")}</Label>
                 <div className="text-sm text-muted-foreground">
@@ -505,6 +487,7 @@ export function ClubManagement() {
               <Switch
                 checked={formData.active}
                 onCheckedChange={(checked: boolean) => setFormData({ ...formData, active: checked })}
+                className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-slate-700"
               />
             </div>
 
