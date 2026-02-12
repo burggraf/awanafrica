@@ -2,12 +2,12 @@ import { useLocale } from '@/lib/locale-context';
 import { useTranslation } from 'react-i18next';
 
 export function useFormat() {
-  const { region, formatCurrency, formatNumber } = useLocale();
+  const { country, formatCurrency, formatNumber } = useLocale();
   const { i18n } = useTranslation();
 
   const getFullLocale = () => {
     const lang = i18n.language.split('-')[0];
-    return `${lang}-${region}`;
+    return `${lang}-${country}`;
   };
 
   const formatDateTime = (date: Date | string | number) => {

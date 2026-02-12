@@ -13,7 +13,7 @@ import { NavUser } from "@/components/nav-user"
 import { useAdmin } from "@/lib/admin-context"
 import { ModeToggle } from "@/components/mode-toggle"
 import { LanguageToggle } from "@/components/language-toggle"
-import { RegionToggle } from "@/components/region-toggle"
+import { CountryToggle } from "@/components/country-toggle"
 import { ClubSwitcher } from "@/components/club-switcher"
 import {
   Sidebar,
@@ -146,7 +146,7 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props
             <LanguageToggle />
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <RegionToggle />
+            <CountryToggle />
           </SidebarMenuItem>
         </SidebarMenu>
         <SidebarSeparator />

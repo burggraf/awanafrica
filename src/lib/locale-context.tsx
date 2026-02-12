@@ -1,16 +1,16 @@
 import { createContext, useContext, useState } from 'react';
 import i18n from './i18n';
 
-export type Region = 'TZ' | 'KE' | 'ZM' | 'ZW' | 'US';
+export type Country = 'TZ' | 'KE' | 'ZM' | 'ZW' | 'US';
 
-interface RegionInfo {
+interface CountryInfo {
   name: string;
   flag: string;
   currency: string;
   locale: string; // e.g., 'en-TZ' or 'sw-TZ'
 }
 
-export const regions: Record<Region, RegionInfo> = {
+export const countries: Record<Country, CountryInfo> = {
   TZ: { name: 'Tanzania', flag: '🇹🇿', currency: 'TZS', locale: 'en-TZ' },
   KE: { name: 'Kenya', flag: '🇰🇪', currency: 'KES', locale: 'en-KE' },
   ZM: { name: 'Zambia', flag: '🇿🇲', currency: 'ZMW', locale: 'en-ZM' },
@@ -19,8 +19,8 @@ export const regions: Record<Region, RegionInfo> = {
 };
 
 interface LocaleContextType {
-  region: Region;
-  setRegion: (region: Region) => void;
+  country: Country;
+  setCountry: (country: Country) => void;
   formatCurrency: (amount: number) => string;
   formatDate: (date: Date | string | number) => string;
   formatNumber: (num: number) => string;
@@ -29,30 +29,30 @@ interface LocaleContextType {
 const LocaleContext = createContext<LocaleContextType | undefined>(undefined);
 
 export const LocaleProvider = ({ children }: { children: React.ReactNode }) => {
-  const [region, setRegionState] = useState<Region>(() => {
-    return (localStorage.getItem('app-region') as Region) || 'TZ';
+  const [country, setCountryState] = useState<Country>(() => {
+    return (localStorage.getItem('app-country') as Country) || 'TZ';
   });
 
-  const setRegion = (newRegion: Region) => {
-    localStorage.setItem('app-region', newRegion);
-    setRegionState(newRegion);
+  const setCountry = (newCountry: Country) => {
+    localStorage.setItem('app-country', newCountry);
+    setCountryState(newCountry);
   };
 
   // The actual locale string used for Intl APIs
-  // We combine current i18n language with the selected region
+  // We combine current i18n language with the selected country
   const getFullLocale = () => {
     const lang = i18n.language.split('-')[0]; // get 'en' from 'en-US'
-    return `${lang}-${region}`;
+    return `${lang}-${country}`;
   };
 
   const formatCurrency = (amount: number) => {
     try {
       return new Intl.NumberFormat(getFullLocale(), {
         style: 'currency',
-        currency: regions[region].currency,
+        currency: countries[country].currency,
       }).format(amount);
     } catch (e) {
-      return `${regions[region].currency} ${amount.toFixed(2)}`;
+      return `${countries[country].currency} ${amount.toFixed(2)}`;
     }
   };
 
@@ -68,7 +68,7 @@ export const LocaleProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <LocaleContext.Provider value={{ region, setRegion, formatCurrency, formatDate, formatNumber }}>
+    <LocaleContext.Provider value={{ country, setCountry, formatCurrency, formatDate, formatNumber }}>
       {children}
     </LocaleContext.Provider>
   );

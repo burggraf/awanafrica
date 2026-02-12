@@ -1,0 +1,36 @@
+import { useTranslation } from "react-i18next"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { SidebarMenuButton } from "@/components/ui/sidebar"
+import { useLocale, countries } from "@/lib/locale-context"
+import type { Country } from "@/lib/locale-context"
+
+export function CountryToggle() {
+  const { country, setCountry } = useLocale()
+  const { t } = useTranslation()
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <SidebarMenuButton tooltip={t('Country')}>
+          <span className="text-lg leading-none" role="img" aria-label={t('Country')}>
+            {countries[country].flag}
+          </span>
+          <span>{t('Country')}</span>
+        </SidebarMenuButton>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {(Object.keys(countries) as Country[]).map((c) => (
+          <DropdownMenuItem key={c} onClick={() => setCountry(c)} className="gap-2">
+            <span className="text-lg">{countries[c].flag}</span>
+            {t(countries[c].name)}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
