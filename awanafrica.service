@@ -4,14 +4,18 @@ After=network.target
 
 [Service]
 Type=simple
-User=root
-Group=root
-WorkingDirectory=/root/awanafrica
-ExecStart=/root/awanafrica/pocketbase serve --http=awanafrica.org:80 --https=awanafrica.org:443
+User=pocketbase
+Group=pocketbase
+WorkingDirectory=/opt/awanafrica
+ExecStart=/opt/awanafrica/pocketbase serve --http=awanafrica.org:80 --https=awanafrica.org:443
 Restart=always
 RestartSec=3
-StandardOutput=append:/root/awanafrica/pb_data/errors.log
-StandardError=append:/root/awanafrica/pb_data/errors.log
+StandardOutput=append:/opt/awanafrica/pb_data/errors.log
+StandardError=append:/opt/awanafrica/pb_data/errors.log
+# Security hardening for the service
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
 
 [Install]
 WantedBy=multi-user.target
