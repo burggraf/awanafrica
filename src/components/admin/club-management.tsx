@@ -382,7 +382,7 @@ export function ClubManagement() {
                     {club.active ? (
                       <span className="text-green-600 dark:text-green-400 font-medium">{t("Active")}</span>
                     ) : (
-                      <span className="text-muted-foreground font-medium">{t("Inactive")}</span>
+                      <span className="text-slate-500 dark:text-slate-400 font-medium">{t("Inactive")}</span>
                     )}
                   </TableCell>
                 </TableRow>
@@ -477,7 +477,7 @@ export function ClubManagement() {
               />
             </div>
 
-            <div className="flex items-center justify-between border p-3 rounded-md bg-muted/30">
+            <div className="flex items-center justify-between border p-3 rounded-md bg-slate-50 dark:bg-slate-900/50">
               <div className="space-y-0.5">
                 <Label className="text-base">{t("Active Status")}</Label>
                 <div className="text-sm text-muted-foreground">
@@ -487,7 +487,7 @@ export function ClubManagement() {
               <Switch
                 checked={formData.active}
                 onCheckedChange={(checked: boolean) => setFormData({ ...formData, active: checked })}
-                className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-slate-700"
+                className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-slate-400"
               />
             </div>
 
