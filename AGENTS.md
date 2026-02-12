@@ -74,11 +74,16 @@ Use the `useLayout()` hook in page components to customize the header and footer
 
 ### 6. PocketBase Migrations
 When adding new collections or fields, create a new file in `/pb_migrations/`.
+Note: PocketBase Go-based migrations (used in this project) require explicit `new Field()` and `new Collection()` constructors for adding elements to schema collections.
+
 Example snippet for adding fields:
 ```javascript
 migrate((app) => {
   const collection = app.findCollectionByNameOrId("your_collection");
-  collection.fields.add({ name: "newField", type: "text" });
+  collection.fields.add(new Field({ 
+    name: "newField", 
+    type: "text" 
+  }));
   return app.save(collection);
 })
 ```

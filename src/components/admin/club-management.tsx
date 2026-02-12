@@ -1,0 +1,459 @@
+import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { Plus, Pencil, Trash2, Building2 } from "lucide-react";
+import { pb } from "@/lib/pb";
+import { useLayout } from "@/lib/layout-context";
+import { useAdmin } from "@/lib/admin-context";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+
+interface Region {
+  id: string;
+  name: string;
+  country: string;
+  expand?: {
+    country: {
+      name: string;
+    }
+  }
+}
+
+interface Club {
+  id: string;
+  name: string;
+  type: "church" | "school" | "other";
+  region: string;
+  address: string;
+  timezone: string;
+  active: boolean;
+  expand?: {
+    region: Region;
+  };
+}
+
+export function ClubManagement() {
+  const { t } = useTranslation();
+  const { setHeaderTitle } = useLayout();
+  const { toast } = useToast();
+  const { isGlobalAdmin, adminRoles } = useAdmin();
+  
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [regions, setRegions] = useState<Region[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingClub, setEditingClub] = useState<Club | null>(null);
+  
+  const [formData, setFormData] = useState<{
+    name: string;
+    type: "church" | "school" | "other";
+    region: string;
+    address: string;
+    timezone: string;
+    active: boolean;
+  }>({
+    name: "",
+    type: "church",
+    region: "",
+    address: "",
+    timezone: "UTC",
+    active: true,
+  });
+
+  // Get regions the user can manage clubs for
+  const managedRegionIds = adminRoles
+    .filter(r => r.role === 'Region')
+    .map(r => r.region)
+    .filter(Boolean) as string[];
+
+  const managedCountryIds = adminRoles
+    .filter(r => r.role === 'Country')
+    .map(r => r.country)
+    .filter(Boolean) as string[];
+
+  useEffect(() => {
+    setHeaderTitle(t("Club Management"));
+    fetchData();
+  }, [setHeaderTitle, t]);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      // Filter clubs based on roles
+      let clubFilter = undefined;
+      if (!isGlobalAdmin) {
+        const conditions = [];
+        if (managedRegionIds.length > 0) {
+          conditions.push(managedRegionIds.map(id => `region = "${id}"`).join(" || "));
+        }
+        if (managedCountryIds.length > 0) {
+          conditions.push(managedCountryIds.map(id => `region.country = "${id}"`).join(" || "));
+        }
+        
+        if (conditions.length > 0) {
+          clubFilter = conditions.map(c => `(${c})`).join(" || ");
+        } else {
+          clubFilter = "id = 'none'";
+        }
+      }
+
+      // Filter regions for the dropdown
+      let regionFilter = undefined;
+      if (!isGlobalAdmin) {
+        const conditions = [];
+        if (managedRegionIds.length > 0) {
+          conditions.push(managedRegionIds.map(id => `id = "${id}"`).join(" || "));
+        }
+        if (managedCountryIds.length > 0) {
+          conditions.push(managedCountryIds.map(id => `country = "${id}"`).join(" || "));
+        }
+        
+        if (conditions.length > 0) {
+          regionFilter = conditions.map(c => `(${c})`).join(" || ");
+        } else {
+          regionFilter = "id = 'none'";
+        }
+      }
+
+      const [clubRecords, regionRecords] = await Promise.all([
+        pb.collection("clubs").getFullList<Club>({
+          sort: "name",
+          expand: "region.country",
+          filter: clubFilter,
+          requestKey: "club_management_list",
+        }),
+        pb.collection("regions").getFullList<Region>({
+          sort: "name",
+          expand: "country",
+          filter: regionFilter,
+          requestKey: "region_dropdown_list",
+        }),
+      ]);
+      
+      setClubs(clubRecords);
+      setRegions(regionRecords);
+    } catch (error: any) {
+      if (error.isAbort) return;
+      console.error("Error fetching data:", error);
+      toast({
+        title: t("Error"),
+        description: t("Failed to fetch clubs or regions"),
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.region) {
+      toast({
+        title: t("Error"),
+        description: t("Please select a region"),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      if (editingClub) {
+        await pb.collection("clubs").update(editingClub.id, formData);
+        toast({ title: t("Success"), description: t("Club updated successfully") });
+      } else {
+        await pb.collection("clubs").create(formData);
+        toast({ title: t("Success"), description: t("Club created successfully") });
+      }
+      setIsDialogOpen(false);
+      setEditingClub(null);
+      setFormData({
+        name: "",
+        type: "church",
+        region: "",
+        address: "",
+        timezone: "UTC",
+        active: true,
+      });
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: t("Error"),
+        description: error.message || t("Failed to save club"),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (clubId: string) => {
+    try {
+      // Check for related data as per user request
+      // We need to check memberships, programs, years, students, events
+      const checks = [
+        pb.collection("club_memberships").getList(1, 1, { filter: `club = "${clubId}"` }),
+        pb.collection("programs").getList(1, 1, { filter: `club = "${clubId}"` }),
+        pb.collection("club_years").getList(1, 1, { filter: `club = "${clubId}"` }),
+        pb.collection("students").getList(1, 1, { filter: `club = "${clubId}"` }),
+        pb.collection("events").getList(1, 1, { filter: `club = "${clubId}"` }),
+      ];
+
+      const results = await Promise.all(checks);
+      const hasRelatedData = results.some(res => res.totalItems > 0);
+
+      if (hasRelatedData) {
+        toast({
+          title: t("Cannot Delete"),
+          description: t("This club has related data (members, programs, etc.) and cannot be deleted. Consider marking it as inactive instead."),
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (confirm(t("Are you sure you want to delete this club?"))) {
+        await pb.collection("clubs").delete(clubId);
+        toast({ title: t("Success"), description: t("Club deleted successfully") });
+        fetchData();
+      }
+    } catch (error: any) {
+      toast({
+        title: t("Error"),
+        description: error.message || t("Failed to delete club"),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleActive = async (club: Club) => {
+    try {
+      await pb.collection("clubs").update(club.id, { active: !club.active });
+      toast({ 
+        title: t("Success"), 
+        description: club.active ? t("Club deactivated") : t("Club activated") 
+      });
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: t("Error"),
+        description: error.message || t("Failed to update status"),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const openDialog = (club?: Club) => {
+    if (club) {
+      setEditingClub(club);
+      setFormData({
+        name: club.name,
+        type: club.type,
+        region: club.region,
+        address: club.address || "",
+        timezone: club.timezone || "UTC",
+        active: club.active,
+      });
+    } else {
+      setEditingClub(null);
+      setFormData({
+        name: "",
+        type: "church",
+        region: "",
+        address: "",
+        timezone: "UTC",
+        active: true,
+      });
+    }
+    setIsDialogOpen(true);
+  };
+
+  return (
+    <div className="p-4 space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          <Building2 className="h-5 w-5 text-primary" />
+          {t("Clubs")}
+        </h2>
+        <Button onClick={() => openDialog()}>
+          <Plus className="h-4 w-4 mr-2" />
+          {t("Add Club")}
+        </Button>
+      </div>
+
+      <div className="border rounded-md">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t("Name")}</TableHead>
+              <TableHead>{t("Type")}</TableHead>
+              <TableHead>{t("Region/Country")}</TableHead>
+              <TableHead>{t("Status")}</TableHead>
+              <TableHead className="w-[100px]">{t("Actions")}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8">
+                  {t("Loading...")}
+                </TableCell>
+              </TableRow>
+            ) : clubs.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  {t("No clubs found")}
+                </TableCell>
+              </TableRow>
+            ) : (
+              clubs.map((club) => (
+                <TableRow key={club.id} className={!club.active ? "opacity-60" : ""}>
+                  <TableCell className="font-medium">
+                    {club.name}
+                    {!club.active && (
+                      <Badge variant="secondary" className="ml-2 text-[10px] h-4">
+                        {t("Inactive")}
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="capitalize">{t(club.type)}</TableCell>
+                  <TableCell>
+                    {club.expand?.region?.name} 
+                    <span className="text-muted-foreground text-xs ml-1">
+                      ({club.expand?.region?.expand?.country?.name})
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Switch 
+                        checked={club.active} 
+                        onCheckedChange={() => toggleActive(club)}
+                      />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="icon" onClick={() => openDialog(club)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(club.id)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingClub ? t("Edit Club") : t("Add Club")}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">{t("Club Name")}</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="type">{t("Type")}</Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value: any) => setFormData({ ...formData, type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="church">{t("Church")}</SelectItem>
+                    <SelectItem value="school">{t("School")}</SelectItem>
+                    <SelectItem value="other">{t("Other")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="region">{t("Region")}</Label>
+                <Select
+                  value={formData.region}
+                  onValueChange={(value) => setFormData({ ...formData, region: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("Select Region")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {regions.map((region) => (
+                      <SelectItem key={region.id} value={region.id}>
+                        {region.name} ({region.expand?.country?.name})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="address">{t("Address")}</Label>
+              <Input
+                id="address"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              />
+            </div>
+
+            <div className="flex items-center justify-between border p-3 rounded-md">
+              <div className="space-y-0.5">
+                <Label className="text-base">{t("Active Status")}</Label>
+                <div className="text-sm text-muted-foreground">
+                  {formData.active ? t("Club is active") : t("Club is inactive")}
+                </div>
+              </div>
+              <Switch
+                checked={formData.active}
+                onCheckedChange={(checked: boolean) => setFormData({ ...formData, active: checked })}
+              />
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                {t("Cancel")}
+              </Button>
+              <Button type="submit">{t("Save")}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
