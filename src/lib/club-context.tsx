@@ -39,9 +39,14 @@ export function ClubProvider({ children }: { children: ReactNode }) {
       if (pb.authStore.isValid) {
         setIsLoading(true);
         try {
-          const list = await pb.collection('club_memberships').getFullList({ expand: 'club' });
+          // Disable auto-cancellation for this global fetch
+          const list = await pb.collection('club_memberships').getFullList({ 
+            expand: 'club',
+            requestKey: 'global_memberships_fetch'
+          });
           setMemberships(list);
-        } catch (error) {
+        } catch (error: any) {
+          if (error.isAbort) return;
           console.error('Failed to fetch memberships:', error);
           setMemberships([]);
         } finally {

@@ -19,9 +19,12 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { AuthModal } from "@/components/auth-modal"
 import { ProfileScreen } from "@/components/profile-screen"
 import { DashboardScreen } from "@/components/dashboard-screen"
+import { CountryManagement } from "@/components/admin/country-management"
+import { RegionManagement } from "@/components/admin/region-management"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LocaleProvider } from "@/lib/locale-context"
 import { ClubProvider } from "@/lib/club-context"
+import { AdminProvider } from "@/lib/admin-context"
 import { Button } from "@/components/ui/button"
 import { Toaster } from "@/components/ui/toaster"
 import { 
@@ -41,6 +44,7 @@ import {
 import { useTranslation } from "react-i18next"
 
 import { LayoutProvider, useLayout } from "@/lib/layout-context"
+import { useAdmin } from "@/lib/admin-context"
 
 const APP_VERSION = __APP_VERSION__
 const APP_NAME = __APP_NAME__
@@ -63,11 +67,19 @@ function MainContent() {
   const [isAuthOpen, setIsAuthOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
+  const { isGlobalAdmin, isCountryAdmin } = useAdmin()
+
   // Derive active page title from location for the header
   const activePageTitle = useMemo(() => {
-    const path = location.pathname.substring(1) || "Dashboard"
+    const path = location.pathname.substring(1)
+    if (!path) return "Dashboard"
+    
+    // Handle nested paths for titles
+    const segments = path.split("/")
+    const lastSegment = segments[segments.length - 1]
+    
     // Capitalize first letter for the title
-    return path.charAt(0).toUpperCase() + path.slice(1)
+    return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1)
   }, [location.pathname])
 
   // Reset layout on page change
@@ -103,9 +115,7 @@ function MainContent() {
                       setIsSidebarOpen(false)
                     }}
                     onPageChange={(page) => {
-                      // page here comes from the sidebar title, we should probably change how sidebar works
-                      // but for now let's just lowercase it
-                      navigate(`/${page.toLowerCase()}`)
+                      navigate(`/${page}`)
                       setIsSidebarOpen(false)
                     }}
                   />
@@ -116,7 +126,7 @@ function MainContent() {
         </div>
         
         <div className="flex-1 flex justify-center">
-          <h1 className="font-semibold text-lg truncate">
+          <h1 className="font-semibold text-lg truncate text-center">
             {headerTitle || (activePageTitle === "Profile" ? t("User Profile") : t(activePageTitle))}
           </h1>
         </div>
@@ -148,6 +158,15 @@ function MainContent() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
+          
+          {/* Admin Routes */}
+          {isGlobalAdmin && (
+            <Route path="/admin/countries" element={<CountryManagement />} />
+          )}
+          {(isGlobalAdmin || isCountryAdmin) && (
+            <Route path="/admin/regions" element={<RegionManagement />} />
+          )}
+          
           <Route path="*" element={
             <div className="p-4">
               <h2 className="text-2xl font-bold">{t(activePageTitle)}</h2>
@@ -210,13 +229,15 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="app-theme">
       <LocaleProvider>
-        <ClubProvider>
-          <LayoutProvider>
-            <BrowserRouter>
-              <MainContent />
-            </BrowserRouter>
-          </LayoutProvider>
-        </ClubProvider>
+        <AdminProvider>
+          <ClubProvider>
+            <LayoutProvider>
+              <BrowserRouter>
+                <MainContent />
+              </BrowserRouter>
+            </LayoutProvider>
+          </ClubProvider>
+        </AdminProvider>
       </LocaleProvider>
     </ThemeProvider>
   )

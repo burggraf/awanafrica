@@ -32,6 +32,13 @@ Junction table connecting users to clubs with specific permissions.
 - `club` (relation, required): Link to `clubs`.
 - `roles` (select, multi, max 4): `Director`, `Secretary`, `Treasurer`, `Leader`.
 
+### `admin_roles`
+Global and hierarchical administrative permissions.
+- `user` (relation, required): Link to `users`.
+- `role` (select, required): `Global`, `Country`, `Region`.
+- `country` (relation, optional): Link to `countries` (required if role is `Country`).
+- `region` (relation, optional): Link to `regions` (required if role is `Region`).
+
 ### `programs`
 The different Awana programs offered by a club.
 - `club` (relation, required): Link to `clubs`.
@@ -68,8 +75,9 @@ Links a student to a specific program for a specific year.
 ## 4. Events & Attendance
 
 ### `events`
-Scheduled meetings or special events.
-- `club` (relation, required): Link to `clubs`.
+Scheduled meetings or special events (Club-level or Regional).
+- `club` (relation, optional): Link to `clubs` (Optional for Regional events).
+- `region` (relation, optional): Link to `regions` (Required for Regional events).
 - `club_year` (relation, required): Link to `club_years`.
 - `name` (text, required): e.g., "Weekly Meeting", "Awana Games".
 - `type` (select, required): `Weekly`, `Games`, `Quiz`, `Other`.
@@ -87,13 +95,19 @@ Recording student presence at events.
 ## Relationships Diagram (Conceptual)
 
 ```text
+[Global Admin Role] → [User]
+
+[Country Admin Role] → [Country] 
+                           └── [Region Admin Role] → [Region] 
+
 [Country] 
    └── [Region] 
+         ├── [Regional Event] (Linked to Region & Club Year)
          └── [Club] 
                ├── [Club Membership] ↔ [User]
                ├── [Program]
                └── [Club Year]
                      ├── [Student Registration] ↔ [Student] ↔ [Club]
-                     └── [Event]
+                     └── [Club Event] (Linked to Club & Club Year)
                            └── [Attendance] ↔ [Student]
 ```

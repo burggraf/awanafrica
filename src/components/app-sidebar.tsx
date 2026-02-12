@@ -2,10 +2,15 @@ import * as React from "react"
 import {
   Settings2,
   SquareTerminal,
+  Shield,
+  Globe,
+  Map,
+  School,
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { NavUser } from "@/components/nav-user"
+import { useAdmin } from "@/lib/admin-context"
 import { ModeToggle } from "@/components/mode-toggle"
 import { LanguageToggle } from "@/components/language-toggle"
 import { RegionToggle } from "@/components/region-toggle"
@@ -32,6 +37,7 @@ const APP_NAME = __APP_NAME__
 
 export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props }: AppSidebarProps) {
   const { t } = useTranslation()
+  const { isAdmin, isGlobalAdmin, isCountryAdmin } = useAdmin()
 
   const navMain = [
     {
@@ -46,6 +52,27 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props
       icon: Settings2,
     },
   ]
+
+  const navAdmin = [
+    {
+      title: t("Countries"),
+      url: "/admin/countries",
+      icon: Globe,
+      visible: isGlobalAdmin,
+    },
+    {
+      title: t("Regions"),
+      url: "/admin/regions",
+      icon: Map,
+      visible: isGlobalAdmin || isCountryAdmin,
+    },
+    {
+      title: t("Clubs"),
+      url: "/admin/clubs",
+      icon: School,
+      visible: isAdmin,
+    },
+  ].filter(item => item.visible)
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -86,6 +113,29 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, ...props
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
+
+        {navAdmin.length > 0 && (
+          <>
+            <SidebarSeparator />
+            <div className="px-4 py-2 text-[10px] text-muted-foreground uppercase tracking-wider font-medium flex items-center gap-2">
+              <Shield className="size-3" />
+              <span>{t("Administration")}</span>
+            </div>
+            <SidebarMenu>
+              {navAdmin.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton 
+                    tooltip={item.title} 
+                    onClick={() => onPageChange(item.url.substring(1))}
+                  >
+                    {item.icon && <item.icon />}
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
