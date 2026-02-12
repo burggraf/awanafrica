@@ -29,6 +29,7 @@ import { ClubProvider } from "@/lib/club-context"
 import { AdminProvider } from "@/lib/admin-context"
 import { Button } from "@/components/ui/button"
 import { Toaster } from "@/components/ui/toaster"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { 
   Sheet, 
   SheetContent, 
@@ -235,11 +236,13 @@ function App() {
       <LocaleProvider>
         <AdminProvider>
           <ClubProvider>
-            <LayoutProvider>
-              <BrowserRouter>
-                <MainContent />
-              </BrowserRouter>
-            </LayoutProvider>
+            <TooltipProvider>
+              <LayoutProvider>
+                <BrowserRouter>
+                  <MainContent />
+                </BrowserRouter>
+              </LayoutProvider>
+            </TooltipProvider>
           </ClubProvider>
         </AdminProvider>
       </LocaleProvider>

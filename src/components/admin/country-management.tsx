@@ -17,6 +17,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -201,6 +202,9 @@ export function CountryManagement() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editingCountry ? t("Edit Country") : t("Add Country")}</DialogTitle>
+            <DialogDescription>
+              {editingCountry ? t("Update the details for this country.") : t("Create a new country record.")}
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 pt-2">
             <div className="space-y-2">

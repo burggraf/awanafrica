@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Trash2, Building2 } from "lucide-react";
+import { Plus, Trash2, Building2, Search, X } from "lucide-react";
 import { pb } from "@/lib/pb";
 import { useLayout } from "@/lib/layout-context";
 import { useAdmin } from "@/lib/admin-context";
@@ -18,6 +18,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -33,6 +34,11 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Country {
   id: string;
@@ -51,6 +57,7 @@ interface Region {
 interface Club {
   id: string;
   name: string;
+  charter: number;
   type: "church" | "school" | "other";
   region: string;
   address: string;
@@ -74,9 +81,11 @@ export function ClubManagement() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClub, setEditingClub] = useState<Club | null>(null);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   
   const [formData, setFormData] = useState<{
     name: string;
+    charter: string;
     type: "church" | "school" | "other";
     country: string;
     region: string;
@@ -85,6 +94,7 @@ export function ClubManagement() {
     active: boolean;
   }>({
     name: "",
+    charter: "",
     type: "church",
     country: "",
     region: "",
@@ -107,8 +117,8 @@ export function ClubManagement() {
         .map(r => r.country)
         .filter(Boolean) as string[];
 
-      // Filter clubs based on roles
-      let clubFilter = undefined;
+      // Base filter from roles
+      let roleFilter = "";
       if (!isGlobalAdmin) {
         const conditions = [];
         if (managedRegionIds.length > 0) {
@@ -119,10 +129,18 @@ export function ClubManagement() {
         }
         
         if (conditions.length > 0) {
-          clubFilter = conditions.map(c => `(${c})`).join(" || ");
+          roleFilter = conditions.map(c => `(${c})`).join(" || ");
         } else {
-          clubFilter = "id = 'none'";
+          roleFilter = "id = 'none'";
         }
+      }
+
+      // Combine with search query
+      let clubFilter = roleFilter;
+      if (searchQuery.trim()) {
+        const s = searchQuery.trim().replace(/"/g, '\\"');
+        const searchPart = `(name ~ "${s}" || charter ~ "${s}")`;
+        clubFilter = clubFilter ? `(${clubFilter}) && ${searchPart}` : searchPart;
       }
 
       // Filter regions for the dropdown
@@ -187,7 +205,7 @@ export function ClubManagement() {
     } finally {
       setIsLoading(false);
     }
-  }, [adminRoles, isGlobalAdmin, t, toast]);
+  }, [adminRoles, isGlobalAdmin, searchQuery, t, toast]);
 
   useEffect(() => {
     setHeaderTitle(t("Club Management"));
@@ -220,6 +238,7 @@ export function ClubManagement() {
       setEditingClub(null);
       setFormData({
         name: "",
+        charter: "",
         type: "church",
         country: "",
         region: "",
@@ -296,6 +315,7 @@ export function ClubManagement() {
       setEditingClub(club);
       setFormData({
         name: club.name,
+        charter: club.charter?.toString() || "",
         type: club.type,
         country: club.expand?.region?.country || "",
         region: club.region,
@@ -307,6 +327,7 @@ export function ClubManagement() {
       setEditingClub(null);
       setFormData({
         name: "",
+        charter: "",
         type: "church",
         country: "",
         region: "",
@@ -322,21 +343,50 @@ export function ClubManagement() {
 
   return (
     <div className="p-4 space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <Building2 className="h-5 w-5 text-primary" />
-          {t("Clubs")}
-        </h2>
-        <Button onClick={() => openDialog()}>
-          <Plus className="h-4 w-4 mr-2" />
-          {t("Add Club")}
-        </Button>
+          <h2 className="text-lg font-semibold whitespace-nowrap">{t("Clubs")}</h2>
+        </div>
+        <div className="flex flex-1 items-center gap-2 justify-end min-w-0">
+          <div className="relative w-full max-w-[180px] sm:max-w-xs">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={t("Search...")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8 pr-8 h-9 text-sm"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                type="button"
+              >
+                <X className="h-3 w-3" />
+                <span className="sr-only">{t("Clear search")}</span>
+              </button>
+            )}
+          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button onClick={() => openDialog()} size="icon" className="h-9 w-9 shrink-0">
+                <Plus className="h-4 w-4" />
+                <span className="sr-only">{t("Add")}</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>{t("Add New")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </div>
 
       <div className="border rounded-md overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>{t("Charter")}</TableHead>
               <TableHead>{t("Name")}</TableHead>
               <TableHead>{t("Type")}</TableHead>
               <TableHead>{t("Region/Country")}</TableHead>
@@ -346,13 +396,13 @@ export function ClubManagement() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8">
+                <TableCell colSpan={5} className="text-center py-8">
                   {t("Loading...")}
                 </TableCell>
               </TableRow>
             ) : clubs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   {t("No clubs found")}
                 </TableCell>
               </TableRow>
@@ -363,6 +413,9 @@ export function ClubManagement() {
                   className={`cursor-pointer hover:bg-muted/50 transition-colors ${!club.active ? "opacity-60" : ""}`}
                   onClick={() => openDialog(club)}
                 >
+                  <TableCell className="font-mono text-xs">
+                    {club.charter || "—"}
+                  </TableCell>
                   <TableCell className="font-medium">
                     {club.name}
                     {!club.active && (
@@ -396,16 +449,31 @@ export function ClubManagement() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>{editingClub ? t("Edit Club") : t("Add Club")}</DialogTitle>
+            <DialogDescription>
+              {editingClub ? t("Update the details for this club.") : t("Create a new club by filling out the information below.")}
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-            <div className="space-y-2">
-              <Label htmlFor="name">{t("Club Name")}</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-              />
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2 col-span-1">
+                <Label htmlFor="charter">{t("Charter #")}</Label>
+                <Input
+                  id="charter"
+                  type="number"
+                  value={formData.charter}
+                  onChange={(e) => setFormData({ ...formData, charter: e.target.value })}
+                  placeholder="0000"
+                />
+              </div>
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="name">{t("Club Name")}</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </div>
             </div>
             
             <div className="space-y-2">

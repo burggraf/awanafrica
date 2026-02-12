@@ -18,6 +18,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -260,6 +261,9 @@ export function RegionManagement() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editingRegion ? t("Edit Region") : t("Add Region")}</DialogTitle>
+            <DialogDescription>
+              {editingRegion ? t("Update the details for this region.") : t("Create a new region by filling out the information below.")}
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 pt-2">
             <div className="space-y-2">

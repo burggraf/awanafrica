@@ -4,6 +4,7 @@ import { pb } from './pb';
 interface Club {
   id: string;
   name: string;
+  charter?: number;
 }
 
 interface ClubYear {
