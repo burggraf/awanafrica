@@ -39,7 +39,7 @@ Geographical areas within a country.
 ### `clubs`
 The primary tenant object.
 - `name` (text, required): Name of the Awana Club (e.g., "First Baptist Arusha").
-- `charter` (number, unique): Unique numeric identifier for the club.
+- `charter` (text, unique): Unique identifier for the club (e.g., "TZ000001").
 - `type` (select, required): `church`, `school`, or `other`.
 - `region` (relation, required): Link to `regions`.
 - `address` (text): Physical address.

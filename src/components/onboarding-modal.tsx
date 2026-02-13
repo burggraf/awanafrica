@@ -137,7 +137,7 @@ export function OnboardingModal() {
     if (!charterNumber) return
     setIsSubmitting(true)
     try {
-      const club = await pb.collection("clubs").getFirstListItem(`charter = ${charterNumber}`, {
+      const club = await pb.collection("clubs").getFirstListItem(`charter = "${charterNumber}"`, {
         expand: "region,region.country"
       })
       setSelectedClub(club)
@@ -264,7 +264,7 @@ export function OnboardingModal() {
                   <div className="flex gap-2">
                     <Input 
                       id="charter" 
-                      placeholder="e.g. 12345" 
+                      placeholder="e.g. TZ000001" 
                       value={charterNumber} 
                       onChange={(e) => setCharterNumber(e.target.value)}
                     />

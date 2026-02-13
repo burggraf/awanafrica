@@ -141,22 +141,24 @@ export function ClubManagement() {
       }
     }
 
+    // Use null for requestKey to disable auto-cancellation within Promise.all
+    // Otherwise PocketBase will cancel requests when they share the same key
     const [clubRecords, regionRecords, countryRecords] = await Promise.all([
       pb.collection("clubs").getFullList<ClubExpanded>({
         sort: "name",
         expand: "region.country",
         filter: clubFilter,
-        requestKey,
+        requestKey: null,
       }),
       pb.collection("regions").getFullList<RegionExpanded>({
         sort: "name",
         expand: "country",
         filter: regionFilter,
-        requestKey,
+        requestKey: null,
       }),
       pb.collection("countries").getFullList<CountriesResponse>({
         sort: "name",
-        requestKey,
+        requestKey: null,
       }),
     ]);
 
@@ -439,10 +441,9 @@ export function ClubManagement() {
                 <Label htmlFor="charter">{t("Charter #")}</Label>
                 <Input
                   id="charter"
-                  type="number"
                   value={formData.charter}
                   onChange={(e) => setFormData({ ...formData, charter: e.target.value })}
-                  placeholder="0000"
+                  placeholder="TZ000001"
                 />
               </div>
               <div className="space-y-2 col-span-2">
