@@ -25,4 +25,4 @@ PB_PID=$!
 sleep 1
 
 # Start the frontend
-pnpm run dev
+pnpm run dev --host 0.0.0.0
