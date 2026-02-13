@@ -1,0 +1,100 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - img "AwanAfrica Logo" [ref=e7]
+      - generic [ref=e8]: AwanAfrica
+    - generic [ref=e9]:
+      - button "Toggle theme" [ref=e10] [cursor=pointer]:
+        - generic [ref=e11]:
+          - img
+        - generic [ref=e12]: Toggle theme
+      - button "Language ENG" [ref=e13] [cursor=pointer]:
+        - img "Language" [ref=e14]: 🇺🇸
+        - generic [ref=e15]: ENG
+      - button "Country TZ" [ref=e16] [cursor=pointer]:
+        - img "Country" [ref=e17]: 🇹🇿
+        - generic [ref=e18]: TZ
+      - button "Log In" [ref=e19] [cursor=pointer]
+  - generic [ref=e25]:
+    - heading "Empowering Awana Clubs Across Africa" [level=1] [ref=e26]:
+      - text: Empowering Awana Clubs
+      - text: Across Africa
+    - paragraph [ref=e27]: The all-in-one management platform for Awana leaders. Track attendance, manage clubs, and scale your impact with precision.
+    - generic [ref=e28]:
+      - button "Get Started" [ref=e29] [cursor=pointer]:
+        - text: Get Started
+        - img
+      - button "Learn More" [ref=e30] [cursor=pointer]
+  - generic [ref=e37]:
+    - generic [ref=e38]:
+      - heading "Everything you need to grow" [level=2] [ref=e39]
+      - paragraph [ref=e40]: Built for the unique needs of ministry in Africa.
+    - generic [ref=e41]:
+      - generic [ref=e42]:
+        - img [ref=e44]
+        - heading "Member Management" [level=3] [ref=e49]
+        - paragraph [ref=e50]: Keep detailed records of clubbers, parents, and volunteers in one secure location.
+        - generic [ref=e51] [cursor=pointer]:
+          - text: Learn more
+          - img [ref=e52]
+      - generic [ref=e54]:
+        - img [ref=e56]
+        - heading "Achievement Tracking" [level=3] [ref=e62]
+        - paragraph [ref=e63]: Monitor handbook progress and award badges as clubbers reach their milestones.
+        - generic [ref=e64] [cursor=pointer]:
+          - text: Learn more
+          - img [ref=e65]
+      - generic [ref=e67]:
+        - img [ref=e69]
+        - heading "Regional Analytics" [level=3] [ref=e72]
+        - paragraph [ref=e73]: Visualize growth across different regions and countries with real-time data.
+        - generic [ref=e74] [cursor=pointer]:
+          - text: Learn more
+          - img [ref=e75]
+      - generic [ref=e77]:
+        - img [ref=e79]
+        - heading "Role-based Access" [level=3] [ref=e82]
+        - paragraph [ref=e83]: Granular permissions for global admins, country leaders, and local club directors.
+        - generic [ref=e84] [cursor=pointer]:
+          - text: Learn more
+          - img [ref=e85]
+      - generic [ref=e87]:
+        - img [ref=e89]
+        - heading "Fast Performance" [level=3] [ref=e91]
+        - paragraph [ref=e92]: Designed to work reliably even on slower mobile connections.
+        - generic [ref=e93] [cursor=pointer]:
+          - text: Learn more
+          - img [ref=e94]
+      - generic [ref=e96]:
+        - img [ref=e98]
+        - heading "Modern Interface" [level=3] [ref=e100]
+        - paragraph [ref=e101]: Intuitive, iOS-style layout that feels familiar and professional.
+        - generic [ref=e102] [cursor=pointer]:
+          - text: Learn more
+          - img [ref=e103]
+  - generic [ref=e106]:
+    - generic [ref=e108]:
+      - img "User" [ref=e134]
+      - img "User" [ref=e135]
+      - img "User" [ref=e136]
+      - img "User" [ref=e137]
+      - img "User" [ref=e138]
+    - heading "\"Transforming how we track ministry impact.\"" [level=3] [ref=e114]
+    - paragraph [ref=e115]: — National Director, Awana Tanzania
+  - generic [ref=e117]:
+    - heading "Ready to start?" [level=2] [ref=e120]
+    - paragraph [ref=e121]: Join leaders across Africa using AwanAfrica to reach more kids with the Gospel.
+    - button "Create Your Account" [ref=e122] [cursor=pointer]
+  - contentinfo [ref=e123]:
+    - generic [ref=e124]:
+      - generic [ref=e125]:
+        - img "Logo" [ref=e127]
+        - generic [ref=e128]: AwanAfrica
+      - generic [ref=e129]:
+        - link "Privacy Policy" [ref=e130] [cursor=pointer]:
+          - /url: "#"
+        - link "Terms of Service" [ref=e131] [cursor=pointer]:
+          - /url: "#"
+        - link "Contact Support" [ref=e132] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e133]: © 2026 AwanAfrica. All rights reserved.

@@ -1,9 +1,15 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Plus, Trash2, Building2, Search, X } from "lucide-react";
 import { pb } from "@/lib/pb";
 import { useLayout } from "@/lib/layout-context";
 import { useAdmin } from "@/lib/admin-context";
+import { usePBQuery } from "@/hooks/use-pb-query";
+import { 
+  type ClubsResponse, 
+  type RegionsResponse, 
+  type CountriesResponse 
+} from "@/types/pocketbase-types";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -40,33 +46,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-interface Country {
-  id: string;
-  name: string;
-}
+type RegionExpanded = RegionsResponse<{
+  country: CountriesResponse;
+}>;
 
-interface Region {
-  id: string;
-  name: string;
-  country: string;
-  expand?: {
-    country: Country;
-  }
-}
-
-interface Club {
-  id: string;
-  name: string;
-  charter: number;
-  type: "church" | "school" | "other";
-  region: string;
-  address: string;
-  timezone: string;
-  active: boolean;
-  expand?: {
-    region: Region;
-  };
-}
+type ClubExpanded = ClubsResponse<{
+  region: RegionExpanded;
+}>;
 
 export function ClubManagement() {
   const { t } = useTranslation();
@@ -74,12 +60,8 @@ export function ClubManagement() {
   const { toast } = useToast();
   const { isGlobalAdmin, adminRoles, isLoading: isAdminLoading } = useAdmin();
   
-  const [clubs, setClubs] = useState<Club[]>([]);
-  const [regions, setRegions] = useState<Region[]>([]);
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingClub, setEditingClub] = useState<Club | null>(null);
+  const [editingClub, setEditingClub] = useState<ClubExpanded | null>(null);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
@@ -103,116 +85,114 @@ export function ClubManagement() {
     active: true,
   });
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      // Get regions the user can manage clubs for
-      const managedRegionIds = adminRoles
-        .filter(r => r.role === 'Region')
-        .map(r => r.region)
-        .filter(Boolean) as string[];
+  const { data, isLoading, refetch } = usePBQuery(async ({ requestKey }) => {
+    // Get regions the user can manage clubs for
+    const managedRegionIds = adminRoles
+      .filter(r => r.role === 'Region')
+      .map(r => r.region)
+      .filter(Boolean) as string[];
 
-      const managedCountryIds = adminRoles
-        .filter(r => r.role === 'Country')
-        .map(r => r.country)
-        .filter(Boolean) as string[];
+    const managedCountryIds = adminRoles
+      .filter(r => r.role === 'Country')
+      .map(r => r.country)
+      .filter(Boolean) as string[];
 
-      // Base filter from roles
-      let roleFilter = "";
-      if (!isGlobalAdmin) {
-        const conditions = [];
-        if (managedRegionIds.length > 0) {
-          conditions.push(managedRegionIds.map(id => `region = "${id}"`).join(" || "));
-        }
-        if (managedCountryIds.length > 0) {
-          conditions.push(managedCountryIds.map(id => `region.country = "${id}"`).join(" || "));
-        }
-        
-        if (conditions.length > 0) {
-          roleFilter = conditions.map(c => `(${c})`).join(" || ");
-        } else {
-          roleFilter = "id = 'none'";
-        }
+    // Base filter from roles
+    let roleFilter = "";
+    if (!isGlobalAdmin) {
+      const conditions = [];
+      if (managedRegionIds.length > 0) {
+        conditions.push(managedRegionIds.map(id => `region = "${id}"`).join(" || "));
       }
-
-      // Combine with search query
-      let clubFilter = roleFilter;
-      if (searchQuery.trim()) {
-        const s = searchQuery.trim().replace(/"/g, '\\"');
-        const searchPart = `(name ~ "${s}" || charter ~ "${s}")`;
-        clubFilter = clubFilter ? `(${clubFilter}) && ${searchPart}` : searchPart;
+      if (managedCountryIds.length > 0) {
+        conditions.push(managedCountryIds.map(id => `region.country = "${id}"`).join(" || "));
       }
-
-      // Filter regions for the dropdown
-      let regionFilter = undefined;
-      if (!isGlobalAdmin) {
-        const conditions = [];
-        if (managedRegionIds.length > 0) {
-          conditions.push(managedRegionIds.map(id => `id = "${id}"`).join(" || "));
-        }
-        if (managedCountryIds.length > 0) {
-          conditions.push(managedCountryIds.map(id => `country = "${id}"`).join(" || "));
-        }
-        
-        if (conditions.length > 0) {
-          regionFilter = conditions.map(c => `(${c})`).join(" || ");
-        } else {
-          regionFilter = "id = 'none'";
-        }
-      }
-
-      const [clubRecords, regionRecords, countryRecords] = await Promise.all([
-        pb.collection("clubs").getFullList<Club>({
-          sort: "name",
-          expand: "region.country",
-          filter: clubFilter,
-          requestKey: "club_management_list",
-        }),
-        pb.collection("regions").getFullList<Region>({
-          sort: "name",
-          expand: "country",
-          filter: regionFilter,
-          requestKey: "region_dropdown_list",
-        }),
-        pb.collection("countries").getFullList<Country>({
-          sort: "name",
-          requestKey: "country_dropdown_list",
-        }),
-      ]);
       
-      setClubs(clubRecords);
-      setRegions(regionRecords);
-
-      // Filter countries based on what regions/countries the user has access to
-      if (isGlobalAdmin) {
-        setCountries(countryRecords);
+      if (conditions.length > 0) {
+        roleFilter = conditions.map(c => `(${c})`).join(" || ");
       } else {
-        const accessibleCountryIds = new Set(managedCountryIds);
-        // Also add countries from managed regions
-        regionRecords.forEach(r => {
-          if (r.country) accessibleCountryIds.add(r.country);
-        });
-        setCountries(countryRecords.filter(c => accessibleCountryIds.has(c.id)));
+        roleFilter = "id = 'none'";
       }
-    } catch (error: any) {
-      if (error.isAbort) return;
-      console.error("Error fetching data:", error);
+    }
+
+    // Combine with search query
+    let clubFilter = roleFilter;
+    if (searchQuery.trim()) {
+      const s = searchQuery.trim().replace(/"/g, '\\"');
+      const searchPart = `(name ~ "${s}" || charter ~ "${s}")`;
+      clubFilter = clubFilter ? `(${clubFilter}) && ${searchPart}` : searchPart;
+    }
+
+    // Filter regions for the dropdown
+    let regionFilter = undefined;
+    if (!isGlobalAdmin) {
+      const conditions = [];
+      if (managedRegionIds.length > 0) {
+        conditions.push(managedRegionIds.map(id => `id = "${id}"`).join(" || "));
+      }
+      if (managedCountryIds.length > 0) {
+        conditions.push(managedCountryIds.map(id => `country = "${id}"`).join(" || "));
+      }
+      
+      if (conditions.length > 0) {
+        regionFilter = conditions.map(c => `(${c})`).join(" || ");
+      } else {
+        regionFilter = "id = 'none'";
+      }
+    }
+
+    const [clubRecords, regionRecords, countryRecords] = await Promise.all([
+      pb.collection("clubs").getFullList<ClubExpanded>({
+        sort: "name",
+        expand: "region.country",
+        filter: clubFilter,
+        requestKey,
+      }),
+      pb.collection("regions").getFullList<RegionExpanded>({
+        sort: "name",
+        expand: "country",
+        filter: regionFilter,
+        requestKey,
+      }),
+      pb.collection("countries").getFullList<CountriesResponse>({
+        sort: "name",
+        requestKey,
+      }),
+    ]);
+
+    // Filter countries based on access
+    let filteredCountries = countryRecords;
+    if (!isGlobalAdmin) {
+      const accessibleCountryIds = new Set(managedCountryIds);
+      regionRecords.forEach(r => {
+        if (r.country) accessibleCountryIds.add(r.country);
+      });
+      filteredCountries = countryRecords.filter(c => accessibleCountryIds.has(c.id));
+    }
+
+    return {
+      clubs: clubRecords,
+      regions: regionRecords,
+      countries: filteredCountries
+    };
+  }, [adminRoles, isGlobalAdmin, searchQuery], {
+    enabled: !isAdminLoading,
+    onError: () => {
       toast({
         title: t("Error"),
         description: t("Failed to fetch clubs or regions"),
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
-  }, [adminRoles, isGlobalAdmin, searchQuery, t, toast]);
+  });
+
+  const clubs = data?.clubs || [];
+  const regions = data?.regions || [];
+  const countries = data?.countries || [];
 
   useEffect(() => {
     setHeaderTitle(t("Club Management"));
-    if (!isAdminLoading) {
-      fetchData();
-    }
-  }, [setHeaderTitle, t, isAdminLoading, fetchData]);
+  }, [setHeaderTitle, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -246,7 +226,7 @@ export function ClubManagement() {
         timezone: "UTC",
         active: true,
       });
-      fetchData();
+      refetch();
     } catch (error: any) {
       toast({
         title: t("Error"),
@@ -263,11 +243,11 @@ export function ClubManagement() {
       // Check for related data as per user request
       // We need to check memberships, programs, years, students, events
       const checks = [
-        pb.collection("club_memberships").getList(1, 1, { filter: `club = "${editingClub.id}"` }),
-        pb.collection("programs").getList(1, 1, { filter: `club = "${editingClub.id}"` }),
-        pb.collection("club_years").getList(1, 1, { filter: `club = "${editingClub.id}"` }),
-        pb.collection("students").getList(1, 1, { filter: `club = "${editingClub.id}"` }),
-        pb.collection("events").getList(1, 1, { filter: `club = "${editingClub.id}"` }),
+        pb.collection("club_memberships").getList(1, 1, { filter: `club = "${editingClub.id}"`, requestKey: null }),
+        pb.collection("programs").getList(1, 1, { filter: `club = "${editingClub.id}"`, requestKey: null }),
+        pb.collection("club_years").getList(1, 1, { filter: `club = "${editingClub.id}"`, requestKey: null }),
+        pb.collection("students").getList(1, 1, { filter: `club = "${editingClub.id}"`, requestKey: null }),
+        pb.collection("events").getList(1, 1, { filter: `club = "${editingClub.id}"`, requestKey: null }),
       ];
 
       const results = await Promise.all(checks);
@@ -300,7 +280,7 @@ export function ClubManagement() {
       setIsDialogOpen(false);
       setIsAlertOpen(false);
       setEditingClub(null);
-      fetchData();
+      refetch();
     } catch (error: any) {
       toast({
         title: t("Error"),
@@ -310,7 +290,7 @@ export function ClubManagement() {
     }
   };
 
-  const openDialog = (club?: Club) => {
+  const openDialog = (club?: ClubExpanded) => {
     if (club) {
       setEditingClub(club);
       setFormData({
@@ -321,7 +301,7 @@ export function ClubManagement() {
         region: club.region,
         address: club.address || "",
         timezone: club.timezone || "UTC",
-        active: club.active,
+        active: !!club.active,
       });
     } else {
       setEditingClub(null);

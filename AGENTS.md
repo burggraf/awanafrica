@@ -34,8 +34,14 @@ PocketBase JS SDK automatically cancels previous pending requests if a new reque
 - **ALWAYS** provide a unique `requestKey` in the request options when making multiple concurrent requests or requests that shouldn't be cancelled (e.g., `pb.collection('...').getFullList({ requestKey: 'unique_key' })`).
 - **ALWAYS** check for `error.isAbort` in `catch` blocks to avoid logging or showing error toasts for intentional/automatic cancellations.
 - Setting `requestKey: null` completely disables auto-cancellation for a specific request.
+- **RECOMMENDED**: Use the `usePBQuery` hook from `@/hooks/use-pb-query` for data fetching. It handles auto-cancellation, loading states, and error filtering automatically.
 
-### 3. UI Layout
+### 3. Type Safety
+- **PocketBase Types**: Use the generated types in `src/types/pocketbase-types.ts`.
+- **Naming Convention**: Use `CollectionResponse<Texpand>` for records with expanded relations to ensure full type safety across deep objects.
+- **Manual Sync**: If you change the database schema via migrations, manually update `src/types/pocketbase-types.ts` until the automated typegen service is fully integrated.
+
+### 4. UI Layout
 The app uses a classic iOS-style layout:
 - **Header**: `h-12`, sticky, backdrop-blur. Contains sidebar trigger, page title, and "more" menu. **Content is customizable per page** via `useLayout()`.
 - **Footer**: `h-14`, sticky, backdrop-blur. Contains version, app name, and settings. **Optional per page** (off by default) and **content is customizable per page** via `useLayout()`.
