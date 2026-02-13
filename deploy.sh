@@ -8,9 +8,9 @@ REMOTE_PATH="/opt/awanafrica"
 # Exit on error
 set -e
 
-# Try to build, but skip if it fails (so we can still sync other changes)
+# Build the application
 echo "--- Building application ---"
-pnpm run build || echo "WARNING: Build failed, proceeding with other syncs..."
+pnpm run build
 
 echo "--- Preparing remote directories ---"
 ssh ${REMOTE_USER}@${REMOTE_HOST} "mkdir -p ${REMOTE_PATH}/pb_hooks ${REMOTE_PATH}/pb_migrations ${REMOTE_PATH}/pb_public"

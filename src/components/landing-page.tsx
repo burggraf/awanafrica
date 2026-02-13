@@ -19,6 +19,8 @@ export function LandingPage() {
   const { t } = useTranslation()
   const [isAuthOpen, setIsAuthOpen] = useState(false)
 
+  console.log("LandingPage rendered, isAuthOpen:", isAuthOpen)
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Navigation */}
@@ -37,7 +39,10 @@ export function LandingPage() {
           <Button 
             variant="default" 
             size="sm" 
-            onClick={() => setIsAuthOpen(true)}
+            onClick={() => {
+              console.log("Login button clicked")
+              setIsAuthOpen(true)
+            }}
             className="ml-2 bg-[#2563eb] hover:bg-[#1d4ed8]"
           >
             {t("Log In")}
