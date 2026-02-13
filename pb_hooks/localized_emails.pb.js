@@ -1,4 +1,6 @@
 
+console.log(">>> [RESTORING VERSION 7] Loading hooks...");
+
 onMailerRecordVerificationSend((e) => {
     try {
         const record = e.record;
@@ -9,12 +11,8 @@ onMailerRecordVerificationSend((e) => {
         const appUrl = settings.meta.appURL || "";
         const token = e.meta.token || "";
 
-        e.message.from = {
-            address: settings.meta.senderAddress,
-            name:    settings.meta.senderName,
-        };
-        e.message.subject = "Thibitisha barua pepe yako ya " + appName;
-        e.message.html = `
+        const subject = "Thibitisha barua pepe yako ya " + appName;
+        const body = `
             <p>Habari,</p>
             <p>Asante kwa kujiunga nasi katika ${appName}.</p>
             <p>Bofya kitufe kilicho hapa chini ili kuthibitisha anwani yako ya barua pepe.</p>
@@ -26,7 +24,17 @@ onMailerRecordVerificationSend((e) => {
               Timu ya ${appName}
             </p>
         `;
-        e.message.text = "Habari, Thibitisha barua pepe yako hapa: " + appUrl + "/_/#/auth/confirm-verification/" + token;
+
+        if (e.message) {
+            e.message.from = {
+                address: settings.meta.senderAddress,
+                name:    settings.meta.senderName,
+            };
+            e.message.subject = subject;
+            e.message.html = body;
+            e.message.text = "Habari, Thibitisha barua pepe yako hapa: " + appUrl + "/_/#/auth/confirm-verification/" + token;
+            console.log(">>> [Verification] Swahili template applied for: " + record.email());
+        }
     } catch (err) {
         console.log(">>> [Verification] ERROR: " + err);
     }
@@ -42,12 +50,8 @@ onMailerRecordPasswordResetSend((e) => {
         const appUrl = settings.meta.appURL || "";
         const token = e.meta.token || "";
 
-        e.message.from = {
-            address: settings.meta.senderAddress,
-            name:    settings.meta.senderName,
-        };
-        e.message.subject = "Badilisha nywila yako ya " + appName;
-        e.message.html = `
+        const subject = "Badilisha nywila yako ya " + appName;
+        const body = `
             <p>Habari,</p>
             <p>Bofya kitufe kilicho hapa chini ili kubadilisha nywila yako.</p>
             <p>
@@ -59,7 +63,17 @@ onMailerRecordPasswordResetSend((e) => {
               Timu ya ${appName}
             </p>
         `;
-        e.message.text = "Habari, Bofya hapa ili kubadilisha nywila yako: " + appUrl + "/_/#/auth/confirm-password-reset/" + token;
+
+        if (e.message) {
+            e.message.from = {
+                address: settings.meta.senderAddress,
+                name:    settings.meta.senderName,
+            };
+            e.message.subject = subject;
+            e.message.html = body;
+            e.message.text = "Habari, Bofya hapa ili kubadilisha nywila yako: " + appUrl + "/_/#/auth/confirm-password-reset/" + token;
+            console.log(">>> [PasswordReset] Swahili template applied for: " + record.email());
+        }
     } catch (err) {
         console.log(">>> [PasswordReset] ERROR: " + err);
     }
@@ -75,12 +89,8 @@ onMailerRecordEmailChangeSend((e) => {
         const appUrl = settings.meta.appURL || "";
         const token = e.meta.token || "";
 
-        e.message.from = {
-            address: settings.meta.senderAddress,
-            name:    settings.meta.senderName,
-        };
-        e.message.subject = "Thibitisha anwani yako mpya ya barua pepe ya " + appName;
-        e.message.html = `
+        const subject = "Thibitisha anwani yako mpya ya barua pepe ya " + appName;
+        const body = `
             <p>Habari,</p>
             <p>Bofya kitufe kilicho hapa chini ili kuthibitisha anwani yako mpya ya barua pepe.</p>
             <p>
@@ -92,7 +102,17 @@ onMailerRecordEmailChangeSend((e) => {
               Timu ya ${appName}
             </p>
         `;
-        e.message.text = "Habari, Thibitisha barua pepe yako mpya hapa: " + appUrl + "/_/#/auth/confirm-email-change/" + token;
+
+        if (e.message) {
+            e.message.from = {
+                address: settings.meta.senderAddress,
+                name:    settings.meta.senderName,
+            };
+            e.message.subject = subject;
+            e.message.html = body;
+            e.message.text = "Habari, Thibitisha barua pepe yako mpya hapa: " + appUrl + "/_/#/auth/confirm-email-change/" + token;
+            console.log(">>> [EmailChange] Swahili template applied for: " + record.email());
+        }
     } catch (err) {
         console.log(">>> [EmailChange] ERROR: " + err);
     }
@@ -107,12 +127,8 @@ onMailerRecordOTPSend((e) => {
         const appName = settings.meta.appName || "AwanAfrica";
         const otp = e.meta.otp || "";
 
-        e.message.from = {
-            address: settings.meta.senderAddress,
-            name:    settings.meta.senderName,
-        };
-        e.message.subject = "Msimbo wako wa siri wa " + appName;
-        e.message.html = `
+        const subject = "Msimbo wako wa siri wa " + appName;
+        const body = `
             <p>Habari,</p>
             <p>Msimbo wako wa siri wa mara moja ni: <strong>${otp}</strong></p>
             <p><i>Ikiwa hukuomba msimbo wa siri, unaweza kupuuza barua pepe hii.</i></p>
@@ -121,8 +137,20 @@ onMailerRecordOTPSend((e) => {
               Timu ya ${appName}
             </p>
         `;
-        e.message.text = "Habari, Msimbo wako wa siri ni: " + otp;
+
+        if (e.message) {
+            e.message.from = {
+                address: settings.meta.senderAddress,
+                name:    settings.meta.senderName,
+            };
+            e.message.subject = subject;
+            e.message.html = body;
+            e.message.text = "Habari, Msimbo wako wa siri ni: " + otp;
+            console.log(">>> [OTP] Swahili template applied for: " + record.email());
+        }
     } catch (err) {
         console.log(">>> [OTP] ERROR: " + err);
     }
 }, "users");
+
+console.log(">>> [RESTORING VERSION 7] Hooks loaded.");
