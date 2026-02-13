@@ -20,6 +20,16 @@ import {
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select"
+import { useTheme } from "@/components/theme-provider"
+import { useLocale, countries, type Country } from "@/lib/locale-context"
+import { Languages, Globe, Sun, Moon, Monitor } from "lucide-react"
 
 import { useTranslation } from "react-i18next"
 
@@ -29,7 +39,9 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
+  const { theme, setTheme } = useTheme()
+  const { country, setCountry } = useLocale()
   const [activeTab, setActiveTab] = useState<"login" | "register" | "forgot">("login")
   const { toast } = useToast()
 
@@ -55,14 +67,41 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     },
   })
 
+  async function syncPreferences(userId: string) {
+    try {
+      await pb.collection("users").update(userId, {
+        language: i18n.language,
+        locale: country,
+        theme: theme,
+      })
+    } catch (error) {
+      console.error("Failed to sync preferences:", error)
+    }
+  }
+
+  async function applyUserPreferences(user: any) {
+    if (user.language && user.language !== i18n.language) {
+      i18n.changeLanguage(user.language)
+    }
+    if (user.locale && user.locale !== country) {
+      setCountry(user.locale as Country)
+    }
+    if (user.theme && user.theme !== theme) {
+      setTheme(user.theme as any)
+    }
+  }
+
   async function onLogin(data: any) {
     try {
-      await pb.collection("users").authWithPassword(data.email, data.password)
-      toast({ title: "Logged in successfully" })
+      const authData = await pb.collection("users").authWithPassword(data.email, data.password)
+      await applyUserPreferences(authData.record)
+      // Sync current local preferences to DB in case they were changed on login screen
+      await syncPreferences(authData.record.id)
+      toast({ title: t("Logged in successfully") })
       onClose()
     } catch (error: any) {
       toast({
-        title: "Login failed",
+        title: t("Login failed"),
         description: error.message,
         variant: "destructive",
       })
@@ -71,12 +110,14 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   async function onGoogleLogin() {
     try {
-      await pb.collection("users").authWithOAuth2({ provider: "google" })
-      toast({ title: "Logged in with Google" })
+      const authData = await pb.collection("users").authWithOAuth2({ provider: "google" })
+      await applyUserPreferences(authData.record)
+      await syncPreferences(authData.record.id)
+      toast({ title: t("Logged in with Google") })
       onClose()
     } catch (error: any) {
       toast({
-        title: "Login failed",
+        title: t("Login failed"),
         description: error.message,
         variant: "destructive",
       })
@@ -85,16 +126,19 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   async function onRegister(data: any) {
     try {
-      await pb.collection("users").create({
+      const user = await pb.collection("users").create({
         ...data,
         emailVisibility: true,
+        language: i18n.language,
+        locale: country,
+        theme: theme,
       })
       await pb.collection("users").authWithPassword(data.email, data.password)
-      toast({ title: "Registered and logged in successfully" })
+      toast({ title: t("Registered and logged in successfully") })
       onClose()
     } catch (error: any) {
       toast({
-        title: "Registration failed",
+        title: t("Registration failed"),
         description: error.message,
         variant: "destructive",
       })
@@ -104,11 +148,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   async function onForgot(data: any) {
     try {
       await pb.collection("users").requestPasswordReset(data.email)
-      toast({ title: "Password reset email sent" })
+      toast({ title: t("Password reset email sent") })
       setActiveTab("login")
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("Error"),
         description: error.message,
         variant: "destructive",
       })
@@ -118,10 +162,71 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
-        <DialogTitle className="sr-only">Authentication</DialogTitle>
+        <DialogTitle className="sr-only">{t("Authentication")}</DialogTitle>
         <DialogDescription className="sr-only">
-          Sign in or create an account to access AwanAfrica.
+          {t("Sign in or create an account to access AwanAfrica.")}
         </DialogDescription>
+        
+        {/* Preference Selectors */}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <Select value={i18n.language} onValueChange={(v) => i18n.changeLanguage(v)}>
+            <SelectTrigger className="h-9 px-2">
+              <Languages className="h-4 w-4 mr-2 shrink-0" />
+              <SelectValue placeholder={t("Language")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">{t("English")}</SelectItem>
+              <SelectItem value="sw">{t("Swahili")}</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={country} onValueChange={(v) => setCountry(v as Country)}>
+            <SelectTrigger className="h-9 px-2">
+              <Globe className="h-4 w-4 mr-2 shrink-0" />
+              <SelectValue placeholder={t("Country")} />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(countries).map(([code, info]) => (
+                <SelectItem key={code} value={code}>
+                  <span className="flex items-center gap-2">
+                    <span>{info.flag}</span>
+                    <span>{t(info.name)}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={theme} onValueChange={(v) => setTheme(v as any)}>
+            <SelectTrigger className="h-9 px-2">
+              {theme === "light" && <Sun className="h-4 w-4 mr-2 shrink-0" />}
+              {theme === "dark" && <Moon className="h-4 w-4 mr-2 shrink-0" />}
+              {theme === "system" && <Monitor className="h-4 w-4 mr-2 shrink-0" />}
+              <SelectValue placeholder={t("Theme")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="light">
+                <span className="flex items-center gap-2">
+                  <Sun className="h-4 w-4" />
+                  {t("Light")}
+                </span>
+              </SelectItem>
+              <SelectItem value="dark">
+                <span className="flex items-center gap-2">
+                  <Moon className="h-4 w-4" />
+                  {t("Dark")}
+                </span>
+              </SelectItem>
+              <SelectItem value="system">
+                <span className="flex items-center gap-2">
+                  <Monitor className="h-4 w-4" />
+                  {t("System")}
+                </span>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">{t("Log in")}</TabsTrigger>

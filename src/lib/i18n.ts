@@ -383,6 +383,23 @@ const resources = {
       "Are you sure you wish to sign out now?": "Je, una uhakika unataka kuondoka sasa?",
       "You will need to complete your profile setup the next time you sign in.": "Utahitaji kukamilisha usanidi wa wasifu wako wakati mwingine utakapoingia.",
       "Sign Out": "Ondoka",
+      "Authentication": "Uthibitishaji",
+      "Sign in or create an account to access AwanAfrica.": "Ingia au fungua akaunti ili kufikia AwanAfrica.",
+      "Select language": "Chagua lugha",
+      "Select country": "Chagua nchi",
+      "Select theme": "Chagua mandhari",
+      "Profile updated": "Wasifu umesasishwa",
+      "Avatar updated": "Picha imesasishwa",
+      "Avatar removed": "Picha imeondolewa",
+      "Logged in successfully": "Umeingia kwa mafanikio",
+      "Registration failed": "Usajili umeshindwa",
+      "Registered and logged in successfully": "Umesajiliwa na kuingia kwa mafanikio",
+      "Password reset email sent": "Barua pepe ya kubadilisha nywila imetumwa",
+      "Update failed": "Usasishaji umeshindwa",
+      "File too large": "Faili ni kubwa sana",
+      "Max size is 5MB": "Ukubwa wa juu ni 5MB",
+      "Upload failed": "Upakiaji umeshindwa",
+      "Removal failed": "Uondoaji umeshindwa",
     }
   }
 };

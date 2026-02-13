@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { pb } from "@/lib/pb"
 import { useAuth } from "@/lib/use-auth"
@@ -16,14 +16,25 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useToast } from "@/hooks/use-toast"
-import { Camera, Trash2, Loader2 } from "lucide-react"
+import { Camera, Trash2, Loader2, Languages, Globe, Sun, Moon, Monitor } from "lucide-react"
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select"
+import { useTheme } from "@/components/theme-provider"
+import { useLocale, countries, type Country } from "@/lib/locale-context"
 
 import { useTranslation } from "react-i18next"
 
 export function ProfileScreen() {
   const { user } = useAuth()
   const { toast } = useToast()
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
+  const { theme, setTheme } = useTheme()
+  const { country, setCountry } = useLocale()
   const [loading, setLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -32,8 +43,25 @@ export function ProfileScreen() {
       name: user?.name || "",
       displayName: user?.displayName || "",
       bio: user?.bio || "",
+      language: user?.language || i18n.language,
+      locale: user?.locale || country,
+      theme: user?.theme || theme,
     },
   })
+
+  // Update form values if user changes (e.g. after login)
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        name: user.name || "",
+        displayName: user.displayName || "",
+        bio: user.bio || "",
+        language: user.language || i18n.language,
+        locale: user.locale || country,
+        theme: user.theme || theme,
+      })
+    }
+  }, [user, form, i18n.language, country, theme])
 
   if (!user) {
     return (
@@ -51,10 +79,16 @@ export function ProfileScreen() {
     setLoading(true)
     try {
       await pb.collection("users").update(user!.id, data)
-      toast({ title: "Profile updated" })
+      
+      // Apply preferences immediately
+      if (data.language) i18n.changeLanguage(data.language)
+      if (data.locale) setCountry(data.locale as Country)
+      if (data.theme) setTheme(data.theme as any)
+
+      toast({ title: t("Profile updated") })
     } catch (error: any) {
       toast({
-        title: "Update failed",
+        title: t("Update failed"),
         description: error.message,
         variant: "destructive",
       })
@@ -69,8 +103,8 @@ export function ProfileScreen() {
 
     if (file.size > 5 * 1024 * 1024) {
       toast({
-        title: "File too large",
-        description: "Max size is 5MB",
+        title: t("File too large"),
+        description: t("Max size is 5MB"),
         variant: "destructive",
       })
       return
@@ -82,10 +116,10 @@ export function ProfileScreen() {
     setLoading(true)
     try {
       await pb.collection("users").update(user!.id, formData)
-      toast({ title: "Avatar updated" })
+      toast({ title: t("Avatar updated") })
     } catch (error: any) {
       toast({
-        title: "Upload failed",
+        title: t("Upload failed"),
         description: error.message,
         variant: "destructive",
       })
@@ -98,10 +132,10 @@ export function ProfileScreen() {
     setLoading(true)
     try {
       await pb.collection("users").update(user!.id, { avatar: null })
-      toast({ title: "Avatar removed" })
+      toast({ title: t("Avatar removed") })
     } catch (error: any) {
       toast({
-        title: "Removal failed",
+        title: t("Removal failed"),
         description: error.message,
         variant: "destructive",
       })
@@ -111,7 +145,7 @@ export function ProfileScreen() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-4 space-y-8">
+    <div className="max-w-2xl mx-auto p-4 space-y-8 pb-10">
       <div className="flex flex-col items-center gap-4">
         <div className="relative group">
           <Avatar className="w-24 h-24 border">
@@ -155,33 +189,36 @@ export function ProfileScreen() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("Full Name")}</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="displayName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("Display Name")}</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormDescription>{t("This is how others will see you.")}</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("Full Name")}</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="displayName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("Display Name")}</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormDescription>{t("This is how others will see you.")}</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <FormField
             control={form.control}
             name="bio"
@@ -195,6 +232,108 @@ export function ProfileScreen() {
               </FormItem>
             )}
           />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <FormField
+              control={form.control}
+              name="language"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Languages className="h-4 w-4" />
+                    {t("Language")}
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("Select language")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="en">{t("English")}</SelectItem>
+                      <SelectItem value="sw">{t("Swahili")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="locale"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    {t("Country")}
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("Select country")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Object.entries(countries).map(([code, info]) => (
+                        <SelectItem key={code} value={code}>
+                          <span className="flex items-center gap-2">
+                            <span>{info.flag}</span>
+                            <span>{t(info.name)}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="theme"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    {field.value === "light" && <Sun className="h-4 w-4" />}
+                    {field.value === "dark" && <Moon className="h-4 w-4" />}
+                    {field.value === "system" && <Monitor className="h-4 w-4" />}
+                    {t("Theme")}
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("Select theme")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="light">
+                        <span className="flex items-center gap-2">
+                          <Sun className="h-4 w-4" />
+                          {t("Light")}
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="dark">
+                        <span className="flex items-center gap-2">
+                          <Moon className="h-4 w-4" />
+                          {t("Dark")}
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="system">
+                        <span className="flex items-center gap-2">
+                          <Monitor className="h-4 w-4" />
+                          {t("System")}
+                        </span>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <Button type="submit" disabled={loading} className="w-full">
             {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             {t("Save Changes")}
