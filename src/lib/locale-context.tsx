@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from 'react';
 import i18n from './i18n';
 
-export type Country = 'TZ' | 'KE' | 'ZM' | 'ZW' | 'US';
+export type Country = 'TZ' | 'KE' | 'ZM' | 'ZW' | 'LS' | 'US';
 
 interface CountryInfo {
   name: string;
@@ -15,6 +15,7 @@ export const countries: Record<Country, CountryInfo> = {
   KE: { name: 'Kenya', flag: '🇰🇪', currency: 'KES', locale: 'en-KE' },
   ZM: { name: 'Zambia', flag: '🇿🇲', currency: 'ZMW', locale: 'en-ZM' },
   ZW: { name: 'Zimbabwe', flag: '🇿🇼', currency: 'USD', locale: 'en-ZW' },
+  LS: { name: 'Lesotho', flag: '🇱🇸', currency: 'LSL', locale: 'en-LS' },
   US: { name: 'United States', flag: '🇺🇸', currency: 'USD', locale: 'en-US' },
 };
 

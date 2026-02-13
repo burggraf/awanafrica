@@ -209,6 +209,7 @@ export function LandingPage() {
 }
 
 function FeatureCard({ icon, title, description, border }: { icon: React.ReactNode, title: string, description: string, border: string }) {
+  const { t } = useTranslation()
   return (
     <div className={`p-8 bg-background border rounded-2xl shadow-sm hover:shadow-md transition-all group ${border} border-t-4`}>
       <div className="size-12 bg-muted rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
@@ -219,7 +220,7 @@ function FeatureCard({ icon, title, description, border }: { icon: React.ReactNo
         {description}
       </p>
       <div className="mt-6 flex items-center text-sm font-semibold text-[#2563eb] cursor-pointer hover:underline">
-        Learn more <ArrowRight className="ml-1 h-4 w-4" />
+        {t("Learn more")} <ArrowRight className="ml-1 h-4 w-4" />
       </div>
     </div>
   )

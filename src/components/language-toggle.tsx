@@ -11,11 +11,12 @@ import { Button } from "@/components/ui/button"
 export function LanguageToggle() {
   const { i18n, t } = useTranslation()
 
-  const currentLanguage = i18n.language.startsWith('sw') ? 'sw' : 'en'
+  const currentLanguage = i18n.language.split('-')[0]
 
   const languages = {
     en: { name: t('English'), flag: "🇺🇸", short: "ENG" },
-    sw: { name: t('Swahili'), flag: "🇹🇿", short: "SWA" }
+    sw: { name: t('Swahili'), flag: "🇹🇿", short: "SWA" },
+    st: { name: t('Sesotho'), flag: "🇱🇸", short: "SES" }
   }
 
   return (
@@ -26,13 +27,17 @@ export function LanguageToggle() {
             {languages[currentLanguage as keyof typeof languages]?.flag || <Languages className="h-4 w-4" />}
           </span>
           <span className="text-[10px] text-muted-foreground font-mono">
-            {languages[currentLanguage as keyof typeof languages]?.short}
+            {languages[currentLanguage as keyof typeof languages]?.short || currentLanguage.toUpperCase()}
           </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {Object.entries(languages).map(([code, { name, flag }]) => (
-          <DropdownMenuItem key={code} onClick={() => i18n.changeLanguage(code)} className="gap-2">
+          <DropdownMenuItem key={code} onClick={() => {
+            console.log('Changing language to:', code);
+            i18n.changeLanguage(code);
+            window.location.reload();
+          }} className="gap-2">
             <span className="text-lg">{flag}</span>
             {name}
           </DropdownMenuItem>
