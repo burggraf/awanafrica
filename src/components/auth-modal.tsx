@@ -217,7 +217,9 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           <Select value={i18n.language} onValueChange={(v) => i18n.changeLanguage(v)}>
             <SelectTrigger className="h-9 px-2">
               <Languages className="h-4 w-4 mr-2 shrink-0" />
-              <SelectValue placeholder={t("Language")} />
+              <SelectValue>
+                {i18n.language === 'sw' ? t('Swahili') : t('English')}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="en">{t("English")}</SelectItem>
@@ -227,7 +229,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
           <Select value={country} onValueChange={(v) => setCountry(v as Country)}>
             <SelectTrigger className="h-9 px-2">
-              <SelectValue placeholder={t("Country")} />
+              <SelectValue>
+                {country && countries[country as Country] ? (
+                  <span className="flex items-center gap-2">
+                    <span>{countries[country as Country].flag}</span>
+                    <span>{t(countries[country as Country].name)}</span>
+                  </span>
+                ) : (
+                  t("Country")
+                )}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {Object.entries(countries).map(([code, info]) => (
@@ -243,7 +254,14 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
           <Select value={theme} onValueChange={(v) => setTheme(v as any)}>
             <SelectTrigger className="h-9 px-2">
-              <SelectValue placeholder={t("Theme")} />
+              <SelectValue>
+                <span className="flex items-center gap-2">
+                  {theme === 'light' ? <Sun className="h-4 w-4" /> : 
+                   theme === 'dark' ? <Moon className="h-4 w-4" /> : 
+                   <Monitor className="h-4 w-4" />}
+                  {t(theme.charAt(0).toUpperCase() + theme.slice(1))}
+                </span>
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="light">
