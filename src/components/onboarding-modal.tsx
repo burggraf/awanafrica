@@ -45,7 +45,7 @@ function OnboardingModalInner() {
   
   // Selection State
   const [selectedRole, setSelectedRole] = useState<"Guardian" | "Leader" | "Admin" | "">("Guardian")
-  const [charterNumber, setCharterNumber] = useState("")
+  const [registrationNumber, setRegistrationNumber] = useState("")
   const [selectedCountry, setSelectedCountry] = useState("")
   const [selectedRegion, setSelectedRegion] = useState("")
   const [selectedClub, setSelectedClub] = useState<any>(null)
@@ -117,16 +117,16 @@ function OnboardingModalInner() {
     c.name.toLowerCase().includes(clubSearch.toLowerCase())
   )
 
-  const handleCharterLookup = async () => {
-    if (!charterNumber) return
+  const handleRegistrationLookup = async () => {
+    if (!registrationNumber) return
     setIsSubmitting(true)
     try {
-      const club = await pb.collection("clubs").getFirstListItem(`charter = "${charterNumber}"`, {
+      const club = await pb.collection("clubs").getFirstListItem(`registration = "${registrationNumber}"`, {
         expand: "region,region.country"
       })
       setSelectedClub(club)
     } catch (error) {
-      setAlertMessage(t("Club with this charter number not found."))
+      setAlertMessage(t("Club with this registration number not found."))
       setShowAlert(true)
     } finally {
       setIsSubmitting(false)
@@ -244,15 +244,15 @@ function OnboardingModalInner() {
             {(selectedRole === "Guardian" || selectedRole === "Leader") && (
               <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
                 <div className="space-y-3">
-                  <Label htmlFor="charter">{t("Enter Club Charter Number")}</Label>
+                  <Label htmlFor="registration">{t("Enter Club Registration Number")}</Label>
                   <div className="flex gap-2">
                     <Input 
-                      id="charter" 
+                      id="registration" 
                       placeholder="e.g. TZ000001" 
-                      value={charterNumber} 
-                      onChange={(e) => setCharterNumber(e.target.value)}
+                      value={registrationNumber} 
+                      onChange={(e) => setRegistrationNumber(e.target.value)}
                     />
-                    <Button onClick={handleCharterLookup} disabled={!charterNumber || isSubmitting}>
+                    <Button onClick={handleRegistrationLookup} disabled={!registrationNumber || isSubmitting}>
                       {t("Find")}
                     </Button>
                   </div>
@@ -322,7 +322,7 @@ function OnboardingModalInner() {
                               >
                                 <div>
                                   <div className="font-medium">{c.name}</div>
-                                  <div className="text-[10px] text-muted-foreground">Charter: {c.charter}</div>
+                                  <div className="text-[10px] text-muted-foreground">Registration: {c.registration}</div>
                                 </div>
                                 {selectedClub?.id === c.id && <Check className="ml-auto h-4 w-4 shrink-0" />}
                               </Button>

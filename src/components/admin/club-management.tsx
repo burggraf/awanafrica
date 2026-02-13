@@ -67,7 +67,7 @@ export function ClubManagement() {
   
   const [formData, setFormData] = useState<{
     name: string;
-    charter: string;
+    registration: string;
     venue: "Church" | "School" | "Community Center" | "Christian Camp" | "Other";
     country: string;
     region: string;
@@ -76,7 +76,7 @@ export function ClubManagement() {
     active: boolean;
   }>({
     name: "",
-    charter: "",
+    registration: "",
     venue: "Church",
     country: "",
     region: "",
@@ -119,7 +119,7 @@ export function ClubManagement() {
     let clubFilter = roleFilter;
     if (searchQuery.trim()) {
       const s = searchQuery.trim().replace(/"/g, '\\"');
-      const searchPart = `(name ~ "${s}" || charter ~ "${s}")`;
+      const searchPart = `(name ~ "${s}" || registration ~ "${s}")`;
       clubFilter = clubFilter ? `(${clubFilter}) && ${searchPart}` : searchPart;
     }
 
@@ -220,7 +220,7 @@ export function ClubManagement() {
       setEditingClub(null);
       setFormData({
         name: "",
-        charter: "",
+        registration: "",
         venue: "Church",
         country: "",
         region: "",
@@ -266,7 +266,7 @@ export function ClubManagement() {
       setEditingClub(club);
       setFormData({
         name: club.name,
-        charter: club.charter?.toString() || "",
+        registration: club.registration?.toString() || "",
         venue: club.venue,
         country: club.expand?.region?.country || "",
         region: club.region,
@@ -278,7 +278,7 @@ export function ClubManagement() {
       setEditingClub(null);
       setFormData({
         name: "",
-        charter: "",
+        registration: "",
         venue: "Church",
         country: "",
         region: "",
@@ -337,7 +337,7 @@ export function ClubManagement() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("Charter")}</TableHead>
+              <TableHead>{t("Registration")}</TableHead>
               <TableHead>{t("Name")}</TableHead>
               <TableHead>{t("Venue")}</TableHead>
               <TableHead>{t("Region/Country")}</TableHead>
@@ -365,7 +365,7 @@ export function ClubManagement() {
                   onClick={() => openDialog(club)}
                 >
                   <TableCell className="font-mono text-xs">
-                    {club.charter || "—"}
+                    {club.registration || "—"}
                   </TableCell>
                   <TableCell className="font-medium">
                     {club.name}
@@ -407,11 +407,11 @@ export function ClubManagement() {
           <form onSubmit={handleSubmit} className="space-y-4 pt-2">
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2 col-span-1">
-                <Label htmlFor="charter">{t("Charter #")}</Label>
+                <Label htmlFor="registration">{t("Registration #")}</Label>
                 <Input
-                  id="charter"
-                  value={formData.charter}
-                  onChange={(e) => setFormData({ ...formData, charter: e.target.value })}
+                  id="registration"
+                  value={formData.registration}
+                  onChange={(e) => setFormData({ ...formData, registration: e.target.value })}
                   placeholder="TZ000001"
                 />
               </div>

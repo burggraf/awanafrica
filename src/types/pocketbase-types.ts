@@ -49,7 +49,7 @@ export interface ClubYearsRecord {
 
 export interface ClubsRecord {
 	name: string
-	charter: string
+	registration: string
 	venue: "Church" | "School" | "Community Center" | "Christian Camp" | "Other"
 	region: string
 	address?: string
