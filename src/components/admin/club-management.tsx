@@ -153,7 +153,7 @@ export function ClubManagement() {
 
     // Use unique request keys for each collection to allow parallel execution
     // while still benefitting from usePBQuery's overall cancellation of stale query runs.
-    const [clubRecords, regionRecords, countryRecords, userRecords] = await Promise.all([
+    const [clubRecords, regionRecords, countryRecords, missionaryRecords] = await Promise.all([
       pb.collection("clubs").getFullList<ClubExpanded>({
         sort: "name",
         expand: "region.country,missionary",
@@ -172,7 +172,8 @@ export function ClubManagement() {
       }),
       pb.collection("users").getFullList<UsersResponse>({
         sort: "name,email",
-        requestKey: `${requestKey}_users`,
+        filter: 'admin_roles_via_user.role ?= "Missionary"',
+        requestKey: `${requestKey}_missionaries`,
       }),
     ]);
 
@@ -190,7 +191,7 @@ export function ClubManagement() {
       clubs: clubRecords,
       regions: regionRecords,
       countries: filteredCountries,
-      users: userRecords
+      missionaries: missionaryRecords
     };
   }, [adminRoles, isGlobalAdmin, searchQuery], {
     enabled: !isAdminLoading,
@@ -206,7 +207,7 @@ export function ClubManagement() {
   const clubs = data?.clubs || [];
   const regions = data?.regions || [];
   const countries = data?.countries || [];
-  const users = data?.users || [];
+  const missionaries = data?.missionaries || [];
 
   useEffect(() => {
     setHeaderTitle(t("Club Management"));
@@ -527,7 +528,7 @@ export function ClubManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">{t("None")}</SelectItem>
-                  {users.map((user) => (
+                  {missionaries.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.displayName || user.name || user.email}
                     </SelectItem>
