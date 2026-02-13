@@ -2,6 +2,24 @@
 
 This document provides a quick reference for the PocketBase data structure used in the AwanAfrica application.
 
+---
+
+## 0. User Management
+
+### `users` (Auth Collection)
+The primary user record.
+- `email` (email, required, unique)
+- `name` (text): Full name (legacy field).
+- `displayName` (text): Preferred display name.
+- `avatar` (file): User profile picture (max 5MB).
+- `bio` (text): Short user biography.
+- `language` (text): Preferred UI language (e.g., "en", "sw").
+- `locale` (text): Preferred geographic locale (e.g., "TZ", "KE").
+- `theme` (text): UI theme preference ("light", "dark", "system").
+- `verified` (bool): Whether the email address is verified.
+
+---
+
 ## 1. Geographical Hierarchy
 
 ### `countries`
@@ -26,17 +44,18 @@ The primary tenant object.
 - `region` (relation, required): Link to `regions`.
 - `address` (text): Physical address.
 - `timezone` (text): Local timezone (default: UTC).
+- `active` (bool): Whether the club is currently active (default: true).
 
 ### `club_memberships`
 Junction table connecting users to clubs with specific permissions.
 - `user` (relation, required): Link to `users`.
 - `club` (relation, required): Link to `clubs`.
-- `roles` (select, multi, max 4): `Director`, `Secretary`, `Treasurer`, `Leader`.
+- `roles` (select, multi, max 6): `Director`, `Secretary`, `Treasurer`, `Leader`, `Guardian`, `Pending`.
 
 ### `admin_roles`
 Global and hierarchical administrative permissions.
 - `user` (relation, required): Link to `users`.
-- `role` (select, required): `Global`, `Country`, `Region`.
+- `role` (select, required): `Global`, `Country`, `Region`, `Pending`.
 - `country` (relation, optional): Link to `countries` (required if role is `Country`).
 - `region` (relation, optional): Link to `regions` (required if role is `Region`).
 
@@ -76,9 +95,8 @@ Links a student to a specific program for a specific year.
 ## 4. Events & Attendance
 
 ### `events`
-Scheduled meetings or special events (Club-level or Regional).
-- `club` (relation, optional): Link to `clubs` (Optional for Regional events).
-- `region` (relation, optional): Link to `regions` (Required for Regional events).
+Scheduled meetings or special events (Club-level).
+- `club` (relation, required): Link to `clubs`.
 - `club_year` (relation, required): Link to `club_years`.
 - `name` (text, required): e.g., "Weekly Meeting", "Awana Games".
 - `type` (select, required): `Weekly`, `Games`, `Quiz`, `Other`.
@@ -103,7 +121,6 @@ Recording student presence at events.
 
 [Country] 
    └── [Region] 
-         ├── [Regional Event] (Linked to Region & Club Year)
          └── [Club] 
                ├── [Club Membership] ↔ [User]
                ├── [Program]
