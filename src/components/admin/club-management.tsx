@@ -68,7 +68,7 @@ export function ClubManagement() {
   const [formData, setFormData] = useState<{
     name: string;
     charter: string;
-    type: "church" | "school" | "other";
+    venue: "Church" | "School" | "Community Center" | "Christian Camp" | "Other";
     country: string;
     region: string;
     address: string;
@@ -77,7 +77,7 @@ export function ClubManagement() {
   }>({
     name: "",
     charter: "",
-    type: "church",
+    venue: "Church",
     country: "",
     region: "",
     address: "",
@@ -221,7 +221,7 @@ export function ClubManagement() {
       setFormData({
         name: "",
         charter: "",
-        type: "church",
+        venue: "Church",
         country: "",
         region: "",
         address: "",
@@ -267,7 +267,7 @@ export function ClubManagement() {
       setFormData({
         name: club.name,
         charter: club.charter?.toString() || "",
-        type: club.type,
+        venue: club.venue,
         country: club.expand?.region?.country || "",
         region: club.region,
         address: club.address || "",
@@ -279,7 +279,7 @@ export function ClubManagement() {
       setFormData({
         name: "",
         charter: "",
-        type: "church",
+        venue: "Church",
         country: "",
         region: "",
         address: "",
@@ -339,7 +339,7 @@ export function ClubManagement() {
             <TableRow>
               <TableHead>{t("Charter")}</TableHead>
               <TableHead>{t("Name")}</TableHead>
-              <TableHead>{t("Type")}</TableHead>
+              <TableHead>{t("Venue")}</TableHead>
               <TableHead>{t("Region/Country")}</TableHead>
               <TableHead>{t("Status")}</TableHead>
             </TableRow>
@@ -375,7 +375,7 @@ export function ClubManagement() {
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell className="capitalize">{t(club.type)}</TableCell>
+                  <TableCell className="capitalize">{t(club.venue)}</TableCell>
                   <TableCell>
                     {club.expand?.region?.name} 
                     <span className="text-muted-foreground text-xs ml-1">
@@ -427,18 +427,20 @@ export function ClubManagement() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="type">{t("Type")}</Label>
+              <Label htmlFor="venue">{t("Venue")}</Label>
               <Select
-                value={formData.type}
-                onValueChange={(value: any) => setFormData({ ...formData, type: value })}
+                value={formData.venue}
+                onValueChange={(value: any) => setFormData({ ...formData, venue: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="church">{t("Church")}</SelectItem>
-                  <SelectItem value="school">{t("School")}</SelectItem>
-                  <SelectItem value="other">{t("Other")}</SelectItem>
+                  <SelectItem value="Church">{t("Church")}</SelectItem>
+                  <SelectItem value="School">{t("School")}</SelectItem>
+                  <SelectItem value="Community Center">{t("Community Center")}</SelectItem>
+                  <SelectItem value="Christian Camp">{t("Christian Camp")}</SelectItem>
+                  <SelectItem value="Other">{t("Other")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

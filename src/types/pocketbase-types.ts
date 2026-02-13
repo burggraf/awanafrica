@@ -50,7 +50,7 @@ export interface ClubYearsRecord {
 export interface ClubsRecord {
 	name: string
 	charter: string
-	type: "church" | "school" | "other"
+	venue: "Church" | "School" | "Community Center" | "Christian Camp" | "Other"
 	region: string
 	address?: string
 	timezone?: string
