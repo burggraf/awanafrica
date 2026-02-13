@@ -50,6 +50,12 @@ import { useTranslation } from "react-i18next"
 import { LayoutProvider, useLayout } from "@/lib/layout-context"
 import { useAdmin } from "@/lib/admin-context"
 
+import { 
+  AuthVerifyPage, 
+  AuthResetPasswordPage, 
+  AuthConfirmEmailChangePage 
+} from "@/components/auth-action-handler"
+
 const APP_VERSION = __APP_VERSION__
 const APP_NAME = __APP_NAME__
 
@@ -162,6 +168,11 @@ function MainContent() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
+          
+          {/* Auth Action Handlers */}
+          <Route path="/auth/verify" element={<AuthVerifyPage />} />
+          <Route path="/auth/reset-password" element={<AuthResetPasswordPage />} />
+          <Route path="/auth/confirm-email-change" element={<AuthConfirmEmailChangePage />} />
           
           {/* Admin Routes */}
           {isGlobalAdmin && (

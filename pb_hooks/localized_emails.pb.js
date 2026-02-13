@@ -7,8 +7,15 @@ onMailerRecordVerificationSend((e) => {
         const lang = record.getString("language") || "en";
         const settings = $app.settings();
         const appName = settings.meta.appName || "AwanAfrica";
-        const appUrl = settings.meta.appURL || "";
+        let appUrl = settings.meta.appURL || "";
+        
+        // Ensure we point to the frontend port (5173) in development
+        if (appUrl.indexOf("localhost:8090") !== -1) {
+            appUrl = appUrl.replace("8090", "5173");
+        }
+        
         const token = e.meta.token || "";
+        const actionUrl = `${appUrl}/auth/verify?token=${token}&lang=${lang}`;
 
         let subject, html, text;
 
@@ -19,11 +26,11 @@ onMailerRecordVerificationSend((e) => {
                 <p>Asante kwa kujiunga nasi katika ${appName}.</p>
                 <p>Bofya kitufe kilicho hapa chini ili kuthibitisha anwani yako ya barua pepe.</p>
                 <p>
-                  <a href="${appUrl}/_/#/auth/confirm-verification/${token}">Thibitisha</a>
+                  <a href="${actionUrl}">Thibitisha</a>
                 </p>
                 <p>Asante,<br/>Timu ya ${appName}</p>
             `;
-            text = "Habari, Thibitisha barua pepe yako hapa: " + appUrl + "/_/#/auth/confirm-verification/" + token;
+            text = "Habari, Thibitisha barua pepe yako hapa: " + actionUrl;
         } else {
             subject = "Verify your email for " + appName;
             html = `
@@ -31,11 +38,11 @@ onMailerRecordVerificationSend((e) => {
                 <p>Thank you for joining us at ${appName}.</p>
                 <p>Click on the button below to verify your email address.</p>
                 <p>
-                  <a href="${appUrl}/_/#/auth/confirm-verification/${token}">Verify</a>
+                  <a href="${actionUrl}">Verify</a>
                 </p>
                 <p>Thanks,<br/>${appName} team</p>
             `;
-            text = "Hello, Verify your email here: " + appUrl + "/_/#/auth/confirm-verification/" + token;
+            text = "Hello, Verify your email here: " + actionUrl;
         }
 
         const msg = new MailerMessage();
@@ -62,8 +69,15 @@ onMailerRecordPasswordResetSend((e) => {
         const lang = record.getString("language") || "en";
         const settings = $app.settings();
         const appName = settings.meta.appName || "AwanAfrica";
-        const appUrl = settings.meta.appURL || "";
+        let appUrl = settings.meta.appURL || "";
+        
+        // Ensure we point to the frontend port (5173) in development
+        if (appUrl.indexOf("localhost:8090") !== -1) {
+            appUrl = appUrl.replace("8090", "5173");
+        }
+        
         const token = e.meta.token || "";
+        const actionUrl = `${appUrl}/auth/reset-password?token=${token}&lang=${lang}`;
 
         let subject, html, text;
 
@@ -73,24 +87,24 @@ onMailerRecordPasswordResetSend((e) => {
                 <p>Habari,</p>
                 <p>Bofya kitufe kilicho hapa chini ili kubadilisha nywila yako.</p>
                 <p>
-                  <a href="${appUrl}/_/#/auth/confirm-password-reset/${token}">Badilisha nywila</a>
+                  <a href="${actionUrl}">Badilisha nywila</a>
                 </p>
                 <p><i>Ikiwa hukuomba kubadilisha nywila yako, unaweza kupuuza barua pepe hii.</i></p>
                 <p>Asante,<br/>Timu ya ${appName}</p>
             `;
-            text = "Habari, Bofya hapa ili kubadilisha nywila yako: " + appUrl + "/_/#/auth/confirm-password-reset/" + token;
+            text = "Habari, Bofya hapa ili kubadilisha nywila yako: " + actionUrl;
         } else {
             subject = "Reset your password for " + appName;
             html = `
                 <p>Hello,</p>
                 <p>Click on the button below to reset your password.</p>
                 <p>
-                  <a href="${appUrl}/_/#/auth/confirm-password-reset/${token}">Reset password</a>
+                  <a href="${actionUrl}">Reset password</a>
                 </p>
                 <p><i>If you didn't ask to reset your password, you can ignore this email.</i></p>
                 <p>Thanks,<br/>${appName} team</p>
             `;
-            text = "Hello, Reset your password here: " + appUrl + "/_/#/auth/confirm-password-reset/" + token;
+            text = "Hello, Reset your password here: " + actionUrl;
         }
 
         const msg = new MailerMessage();
@@ -117,8 +131,15 @@ onMailerRecordEmailChangeSend((e) => {
         const lang = record.getString("language") || "en";
         const settings = $app.settings();
         const appName = settings.meta.appName || "AwanAfrica";
-        const appUrl = settings.meta.appURL || "";
+        let appUrl = settings.meta.appURL || "";
+        
+        // Ensure we point to the frontend port (5173) in development
+        if (appUrl.indexOf("localhost:8090") !== -1) {
+            appUrl = appUrl.replace("8090", "5173");
+        }
+        
         const token = e.meta.token || "";
+        const actionUrl = `${appUrl}/auth/confirm-email-change?token=${token}&lang=${lang}`;
 
         let subject, html, text;
 
@@ -128,24 +149,24 @@ onMailerRecordEmailChangeSend((e) => {
                 <p>Habari,</p>
                 <p>Bofya kitufe kilicho hapa chini ili kuthibitisha anwani yako mpya ya barua pepe.</p>
                 <p>
-                  <a class="btn" href="${appUrl}/_/#/auth/confirm-email-change/${token}" target="_blank" rel="noopener">Thibitisha barua pepe mpya</a>
+                  <a class="btn" href="${actionUrl}" target="_blank" rel="noopener">Thibitisha barua pepe mpya</a>
                 </p>
                 <p><i>Ikiwa hukuomba kubadilisha anwani yako ya barua pepe, unaweza kupuuza barua pepe hii.</i></p>
                 <p>Asante,<br/>Timu ya ${appName}</p>
             `;
-            text = "Habari, Thibitisha barua pepe yako mpya hapa: " + appUrl + "/_/#/auth/confirm-email-change/" + token;
+            text = "Habari, Thibitisha barua pepe yako mpya hapa: " + actionUrl;
         } else {
             subject = "Confirm your new email address for " + appName;
             html = `
                 <p>Hello,</p>
                 <p>Click on the button below to confirm your new email address.</p>
                 <p>
-                  <a class="btn" href="${appUrl}/_/#/auth/confirm-email-change/${token}" target="_blank" rel="noopener">Confirm new email</a>
+                  <a class="btn" href="${actionUrl}" target="_blank" rel="noopener">Confirm new email</a>
                 </p>
                 <p><i>If you didn't ask to change your email address, you can ignore this email.</i></p>
                 <p>Thanks,<br/>${appName} team</p>
             `;
-            text = "Hello, Confirm your new email here: " + appUrl + "/_/#/auth/confirm-email-change/" + token;
+            text = "Hello, Confirm your new email here: " + actionUrl;
         }
 
         const msg = new MailerMessage();
