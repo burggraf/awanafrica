@@ -100,9 +100,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       toast({ title: t("Logged in successfully") })
       onClose()
     } catch (error: any) {
+      console.error("Login error:", error)
+      
+      let description = error.message
+      if (error.message?.includes('Failed to fetch') || error.status === 0) {
+        description = t("Network error: Could not connect to the server. Please check your connection or browser settings.")
+      }
+
       toast({
         title: t("Login failed"),
-        description: error.message,
+        description,
         variant: "destructive",
       })
     }
