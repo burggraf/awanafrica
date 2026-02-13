@@ -180,6 +180,9 @@ export function UserManagement() {
       } else if (newRoleData.role === 'Region') {
         if (!newRoleData.region) throw new Error(t("Please select a region"));
         data.region = newRoleData.region;
+      } else if (newRoleData.role === 'Pending') {
+        data.country = newRoleData.country || "";
+        data.region = newRoleData.region || "";
       }
       
       await pb.collection("admin_roles").create(data);

@@ -138,8 +138,8 @@ function OnboardingModalInner() {
     setIsSubmitting(true)
     try {
       if (selectedRole === "Admin") {
-        const countryId = adminCountry && adminCountry !== "global" ? adminCountry : null;
-        const regionId = adminRegion && adminRegion !== "country" ? adminRegion : null;
+        const countryId = adminCountry && adminCountry !== "global" ? adminCountry : "";
+        const regionId = adminRegion && adminRegion !== "country" ? adminRegion : "";
         
         await pb.collection("admin_roles").create({
           user: user?.id,
