@@ -67,13 +67,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     },
   })
 
-  async function syncPreferences(userId: string) {
+  async function syncPreferences(userId: string, currentPrefs?: any) {
     try {
-      await pb.collection("users").update(userId, {
-        language: i18n.language,
-        locale: country,
-        theme: theme,
-      })
+      const updates: any = {}
+      if (currentPrefs?.language !== i18n.language) updates.language = i18n.language
+      if (currentPrefs?.locale !== country) updates.locale = country
+      if (currentPrefs?.theme !== theme) updates.theme = theme
+
+      if (Object.keys(updates).length > 0) {
+        await pb.collection("users").update(userId, updates)
+      }
     } catch (error) {
       console.error("Failed to sync preferences:", error)
     }
@@ -97,7 +100,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       const authData = await pb.collection("users").authWithPassword(data.email, data.password)
       await applyUserPreferences(authData.record)
       // Sync current local preferences to DB in case they were changed on login screen
-      await syncPreferences(authData.record.id)
+      await syncPreferences(authData.record.id, authData.record)
       toast({ title: t("Logged in successfully") })
       onClose()
     } catch (error: any) {
@@ -120,7 +123,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       const authData = await pb.collection("users").authWithOAuth2({ provider: "google" })
       await applyUserPreferences(authData.record)
-      await syncPreferences(authData.record.id)
+      await syncPreferences(authData.record.id, authData.record)
       toast({ title: t("Logged in with Google") })
       onClose()
     } catch (error: any) {
@@ -146,7 +149,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
       await pb.collection("users").create({
         ...data,
-        emailVisibility: true,
+        emailVisibility: false,
         language: i18n.language,
         locale: country,
         theme: theme,

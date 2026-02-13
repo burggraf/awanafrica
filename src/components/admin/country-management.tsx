@@ -91,34 +91,6 @@ export function CountryManagement() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!editingCountry) return;
-    
-    try {
-      // Check for regions
-      const regions = await pb.collection("regions").getList(1, 1, {
-        filter: `country = "${editingCountry.id}"`,
-      });
-
-      if (regions.totalItems > 0) {
-        toast({
-          title: t("Cannot Delete"),
-          description: t("This country has regions and cannot be deleted."),
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setIsAlertOpen(true);
-    } catch (error: any) {
-      toast({
-        title: t("Error"),
-        description: error.message || t("Failed to check constraints"),
-        variant: "destructive",
-      });
-    }
-  };
-
   const confirmDelete = async () => {
     if (!editingCountry) return;
     try {
@@ -135,6 +107,11 @@ export function CountryManagement() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleDelete = () => {
+    if (!editingCountry) return;
+    setIsAlertOpen(true);
   };
 
   const openDialog = (country?: Country) => {

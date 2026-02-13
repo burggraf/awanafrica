@@ -238,42 +238,6 @@ export function ClubManagement() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!editingClub) return;
-    
-    try {
-      // Check for related data as per user request
-      // We need to check memberships, programs, years, students, events
-      const checks = [
-        pb.collection("club_memberships").getList(1, 1, { filter: `club = "${editingClub.id}"`, requestKey: null }),
-        pb.collection("programs").getList(1, 1, { filter: `club = "${editingClub.id}"`, requestKey: null }),
-        pb.collection("club_years").getList(1, 1, { filter: `club = "${editingClub.id}"`, requestKey: null }),
-        pb.collection("students").getList(1, 1, { filter: `club = "${editingClub.id}"`, requestKey: null }),
-        pb.collection("events").getList(1, 1, { filter: `club = "${editingClub.id}"`, requestKey: null }),
-      ];
-
-      const results = await Promise.all(checks);
-      const hasRelatedData = results.some(res => res.totalItems > 0);
-
-      if (hasRelatedData) {
-        toast({
-          title: t("Cannot Delete"),
-          description: t("This club has related data (members, programs, etc.) and cannot be deleted. Consider marking it as inactive instead."),
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setIsAlertOpen(true);
-    } catch (error: any) {
-      toast({
-        title: t("Error"),
-        description: error.message || t("Failed to check constraints"),
-        variant: "destructive",
-      });
-    }
-  };
-
   const confirmDelete = async () => {
     if (!editingClub) return;
     try {
@@ -290,6 +254,11 @@ export function ClubManagement() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleDelete = () => {
+    if (!editingClub) return;
+    setIsAlertOpen(true);
   };
 
   const openDialog = (club?: ClubExpanded) => {

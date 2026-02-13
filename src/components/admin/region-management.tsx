@@ -141,34 +141,6 @@ export function RegionManagement() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!editingRegion) return;
-    
-    try {
-      // Check for clubs
-      const clubs = await pb.collection("clubs").getList(1, 1, {
-        filter: `region = "${editingRegion.id}"`,
-      });
-
-      if (clubs.totalItems > 0) {
-        toast({
-          title: t("Cannot Delete"),
-          description: t("This region has clubs and cannot be deleted."),
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setIsAlertOpen(true);
-    } catch (error: any) {
-      toast({
-        title: t("Error"),
-        description: error.message || t("Failed to check constraints"),
-        variant: "destructive",
-      });
-    }
-  };
-
   const confirmDelete = async () => {
     if (!editingRegion) return;
     try {
@@ -185,6 +157,11 @@ export function RegionManagement() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleDelete = () => {
+    if (!editingRegion) return;
+    setIsAlertOpen(true);
   };
 
   const openDialog = (region?: RegionExpanded) => {
