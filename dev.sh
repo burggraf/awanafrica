@@ -17,9 +17,8 @@ trap cleanup EXIT INT TERM
 # Kill any existing pocketbase process on this port if it exists
 pkill -f "pocketbase serve" || true
 
-# Start pocketbase in the background, redirecting output slightly if needed 
-# but keeping it visible for debugging
-./pocketbase serve &
+# Start pocketbase in the background, redirecting output to a log file
+./pocketbase serve > pocketbase.log 2>&1 &
 PB_PID=$!
 
 # Wait a moment for PB to initialize
