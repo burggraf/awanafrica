@@ -51,6 +51,10 @@ export interface ClubsRecord {
 	name: string
 	registration: string
 	venue: "Church" | "School" | "Community Center" | "Christian Camp" | "Other"
+	type: "Leader Based" | "Other"
+	denomination?: string
+	location?: string
+	missionary?: string
 	region: string
 	address?: string
 	timezone?: string

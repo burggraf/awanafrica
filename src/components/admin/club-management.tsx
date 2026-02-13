@@ -8,7 +8,8 @@ import { usePBQuery } from "@/hooks/use-pb-query";
 import { 
   type ClubsResponse, 
   type RegionsResponse, 
-  type CountriesResponse 
+  type CountriesResponse,
+  type UsersResponse
 } from "@/types/pocketbase-types";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,6 +53,7 @@ type RegionExpanded = RegionsResponse<{
 
 type ClubExpanded = ClubsResponse<{
   region: RegionExpanded;
+  missionary?: UsersResponse;
 }>;
 
 export function ClubManagement() {
@@ -69,6 +71,10 @@ export function ClubManagement() {
     name: string;
     registration: string;
     venue: "Church" | "School" | "Community Center" | "Christian Camp" | "Other";
+    type: "Leader Based" | "Other";
+    denomination: string;
+    location: string;
+    missionary: string;
     country: string;
     region: string;
     address: string;
@@ -78,6 +84,10 @@ export function ClubManagement() {
     name: "",
     registration: "",
     venue: "Church",
+    type: "Leader Based",
+    denomination: "",
+    location: "",
+    missionary: "",
     country: "",
     region: "",
     address: "",
@@ -143,10 +153,10 @@ export function ClubManagement() {
 
     // Use unique request keys for each collection to allow parallel execution
     // while still benefitting from usePBQuery's overall cancellation of stale query runs.
-    const [clubRecords, regionRecords, countryRecords] = await Promise.all([
+    const [clubRecords, regionRecords, countryRecords, userRecords] = await Promise.all([
       pb.collection("clubs").getFullList<ClubExpanded>({
         sort: "name",
-        expand: "region.country",
+        expand: "region.country,missionary",
         filter: clubFilter,
         requestKey: `${requestKey}_clubs`,
       }),
@@ -159,6 +169,10 @@ export function ClubManagement() {
       pb.collection("countries").getFullList<CountriesResponse>({
         sort: "name",
         requestKey: `${requestKey}_countries`,
+      }),
+      pb.collection("users").getFullList<UsersResponse>({
+        sort: "name,email",
+        requestKey: `${requestKey}_users`,
       }),
     ]);
 
@@ -175,7 +189,8 @@ export function ClubManagement() {
     return {
       clubs: clubRecords,
       regions: regionRecords,
-      countries: filteredCountries
+      countries: filteredCountries,
+      users: userRecords
     };
   }, [adminRoles, isGlobalAdmin, searchQuery], {
     enabled: !isAdminLoading,
@@ -191,6 +206,7 @@ export function ClubManagement() {
   const clubs = data?.clubs || [];
   const regions = data?.regions || [];
   const countries = data?.countries || [];
+  const users = data?.users || [];
 
   useEffect(() => {
     setHeaderTitle(t("Club Management"));
@@ -209,6 +225,10 @@ export function ClubManagement() {
 
     try {
       const { country, ...submitData } = formData;
+      if (submitData.missionary === "none" || !submitData.missionary) {
+        (submitData as any).missionary = null;
+      }
+      
       if (editingClub) {
         await pb.collection("clubs").update(editingClub.id, submitData);
         toast({ title: t("Success"), description: t("Club updated successfully") });
@@ -222,6 +242,10 @@ export function ClubManagement() {
         name: "",
         registration: "",
         venue: "Church",
+        type: "Leader Based",
+        denomination: "",
+        location: "",
+        missionary: "",
         country: "",
         region: "",
         address: "",
@@ -268,6 +292,10 @@ export function ClubManagement() {
         name: club.name,
         registration: club.registration?.toString() || "",
         venue: club.venue,
+        type: club.type || "Leader Based",
+        denomination: club.denomination || "",
+        location: club.location || "",
+        missionary: club.missionary || "",
         country: club.expand?.region?.country || "",
         region: club.region,
         address: club.address || "",
@@ -280,6 +308,10 @@ export function ClubManagement() {
         name: "",
         registration: "",
         venue: "Church",
+        type: "Leader Based",
+        denomination: "",
+        location: "",
+        missionary: "",
         country: "",
         region: "",
         address: "",
@@ -339,6 +371,7 @@ export function ClubManagement() {
             <TableRow>
               <TableHead>{t("Registration")}</TableHead>
               <TableHead>{t("Name")}</TableHead>
+              <TableHead>{t("Type")}</TableHead>
               <TableHead>{t("Venue")}</TableHead>
               <TableHead>{t("Region/Country")}</TableHead>
               <TableHead>{t("Status")}</TableHead>
@@ -375,6 +408,7 @@ export function ClubManagement() {
                       </Badge>
                     )}
                   </TableCell>
+                  <TableCell className="capitalize">{t(club.type)}</TableCell>
                   <TableCell className="capitalize">{t(club.venue)}</TableCell>
                   <TableCell>
                     {club.expand?.region?.name} 
@@ -426,21 +460,78 @@ export function ClubManagement() {
               </div>
             </div>
             
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="type">{t("Type")}</Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value: any) => setFormData({ ...formData, type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Leader Based">{t("Leader Based")}</SelectItem>
+                    <SelectItem value="Other">{t("Other")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="venue">{t("Venue")}</Label>
+                <Select
+                  value={formData.venue}
+                  onValueChange={(value: any) => setFormData({ ...formData, venue: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Church">{t("Church")}</SelectItem>
+                    <SelectItem value="School">{t("School")}</SelectItem>
+                    <SelectItem value="Community Center">{t("Community Center")}</SelectItem>
+                    <SelectItem value="Christian Camp">{t("Christian Camp")}</SelectItem>
+                    <SelectItem value="Other">{t("Other")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="denomination">{t("Denomination")}</Label>
+                <Input
+                  id="denomination"
+                  value={formData.denomination}
+                  onChange={(e) => setFormData({ ...formData, denomination: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="location">{t("Location")}</Label>
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="venue">{t("Venue")}</Label>
+              <Label htmlFor="missionary">{t("Missionary")}</Label>
               <Select
-                value={formData.venue}
-                onValueChange={(value: any) => setFormData({ ...formData, venue: value })}
+                value={formData.missionary}
+                onValueChange={(value) => setFormData({ ...formData, missionary: value })}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder={t("Select Missionary")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Church">{t("Church")}</SelectItem>
-                  <SelectItem value="School">{t("School")}</SelectItem>
-                  <SelectItem value="Community Center">{t("Community Center")}</SelectItem>
-                  <SelectItem value="Christian Camp">{t("Christian Camp")}</SelectItem>
-                  <SelectItem value="Other">{t("Other")}</SelectItem>
+                  <SelectItem value="none">{t("None")}</SelectItem>
+                  {users.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.displayName || user.name || user.email}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
