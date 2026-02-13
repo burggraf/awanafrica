@@ -402,6 +402,7 @@ const resources = {
       "Removal failed": "Uondoaji umeshindwa",
       "Account created": "Akaunti imeundwa",
       "Please check your email to verify your account before logging in.": "Tafadhali kagua barua pepe yako ili kuthibitisha akaunti yako kabla ya kuingia.",
+      "Passwords do not match": "Nywila hazilingani",
     }
   }
 };

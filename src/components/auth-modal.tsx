@@ -126,6 +126,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   async function onRegister(data: any) {
     try {
+      // Validate passwords match before sending to API
+      if (data.password !== data.passwordConfirm) {
+        toast({
+          title: t("Registration failed"),
+          description: t("Passwords do not match"),
+          variant: "destructive",
+        })
+        return
+      }
+
       await pb.collection("users").create({
         ...data,
         emailVisibility: true,
@@ -145,9 +155,20 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       // Switch to login tab since they can't auto-login yet
       setActiveTab("login")
     } catch (error: any) {
+      console.error("Registration error details:", error.data)
+      
+      // Extract specific field errors if available
+      let errorMessage = error.message
+      if (error.data?.data) {
+        const fieldErrors = Object.entries(error.data.data)
+          .map(([field, detail]: [string, any]) => `${field}: ${detail.message || detail.code || JSON.stringify(detail)}`)
+          .join(", ")
+        if (fieldErrors) errorMessage = fieldErrors
+      }
+
       toast({
         title: t("Registration failed"),
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       })
     }
