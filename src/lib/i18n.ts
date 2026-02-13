@@ -403,6 +403,7 @@ const resources = {
       "Account created": "Akaunti imeundwa",
       "Please check your email to verify your account before logging in.": "Tafadhali kagua barua pepe yako ili kuthibitisha akaunti yako kabla ya kuingia.",
       "Passwords do not match": "Nywila hazilingani",
+      "Email already registered. Please log in or reset your password.": "Barua pepe tayari imesajiliwa. Tafadhali ingia au badilisha nywila yako.",
     }
   }
 };

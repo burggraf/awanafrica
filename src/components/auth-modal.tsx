@@ -145,7 +145,13 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       })
       
       // Request verification email immediately after registration
-      await pb.collection("users").requestVerification(data.email)
+      try {
+        await pb.collection("users").requestVerification(data.email)
+      } catch (verifyError: any) {
+        console.warn("Verification email request failed (possibly rate limited):", verifyError)
+        // We don't fail the whole registration if just the email trigger fails, 
+        // as the user can always request it again from the login screen if we added a button.
+      }
       
       toast({ 
         title: t("Account created"), 
@@ -157,6 +163,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     } catch (error: any) {
       console.error("Registration error details:", error.data)
       
+      // Check for unique constraint violation (email already exists)
+      if (error.data?.data?.email?.code === 'validation_not_unique') {
+        toast({
+          title: t("Registration failed"),
+          description: t("Email already registered. Please log in or reset your password."),
+          variant: "destructive",
+        })
+        return
+      }
+
       // Extract specific field errors if available
       let errorMessage = error.message
       if (error.data?.data) {

@@ -25,7 +25,6 @@ onMailerRecordVerificationSend((e) => {
             `;
             text = "Habari, Thibitisha barua pepe yako hapa: " + appUrl + "/_/#/auth/confirm-verification/" + token;
         } else {
-            // Default English
             subject = "Verify your email for " + appName;
             html = `
                 <p>Hello,</p>
@@ -47,12 +46,11 @@ onMailerRecordVerificationSend((e) => {
         msg.text = text;
 
         $app.newMailClient().send(msg);
-        console.log(">>> Manual Verification sent to " + record.email() + " (lang: " + lang + ")");
         
         // Stop original
         e.message.to = [];
     } catch (err) {
-        console.log(">>> [Verification] ERROR: " + err);
+        console.log("ERROR in verification hook: " + err);
     }
 }, "users");
 
@@ -82,7 +80,6 @@ onMailerRecordPasswordResetSend((e) => {
             `;
             text = "Habari, Bofya hapa ili kubadilisha nywila yako: " + appUrl + "/_/#/auth/confirm-password-reset/" + token;
         } else {
-            // Default English
             subject = "Reset your password for " + appName;
             html = `
                 <p>Hello,</p>
@@ -104,12 +101,11 @@ onMailerRecordPasswordResetSend((e) => {
         msg.text = text;
 
         $app.newMailClient().send(msg);
-        console.log(">>> Manual PasswordReset sent to " + record.email() + " (lang: " + lang + ")");
         
         // Stop original
         e.message.to = [];
     } catch (err) {
-        console.log(">>> [PasswordReset] ERROR: " + err);
+        console.log("ERROR in password reset hook: " + err);
     }
 }, "users");
 
@@ -132,20 +128,19 @@ onMailerRecordEmailChangeSend((e) => {
                 <p>Habari,</p>
                 <p>Bofya kitufe kilicho hapa chini ili kuthibitisha anwani yako mpya ya barua pepe.</p>
                 <p>
-                  <a href="${appUrl}/_/#/auth/confirm-email-change/${token}">Thibitisha barua pepe mpya</a>
+                  <a class="btn" href="${appUrl}/_/#/auth/confirm-email-change/${token}" target="_blank" rel="noopener">Thibitisha barua pepe mpya</a>
                 </p>
                 <p><i>Ikiwa hukuomba kubadilisha anwani yako ya barua pepe, unaweza kupuuza barua pepe hii.</i></p>
                 <p>Asante,<br/>Timu ya ${appName}</p>
             `;
             text = "Habari, Thibitisha barua pepe yako mpya hapa: " + appUrl + "/_/#/auth/confirm-email-change/" + token;
         } else {
-            // Default English
             subject = "Confirm your new email address for " + appName;
             html = `
                 <p>Hello,</p>
                 <p>Click on the button below to confirm your new email address.</p>
                 <p>
-                  <a href="${appUrl}/_/#/auth/confirm-email-change/${token}">Confirm new email</a>
+                  <a class="btn" href="${appUrl}/_/#/auth/confirm-email-change/${token}" target="_blank" rel="noopener">Confirm new email</a>
                 </p>
                 <p><i>If you didn't ask to change your email address, you can ignore this email.</i></p>
                 <p>Thanks,<br/>${appName} team</p>
@@ -161,12 +156,11 @@ onMailerRecordEmailChangeSend((e) => {
         msg.text = text;
 
         $app.newMailClient().send(msg);
-        console.log(">>> Manual EmailChange sent to " + record.email() + " (lang: " + lang + ")");
         
         // Stop original
         e.message.to = [];
     } catch (err) {
-        console.log(">>> [EmailChange] ERROR: " + err);
+        console.log("ERROR in email change hook: " + err);
     }
 }, "users");
 
@@ -192,7 +186,6 @@ onMailerRecordOTPSend((e) => {
             `;
             text = "Habari, Msimbo wako wa siri ni: " + otp;
         } else {
-            // Default English
             subject = "OTP for " + appName;
             html = `
                 <p>Hello,</p>
@@ -211,11 +204,10 @@ onMailerRecordOTPSend((e) => {
         msg.text = text;
 
         $app.newMailClient().send(msg);
-        console.log(">>> Manual OTP sent to " + record.email() + " (lang: " + lang + ")");
         
         // Stop original
         e.message.to = [];
     } catch (err) {
-        console.log(">>> [OTP] ERROR: " + err);
+        console.log("ERROR in OTP hook: " + err);
     }
 }, "users");
