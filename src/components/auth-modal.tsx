@@ -126,16 +126,24 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   async function onRegister(data: any) {
     try {
-      const user = await pb.collection("users").create({
+      await pb.collection("users").create({
         ...data,
         emailVisibility: true,
         language: i18n.language,
         locale: country,
         theme: theme,
       })
-      await pb.collection("users").authWithPassword(data.email, data.password)
-      toast({ title: t("Registered and logged in successfully") })
-      onClose()
+      
+      // Request verification email immediately after registration
+      await pb.collection("users").requestVerification(data.email)
+      
+      toast({ 
+        title: t("Account created"), 
+        description: t("Please check your email to verify your account before logging in.") 
+      })
+      
+      // Switch to login tab since they can't auto-login yet
+      setActiveTab("login")
     } catch (error: any) {
       toast({
         title: t("Registration failed"),

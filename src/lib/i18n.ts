@@ -400,6 +400,8 @@ const resources = {
       "Max size is 5MB": "Ukubwa wa juu ni 5MB",
       "Upload failed": "Upakiaji umeshindwa",
       "Removal failed": "Uondoaji umeshindwa",
+      "Account created": "Akaunti imeundwa",
+      "Please check your email to verify your account before logging in.": "Tafadhali kagua barua pepe yako ili kuthibitisha akaunti yako kabla ya kuingia.",
     }
   }
 };
