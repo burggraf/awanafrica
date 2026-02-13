@@ -28,7 +28,7 @@ export function ClubSwitcher() {
         {memberships.map((m) => (
           <DropdownMenuItem 
             key={m.id} 
-            onClick={() => setCurrentClub({ id: m.expand?.club.id, name: m.expand?.club.name })}
+            onClick={() => m.expand?.club && setCurrentClub(m.expand.club)}
           >
             {m.expand?.club.name}
           </DropdownMenuItem>

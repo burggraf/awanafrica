@@ -4,6 +4,7 @@ import { Plus, Trash2, Map } from "lucide-react";
 import { pb } from "@/lib/pb";
 import { useLayout } from "@/lib/layout-context";
 import { useAdmin } from "@/lib/admin-context";
+import type { RegionsResponse, CountriesResponse } from "@/types/pocketbase-types";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -33,30 +34,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 
-interface Country {
-  id: string;
-  name: string;
-}
-
-interface Region {
-  id: string;
-  name: string;
-  country: string;
-  expand?: {
-    country: Country;
-  };
-}
+type RegionExpanded = RegionsResponse<{
+  country: CountriesResponse;
+}>;
 
 export function RegionManagement() {
   const { t } = useTranslation();
   const { setHeaderTitle } = useLayout();
   const { toast } = useToast();
   const { isGlobalAdmin, adminRoles } = useAdmin();
-  const [regions, setRegions] = useState<Region[]>([]);
-  const [countries, setCountries] = useState<Country[]>([]);
+  const [regions, setRegions] = useState<RegionExpanded[]>([]);
+  const [countries, setCountries] = useState<CountriesResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingRegion, setEditingRegion] = useState<Region | null>(null);
+  const [editingRegion, setEditingRegion] = useState<RegionExpanded | null>(null);
   const [formData, setFormData] = useState({ name: "", country: "" });
   const [isAlertOpen, setIsAlertOpen] = useState(false);
 
@@ -86,13 +77,13 @@ export function RegionManagement() {
       }
 
       const [regionRecords, countryRecords] = await Promise.all([
-        pb.collection("regions").getFullList<Region>({
+        pb.collection("regions").getFullList<RegionExpanded>({
           sort: "name",
           expand: "country",
           filter: regionFilter,
           requestKey: "region_management_list",
         }),
-        pb.collection("countries").getFullList<Country>({
+        pb.collection("countries").getFullList<CountriesResponse>({
           sort: "name",
           requestKey: "country_dropdown_list",
         }),
@@ -196,7 +187,7 @@ export function RegionManagement() {
     }
   };
 
-  const openDialog = (region?: Region) => {
+  const openDialog = (region?: RegionExpanded) => {
     if (region) {
       setEditingRegion(region);
       setFormData({ name: region.name, country: region.country });

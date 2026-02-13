@@ -4,6 +4,12 @@ import { Search, Plus, Trash2, Shield } from "lucide-react";
 import { pb } from "@/lib/pb";
 import { useLayout } from "@/lib/layout-context";
 import { useAdmin } from "@/lib/admin-context";
+import type { 
+  UsersResponse, 
+  AdminRolesResponse, 
+  CountriesResponse, 
+  RegionsResponse 
+} from "@/types/pocketbase-types";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -35,42 +41,18 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
-interface UserRecord {
-  id: string;
-  email: string;
-  name: string;
-  displayName: string;
-  avatar: string;
-  expand?: {
-    admin_roles_via_user?: AdminRole[];
-  };
-}
+type AdminRoleExpanded = AdminRolesResponse<{
+  country?: CountriesResponse;
+  region?: RegionsResponse;
+}>;
 
-interface AdminRole {
-  id: string;
-  user: string;
-  role: 'Global' | 'Country' | 'Region' | 'Pending';
-  country?: string;
-  region?: string;
-  expand?: {
-    country?: { name: string };
-    region?: { name: string };
-  };
-}
+type UserWithRoles = UsersResponse<{
+  admin_roles_via_user?: AdminRoleExpanded[];
+}>;
 
-interface Country {
-  id: string;
-  name: string;
-}
-
-interface Region {
-  id: string;
-  name: string;
-  country: string;
-  expand?: {
-    country?: { name: string };
-  };
-}
+type RegionExpanded = RegionsResponse<{
+  country?: CountriesResponse;
+}>;
 
 export function UserManagement() {
   const { t } = useTranslation();
@@ -79,18 +61,18 @@ export function UserManagement() {
   const { isGlobalAdmin, adminRoles: myRoles } = useAdmin();
   
   const [searchQuery, setSearchQuery] = useState("");
-  const [users, setUsers] = useState<UserRecord[]>([]);
+  const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   
-  const [selectedUser, setSelectedUser] = useState<UserRecord | null>(null);
-  const [userRoles, setUserRoles] = useState<AdminRole[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserWithRoles | null>(null);
+  const [userRoles, setUserRoles] = useState<AdminRoleExpanded[]>([]);
   const [isRolesDialogOpen, setIsRolesDialogOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<string | null>(null);
   
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [regions, setRegions] = useState<Region[]>([]);
+  const [countries, setCountries] = useState<CountriesResponse[]>([]);
+  const [regions, setRegions] = useState<RegionExpanded[]>([]);
   
   const [newRoleData, setNewRoleData] = useState<{
     role: 'Global' | 'Country' | 'Region' | 'Pending';
@@ -113,11 +95,11 @@ export function UserManagement() {
   const fetchCountriesAndRegions = async () => {
     try {
       const [countriesList, regionsList] = await Promise.all([
-        pb.collection("countries").getFullList<Country>({ 
+        pb.collection("countries").getFullList<CountriesResponse>({ 
           sort: "name",
           requestKey: "user_mgmt_countries"
         }),
-        pb.collection("regions").getFullList<Region>({ 
+        pb.collection("regions").getFullList<RegionExpanded>({ 
           sort: "name", 
           expand: "country",
           requestKey: "user_mgmt_regions"
@@ -140,7 +122,7 @@ export function UserManagement() {
     
     setIsLoading(true);
     try {
-      const records = await pb.collection("users").getList<UserRecord>(1, 50, {
+      const records = await pb.collection("users").getList<UserWithRoles>(1, 50, {
         filter: `email ~ "${query}" || name ~ "${query}" || displayName ~ "${query}"`,
         expand: "admin_roles_via_user.country,admin_roles_via_user.region",
         requestKey: "user_search"
@@ -163,7 +145,7 @@ export function UserManagement() {
     return () => clearTimeout(timer);
   }, [searchQuery, handleSearch]);
 
-  const openRolesDialog = async (user: UserRecord) => {
+  const openRolesDialog = async (user: UserWithRoles) => {
     setSelectedUser(user);
     setSelectedCountryId(""); // Reset country selection for new user
     setNewRoleData({ role: 'Region', country: "", region: "" }); // Reset form
@@ -173,7 +155,7 @@ export function UserManagement() {
 
   const fetchUserRoles = async (userId: string) => {
     try {
-      const roles = await pb.collection("admin_roles").getFullList<AdminRole>({
+      const roles = await pb.collection("admin_roles").getFullList<AdminRoleExpanded>({
         filter: `user = "${userId}"`,
         expand: "country,region",
       });

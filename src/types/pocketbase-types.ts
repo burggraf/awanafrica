@@ -98,6 +98,8 @@ export interface StudentsRecord {
 }
 
 export interface UsersRecord {
+	email: string
+	verified: boolean
 	name?: string
 	displayName?: string
 	avatar?: string

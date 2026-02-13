@@ -268,17 +268,17 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="app-theme">
       <LocaleProvider>
-        <AdminProvider>
-          <ClubProvider>
-            <TooltipProvider>
-              <LayoutProvider>
-                <BrowserRouter>
+        <TooltipProvider>
+          <LayoutProvider>
+            <BrowserRouter>
+              <AdminProvider>
+                <ClubProvider>
                   <MainContent />
-                </BrowserRouter>
-              </LayoutProvider>
-            </TooltipProvider>
-          </ClubProvider>
-        </AdminProvider>
+                </ClubProvider>
+              </AdminProvider>
+            </BrowserRouter>
+          </LayoutProvider>
+        </TooltipProvider>
       </LocaleProvider>
     </ThemeProvider>
   )

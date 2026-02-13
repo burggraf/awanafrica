@@ -1,38 +1,32 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { pb } from './pb';
+import type { ClubsResponse, ClubMembershipsResponse, ClubYearsResponse } from '@/types/pocketbase-types';
 
-interface Club {
-  id: string;
-  name: string;
-  charter?: string;
-}
-
-interface ClubYear {
-  id: string;
-  label: string;
-}
+export type ClubMembershipExpanded = ClubMembershipsResponse<{
+  club: ClubsResponse;
+}>;
 
 interface ClubContextType {
-  currentClub: Club | null;
-  currentYear: ClubYear | null;
-  setCurrentClub: (club: Club | null) => void;
-  setCurrentYear: (year: ClubYear | null) => void;
-  memberships: any[];
+  currentClub: ClubsResponse | null;
+  currentYear: ClubYearsResponse | null;
+  setCurrentClub: (club: ClubsResponse | null) => void;
+  setCurrentYear: (year: ClubYearsResponse | null) => void;
+  memberships: ClubMembershipExpanded[];
   isLoading: boolean;
 }
 
 const ClubContext = createContext<ClubContextType | undefined>(undefined);
 
 export function ClubProvider({ children }: { children: ReactNode }) {
-  const [currentClub, setCurrentClub] = useState<Club | null>(() => {
+  const [currentClub, setCurrentClub] = useState<ClubsResponse | null>(() => {
     const saved = localStorage.getItem('active-club');
     return saved ? JSON.parse(saved) : null;
   });
-  const [currentYear, setCurrentYear] = useState<ClubYear | null>(() => {
+  const [currentYear, setCurrentYear] = useState<ClubYearsResponse | null>(() => {
     const saved = localStorage.getItem('active-year');
     return saved ? JSON.parse(saved) : null;
   });
-  const [memberships, setMemberships] = useState<any[]>([]);
+  const [memberships, setMemberships] = useState<ClubMembershipExpanded[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -41,7 +35,7 @@ export function ClubProvider({ children }: { children: ReactNode }) {
         setIsLoading(true);
         try {
           // Disable auto-cancellation for this global fetch
-          const list = await pb.collection('club_memberships').getFullList({ 
+          const list = await pb.collection('club_memberships').getFullList<ClubMembershipExpanded>({ 
             expand: 'club',
             requestKey: 'global_memberships_fetch'
           });
@@ -80,10 +74,19 @@ export function ClubProvider({ children }: { children: ReactNode }) {
     } else if (memberships.length > 0) {
       const firstClub = memberships[0].expand?.club;
       if (firstClub) {
-        setCurrentClub({ id: firstClub.id, name: firstClub.name });
+        setCurrentClub(firstClub);
       }
     }
   }, [memberships, currentClub, isLoading]);
+
+  useEffect(() => {
+    if (currentYear && currentClub) {
+      // Basic validation: ensure currentYear belongs to currentClub
+      if (currentYear.club !== currentClub.id) {
+        setCurrentYear(null);
+      }
+    }
+  }, [currentClub, currentYear]);
 
   useEffect(() => {
     if (currentClub) localStorage.setItem('active-club', JSON.stringify(currentClub));

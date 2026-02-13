@@ -1,19 +1,14 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { pb } from './pb';
+import type { AdminRolesResponse, CountriesResponse, RegionsResponse } from '@/types/pocketbase-types';
 
-interface AdminRole {
-  id: string;
-  role: 'Global' | 'Country' | 'Region' | 'Pending';
-  country?: string;
-  region?: string;
-  expand?: {
-    country?: { name: string };
-    region?: { name: string };
-  };
-}
+export type AdminRoleExpanded = AdminRolesResponse<{
+  country?: CountriesResponse;
+  region?: RegionsResponse;
+}>;
 
 interface AdminContextType {
-  adminRoles: AdminRole[];
+  adminRoles: AdminRoleExpanded[];
   isGlobalAdmin: boolean;
   isCountryAdmin: boolean;
   isRegionAdmin: boolean;
@@ -24,7 +19,7 @@ interface AdminContextType {
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export function AdminProvider({ children }: { children: ReactNode }) {
-  const [adminRoles, setAdminRoles] = useState<AdminRole[]>([]);
+  const [adminRoles, setAdminRoles] = useState<AdminRoleExpanded[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -33,7 +28,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         setIsLoading(true);
         try {
           // Disable auto-cancellation for this initial/global fetch
-          const list = await pb.collection('admin_roles').getFullList<AdminRole>({
+          const list = await pb.collection('admin_roles').getFullList<AdminRoleExpanded>({
             expand: 'country,region',
             requestKey: 'initial_admin_roles_fetch'
           });
