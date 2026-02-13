@@ -15,5 +15,9 @@ export function useAuth() {
     pb.authStore.clear()
   }
 
-  return { user, logout }
+  return { 
+    user, 
+    logout,
+    pb // Exposed for legacy compatibility, though direct import from @/lib/pb is preferred
+  }
 }

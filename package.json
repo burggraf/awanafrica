@@ -9,6 +9,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "typegen": "pocketbase-typegen --db ./pb_data/data.db --out ./src/types/pocketbase-types.ts",
     "preview": "vite preview"
   },
   "dependencies": {
