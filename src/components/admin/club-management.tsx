@@ -530,7 +530,7 @@ export function ClubManagement() {
                   <SelectItem value="none">{t("None")}</SelectItem>
                   {missionaries.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
-                      {user.displayName || user.name || user.email}
+                      {user.name || user.displayName || user.email}
                     </SelectItem>
                   ))}
                 </SelectContent>
