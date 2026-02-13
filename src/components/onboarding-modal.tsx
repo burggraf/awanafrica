@@ -34,13 +34,13 @@ import { useTranslation } from "react-i18next"
 import { Search, Check, AlertCircle } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-export function OnboardingModal() {
+// The inner component contains all the state and the actual Dialog.
+// It is ONLY rendered when the parent OnboardingModal determines it is necessary.
+function OnboardingModalInner() {
   const { t } = useTranslation()
   const { user, logout } = useAuth()
-  const { memberships, isLoading: isClubsLoading } = useClubs()
-  const { adminRoles, isLoading: isAdminLoading } = useAdmin()
   
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   // Selection State
@@ -63,28 +63,12 @@ export function OnboardingModal() {
   const [alertMessage, setAlertMessage] = useState("")
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
-  // Determine if onboarding is needed
-  useEffect(() => {
-    if (!isClubsLoading && !isAdminLoading && user) {
-      // Check if user is verified if using email/password
-      const isVerified = user.verified || !user.email
-      
-      if (isVerified && memberships.length === 0 && adminRoles.length === 0) {
-        setIsOpen(true)
-      } else {
-        setIsOpen(false)
-      }
-    }
-  }, [isClubsLoading, isAdminLoading, user, memberships, adminRoles])
-
   // Fetch Countries
   useEffect(() => {
-    if (isOpen) {
-      pb.collection("countries").getFullList({ sort: "name" })
-        .then(setCountries)
-        .catch(console.error)
-    }
-  }, [isOpen])
+    pb.collection("countries").getFullList({ sort: "name" })
+      .then(setCountries)
+      .catch(console.error)
+  }, [])
 
   // Fetch Regions when country changes
   useEffect(() => {
@@ -452,4 +436,54 @@ export function OnboardingModal() {
       </AlertDialog>
     </>
   )
+}
+
+/**
+ * OnboardingModal acts as a strict guard. 
+ * It will not render the actual modal UI until it is 100% certain 
+ * that the user needs onboarding.
+ */
+export function OnboardingModal() {
+  const { user } = useAuth()
+  const { memberships, isLoading: isClubsLoading } = useClubs()
+  const { adminRoles, isLoading: isAdminLoading } = useAdmin()
+  
+  // CRITICAL TIMING FIX:
+  // Even if loading is false, memberships/adminRoles can be empty for ONE render
+  // while the state propagates from the context providers.
+  // We use a local state to delay the appearance of the modal until 
+  // we've had a chance to see the data for more than one render frame.
+  const [hasSettled, setHasSettled] = useState(false)
+
+  useEffect(() => {
+    if (!isClubsLoading && !isAdminLoading) {
+      // Defer to next tick to ensure state has fully propagated
+      const timer = setTimeout(() => setHasSettled(true), 50)
+      return () => clearTimeout(timer)
+    } else {
+      setHasSettled(false)
+    }
+  }, [isClubsLoading, isAdminLoading])
+
+  // If the user is definitely NOT logged in, we shouldn't even be here.
+  if (!user) return null
+
+  // 1. If we are still loading data, we render nothing.
+  if (isClubsLoading || isAdminLoading) return null
+
+  // 2. Data is loaded. Check if the user is verified.
+  const isVerified = user.verified || !user.email
+  if (!isVerified) return null
+
+  // 3. Check for existing club memberships or approved admin roles.
+  const hasMemberships = memberships.length > 0
+  const hasApprovedAdminRoles = adminRoles.some(role => role.role !== "Pending")
+
+  // 4. If they have either, they definitely DON'T need onboarding.
+  if (hasMemberships || hasApprovedAdminRoles) return null
+
+  // 5. Final check for settling
+  if (!hasSettled) return null
+
+  return <OnboardingModalInner />
 }

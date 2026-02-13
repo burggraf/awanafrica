@@ -85,7 +85,7 @@ export function ClubManagement() {
     active: true,
   });
 
-  const { data, isLoading, refetch } = usePBQuery(async ({ requestKey }) => {
+  const { data, isLoading, refetch } = usePBQuery(async () => {
     // Get regions the user can manage clubs for
     const managedRegionIds = adminRoles
       .filter(r => r.role === 'Region')
