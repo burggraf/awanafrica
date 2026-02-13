@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Search, UserCog, Plus, Trash2, Shield } from "lucide-react";
+import { Search, Plus, Trash2, Shield } from "lucide-react";
 import { pb } from "@/lib/pb";
 import { useLayout } from "@/lib/layout-context";
 import { useAdmin } from "@/lib/admin-context";
@@ -41,6 +41,9 @@ interface UserRecord {
   name: string;
   displayName: string;
   avatar: string;
+  expand?: {
+    admin_roles_via_user?: AdminRole[];
+  };
 }
 
 interface AdminRole {
@@ -139,6 +142,7 @@ export function UserManagement() {
     try {
       const records = await pb.collection("users").getList<UserRecord>(1, 50, {
         filter: `email ~ "${query}" || name ~ "${query}" || displayName ~ "${query}"`,
+        expand: "admin_roles_via_user.country,admin_roles_via_user.region",
         requestKey: "user_search"
       });
       
@@ -200,6 +204,9 @@ export function UserManagement() {
       toast({ title: t("Success"), description: t("Role added successfully") });
       fetchUserRoles(selectedUser.id);
       
+      // Refresh the user list to show updated roles in the table
+      handleSearch(searchQuery);
+
       // Reset form partly
       setNewRoleData(prev => ({ ...prev, country: "", region: "" }));
     } catch (error: any) {
@@ -222,6 +229,10 @@ export function UserManagement() {
       await pb.collection("admin_roles").delete(roleToDelete);
       toast({ title: t("Success"), description: t("Role removed successfully") });
       if (selectedUser) fetchUserRoles(selectedUser.id);
+      
+      // Refresh the user list to show updated roles in the table
+      handleSearch(searchQuery);
+
       setIsConfirmOpen(false);
       setRoleToDelete(null);
     } catch (error: any) {
@@ -302,7 +313,7 @@ export function UserManagement() {
               <TableHead className="w-12"></TableHead>
               <TableHead>{t("User")}</TableHead>
               <TableHead>{t("Email")}</TableHead>
-              <TableHead className="text-right">{t("Actions")}</TableHead>
+              <TableHead className="hidden lg:table-cell">{t("Permissions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -320,7 +331,11 @@ export function UserManagement() {
               </TableRow>
             ) : (
               users.map((user) => (
-                <TableRow key={user.id}>
+                <TableRow 
+                  key={user.id} 
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => openRolesDialog(user)}
+                >
                   <TableCell>
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user.avatar ? pb.files.getURL(user, user.avatar) : ""} />
@@ -330,13 +345,37 @@ export function UserManagement() {
                   <TableCell>
                     <div className="font-medium">{user.displayName || user.name || t("Unnamed")}</div>
                     <div className="text-[10px] text-muted-foreground md:hidden">{user.email || t("Email hidden")}</div>
+                    <div className="flex flex-wrap gap-1 mt-1 lg:hidden">
+                      {user.expand?.admin_roles_via_user?.map((role) => (
+                        <Badge 
+                          key={role.id} 
+                          variant={role.role === 'Global' ? 'destructive' : role.role === 'Pending' ? 'outline' : role.role === 'Country' ? 'default' : 'secondary'}
+                          className="text-[10px] px-1 py-0 h-4"
+                        >
+                          {t(role.role)}
+                        </Badge>
+                      ))}
+                    </div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell text-muted-foreground">{user.email || t("Email hidden")}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" onClick={() => openRolesDialog(user)}>
-                      <UserCog className="h-4 w-4 mr-2" />
-                      {t("Permissions")}
-                    </Button>
+                  <TableCell className="hidden md:table-cell text-muted-foreground">
+                    {user.email || t("Email hidden")}
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    <div className="flex flex-wrap gap-1">
+                      {user.expand?.admin_roles_via_user?.map((role) => (
+                        <Badge 
+                          key={role.id} 
+                          variant={role.role === 'Global' ? 'destructive' : role.role === 'Pending' ? 'outline' : role.role === 'Country' ? 'default' : 'secondary'}
+                        >
+                          {t(role.role)}
+                          {role.role === 'Country' && role.expand?.country?.name && ` (${role.expand.country.name})`}
+                          {role.role === 'Region' && role.expand?.region?.name && ` (${role.expand.region.name})`}
+                        </Badge>
+                      ))}
+                      {(!user.expand?.admin_roles_via_user || user.expand.admin_roles_via_user.length === 0) && (
+                        <span className="text-xs text-muted-foreground">-</span>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
