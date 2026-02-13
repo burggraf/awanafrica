@@ -118,9 +118,9 @@ function MainContent() {
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background">
+    <div className="flex flex-col fixed inset-0 overflow-hidden bg-background">
       {/* iOS Style Header */}
-      <header className="h-12 border-b flex items-center justify-between px-4 sticky top-0 bg-background/80 backdrop-blur-md z-10 shrink-0">
+      <header className="h-12 border-b flex items-center justify-between px-4 bg-background/80 backdrop-blur-md z-10 shrink-0">
         <div className="flex-1 flex justify-start">
           {headerLeft || (
             <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
@@ -183,7 +183,7 @@ function MainContent() {
       </header>
 
       {/* Scrollable Content */}
-      <main className="flex-1 overflow-y-auto pt-safe pb-safe">
+      <main className="flex-1 overflow-y-auto pt-safe pb-safe touch-auto">
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/landing" element={<LandingPage />} />
@@ -216,7 +216,7 @@ function MainContent() {
 
       {/* iOS Style Footer */}
       {showFooter && (
-        <footer className="h-14 border-t flex items-center justify-between px-4 sticky bottom-0 bg-background/80 backdrop-blur-md z-10 shrink-0">
+        <footer className="h-14 border-t flex items-center justify-between px-4 bg-background/80 backdrop-blur-md z-10 shrink-0">
           <div className="flex-1 text-xs text-muted-foreground">
             {footerLeft || `v${APP_VERSION}`}
           </div>

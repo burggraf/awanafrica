@@ -79,6 +79,12 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overflow-hidden fixed inset-0 touch-none;
+  }
+}
+
+@layer utilities {
+  .touch-auto {
+    touch-action: auto;
   }
 }
