@@ -5,7 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { SidebarMenuButton } from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
 import { useLocale, countries } from "@/lib/locale-context"
 import type { Country } from "@/lib/locale-context"
 
@@ -16,14 +16,14 @@ export function CountryToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <SidebarMenuButton tooltip={t('Country')} className="w-fit px-2">
+        <Button variant="ghost" size="sm" className="h-9 px-2 gap-1">
           <span className="text-lg leading-none shrink-0" role="img" aria-label={t('Country')}>
             {countries[country].flag}
           </span>
-          <span className="text-[10px] text-muted-foreground font-mono ml-1">
+          <span className="text-[10px] text-muted-foreground font-mono">
             {country}
           </span>
-        </SidebarMenuButton>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {(Object.keys(countries) as Country[]).map((c) => (

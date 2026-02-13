@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { SidebarMenuButton } from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
 
 export function LanguageToggle() {
   const { i18n, t } = useTranslation()
@@ -21,14 +21,14 @@ export function LanguageToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <SidebarMenuButton tooltip={t('Language')} className="w-fit px-2">
+        <Button variant="ghost" size="sm" className="h-9 px-2 gap-1">
           <span className="text-lg leading-none shrink-0" role="img" aria-label={t('Language')}>
             {languages[currentLanguage as keyof typeof languages]?.flag || <Languages className="h-4 w-4" />}
           </span>
-          <span className="text-[10px] text-muted-foreground font-mono ml-1">
+          <span className="text-[10px] text-muted-foreground font-mono">
             {languages[currentLanguage as keyof typeof languages]?.short}
           </span>
-        </SidebarMenuButton>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {Object.entries(languages).map(([code, { name, flag }]) => (

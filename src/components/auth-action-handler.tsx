@@ -119,7 +119,7 @@ export function AuthResetPasswordPage() {
 
     setStatus("loading")
     try {
-      await pb.collection("users").confirmPasswordReset(token, password, passwordConfirm)
+      await (pb.collection("users") as any).confirmPasswordReset(token, password, passwordConfirm)
       setStatus("success")
       toast({
         title: t("Password reset"),
@@ -185,7 +185,7 @@ export function AuthResetPasswordPage() {
                   required 
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={status === "loading"}>
+              <Button type="submit" className="w-full" disabled={status as string === "loading"}>
                 {t("Update Password")}
               </Button>
             </form>
@@ -206,7 +206,7 @@ export function AuthResetPasswordPage() {
             </div>
           )}
         </CardContent>
-        {status !== "form" && (
+        {status as string !== "form" && (
           <CardFooter>
             <Button className="w-full" onClick={() => navigate("/")}>
               {status === "success" ? t("Go to Login") : t("Try Again")}
@@ -236,7 +236,7 @@ export function AuthConfirmEmailChangePage() {
 
     async function confirm() {
       try {
-        await pb.collection("users").confirmEmailChange(token!)
+        await (pb.collection("users") as any).confirmEmailChange(token!)
         setStatus("success")
         toast({
           title: t("Email changed"),

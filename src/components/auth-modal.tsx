@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select"
 import { useTheme } from "@/components/theme-provider"
 import { useLocale, countries, type Country } from "@/lib/locale-context"
-import { Languages, Globe, Sun, Moon, Monitor } from "lucide-react"
+import { Languages, Sun, Moon, Monitor } from "lucide-react"
 
 import { useTranslation } from "react-i18next"
 
@@ -206,7 +206,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] [&>button]:hidden">
         <DialogTitle className="sr-only">{t("Authentication")}</DialogTitle>
         <DialogDescription className="sr-only">
           {t("Sign in or create an account to access AwanAfrica.")}
@@ -227,7 +227,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
           <Select value={country} onValueChange={(v) => setCountry(v as Country)}>
             <SelectTrigger className="h-9 px-2">
-              <Globe className="h-4 w-4 mr-2 shrink-0" />
               <SelectValue placeholder={t("Country")} />
             </SelectTrigger>
             <SelectContent>
@@ -244,9 +243,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
           <Select value={theme} onValueChange={(v) => setTheme(v as any)}>
             <SelectTrigger className="h-9 px-2">
-              {theme === "light" && <Sun className="h-4 w-4 mr-2 shrink-0" />}
-              {theme === "dark" && <Moon className="h-4 w-4 mr-2 shrink-0" />}
-              {theme === "system" && <Monitor className="h-4 w-4 mr-2 shrink-0" />}
               <SelectValue placeholder={t("Theme")} />
             </SelectTrigger>
             <SelectContent>

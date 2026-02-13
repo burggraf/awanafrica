@@ -56,6 +56,9 @@ import {
   AuthConfirmEmailChangePage 
 } from "@/components/auth-action-handler"
 
+import { LandingPage } from "@/components/landing-page"
+import { useAuth } from "@/lib/use-auth"
+
 const APP_VERSION = __APP_VERSION__
 const APP_NAME = __APP_NAME__
 
@@ -63,6 +66,7 @@ function MainContent() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
+  const { user } = useAuth()
   const { 
     showFooter, 
     headerTitle,
@@ -96,6 +100,22 @@ function MainContent() {
   useEffect(() => {
     resetLayout()
   }, [location.pathname, resetLayout])
+
+  // Redirect to landing if not logged in
+  if (!user && location.pathname !== "/landing" && 
+      !location.pathname.startsWith("/auth/")) {
+    return <Navigate to="/landing" replace />
+  }
+
+  // Redirect to dashboard if logged in and on landing
+  if (user && location.pathname === "/landing") {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  // Define landing route
+  if (location.pathname === "/landing") {
+    return <LandingPage />
+  }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background">
@@ -166,6 +186,7 @@ function MainContent() {
       <main className="flex-1 overflow-y-auto pt-safe pb-safe">
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/landing" element={<LandingPage />} />
           <Route path="/dashboard" element={<DashboardScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
           
