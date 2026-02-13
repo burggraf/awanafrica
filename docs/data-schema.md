@@ -79,6 +79,7 @@ Defines the operational/academic cycle for a club.
 ### `students`
 Master record for children (not system users).
 - `club` (relation, required): Link to `clubs`.
+- `user` (relation, optional): Link to `users` (for student leaders or graduates).
 - `firstName` (text, required)
 - `lastName` (text, required)
 - `dateOfBirth` (date)
