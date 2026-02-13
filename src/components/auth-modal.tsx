@@ -93,6 +93,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   async function onLogin(data: any) {
     try {
+      console.log("Attempting login to:", pb.baseUrl)
       const authData = await pb.collection("users").authWithPassword(data.email, data.password)
       await applyUserPreferences(authData.record)
       // Sync current local preferences to DB in case they were changed on login screen
