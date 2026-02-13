@@ -53,7 +53,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const isGlobalAdmin = adminRoles.some(r => r.role === 'Global');
+  const isGlobalAdmin = adminRoles.some(r => r.role === 'Global' || r.role === 'Missionary');
   const isCountryAdmin = adminRoles.some(r => r.role === 'Country');
   const isRegionAdmin = adminRoles.some(r => r.role === 'Region');
   const isAdmin = adminRoles.length > 0;

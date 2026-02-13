@@ -22,7 +22,7 @@ export const Collections = {
 
 export interface AdminRolesRecord {
 	user: string
-	role: "Global" | "Country" | "Region" | "Pending"
+	role: "Global" | "Missionary" | "Country" | "Region" | "Pending"
 	country?: string
 	region?: string
 }

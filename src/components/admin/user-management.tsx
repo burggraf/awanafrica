@@ -75,7 +75,7 @@ export function UserManagement() {
   const [regions, setRegions] = useState<RegionExpanded[]>([]);
   
   const [newRoleData, setNewRoleData] = useState<{
-    role: 'Global' | 'Country' | 'Region' | 'Pending';
+    role: 'Global' | 'Missionary' | 'Country' | 'Region' | 'Pending';
     country: string;
     region: string;
   }>({
@@ -331,7 +331,7 @@ export function UserManagement() {
                       {user.expand?.admin_roles_via_user?.map((role) => (
                         <Badge 
                           key={role.id} 
-                          variant={role.role === 'Global' ? 'destructive' : role.role === 'Pending' ? 'outline' : role.role === 'Country' ? 'default' : 'secondary'}
+                          variant={role.role === 'Global' || role.role === 'Missionary' ? 'destructive' : role.role === 'Pending' ? 'outline' : role.role === 'Country' ? 'default' : 'secondary'}
                           className="text-[10px] px-1 py-0 h-4"
                         >
                           {t(role.role)}
@@ -347,7 +347,7 @@ export function UserManagement() {
                       {user.expand?.admin_roles_via_user?.map((role) => (
                         <Badge 
                           key={role.id} 
-                          variant={role.role === 'Global' ? 'destructive' : role.role === 'Pending' ? 'outline' : role.role === 'Country' ? 'default' : 'secondary'}
+                          variant={role.role === 'Global' || role.role === 'Missionary' ? 'destructive' : role.role === 'Pending' ? 'outline' : role.role === 'Country' ? 'default' : 'secondary'}
                         >
                           {t(role.role)}
                           {role.role === 'Country' && role.expand?.country?.name && ` (${role.expand.country.name})`}
@@ -392,7 +392,7 @@ export function UserManagement() {
                   userRoles.map((role) => (
                     <div key={role.id} className="flex items-center justify-between p-2 border rounded-md bg-muted/30">
                       <div className="flex flex-col">
-                        <Badge variant={role.role === 'Global' ? 'destructive' : role.role === 'Pending' ? 'outline' : role.role === 'Country' ? 'default' : 'secondary'}>
+                        <Badge variant={role.role === 'Global' || role.role === 'Missionary' ? 'destructive' : role.role === 'Pending' ? 'outline' : role.role === 'Country' ? 'default' : 'secondary'}>
                           {t(role.role)}
                         </Badge>
                         <span className="text-xs text-muted-foreground mt-1">
@@ -433,7 +433,12 @@ export function UserManagement() {
                       <SelectValue placeholder={t("Select role")} />
                     </SelectTrigger>
                     <SelectContent>
-                      {isGlobalAdmin && <SelectItem value="Global">{t("Global")}</SelectItem>}
+                      {isGlobalAdmin && (
+                        <>
+                          <SelectItem value="Global">{t("Global")}</SelectItem>
+                          <SelectItem value="Missionary">{t("Missionary")}</SelectItem>
+                        </>
+                      )}
                       {(isGlobalAdmin || availableCountries.length > 0) && (
                         <SelectItem value="Country">{t("Country")}</SelectItem>
                       )}
