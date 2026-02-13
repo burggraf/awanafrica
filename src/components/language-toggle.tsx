@@ -16,7 +16,9 @@ export function LanguageToggle() {
   const languages = {
     en: { name: t('English'), flag: "🇺🇸", short: "ENG" },
     sw: { name: t('Swahili'), flag: "🇹🇿", short: "SWA" },
-    st: { name: t('Sesotho'), flag: "🇱🇸", short: "SES" }
+    st: { name: t('Sesotho'), flag: "🇱🇸", short: "SES" },
+    mg: { name: t('Malagasy'), flag: "🇲🇬", short: "MLG" },
+    fr: { name: t('French'), flag: "🇫🇷", short: "FRA" }
   }
 
   return (
