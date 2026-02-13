@@ -85,7 +85,7 @@ export function ClubManagement() {
     active: true,
   });
 
-  const { data, isLoading, refetch } = usePBQuery(async () => {
+  const { data, isLoading, refetch } = usePBQuery(async ({ requestKey }) => {
     // Get regions the user can manage clubs for
     const managedRegionIds = adminRoles
       .filter(r => r.role === 'Region')
@@ -141,24 +141,24 @@ export function ClubManagement() {
       }
     }
 
-    // Use null for requestKey to disable auto-cancellation within Promise.all
-    // Otherwise PocketBase will cancel requests when they share the same key
+    // Use unique request keys for each collection to allow parallel execution
+    // while still benefitting from usePBQuery's overall cancellation of stale query runs.
     const [clubRecords, regionRecords, countryRecords] = await Promise.all([
       pb.collection("clubs").getFullList<ClubExpanded>({
         sort: "name",
         expand: "region.country",
         filter: clubFilter,
-        requestKey: null,
+        requestKey: `${requestKey}_clubs`,
       }),
       pb.collection("regions").getFullList<RegionExpanded>({
         sort: "name",
         expand: "country",
         filter: regionFilter,
-        requestKey: null,
+        requestKey: `${requestKey}_regions`,
       }),
       pb.collection("countries").getFullList<CountriesResponse>({
         sort: "name",
-        requestKey: null,
+        requestKey: `${requestKey}_countries`,
       }),
     ]);
 
