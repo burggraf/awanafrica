@@ -238,7 +238,7 @@ export function ImportClubsModal({ isOpen, onOpenChange, onImportComplete }: Imp
           batchRequests.push(
             pb.collection("clubs").create(clubData, { requestKey: null })
               .catch(err => {
-                console.error("Failed to create club:", clubData.name, err.data);
+                console.error("Failed to create club:", clubData.name, JSON.stringify(err.data, null, 2));
                 throw err;
               })
           );
