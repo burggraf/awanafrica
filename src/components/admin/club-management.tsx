@@ -737,63 +737,63 @@ export function ClubManagement() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                       <div className="space-y-1">
                         <Label className="text-[10px]">{t("Puggles")}</Label>
-                        <Input type="number" value={formData.puggles} onChange={(e) => setFormData({...formData, puggles: parseInt(e.target.value) || 0})} className="h-8" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.puggles} onChange={(e) => setFormData({...formData, puggles: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px]">{t("Cubbies")}</Label>
-                        <Input type="number" value={formData.cubbies} onChange={(e) => setFormData({...formData, cubbies: parseInt(e.target.value) || 0})} className="h-8" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.cubbies} onChange={(e) => setFormData({...formData, cubbies: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px]">{t("Sparks")}</Label>
-                        <Input type="number" value={formData.sparks} onChange={(e) => setFormData({...formData, sparks: parseInt(e.target.value) || 0})} className="h-8" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.sparks} onChange={(e) => setFormData({...formData, sparks: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px]">{t("Flame")}</Label>
-                        <Input type="number" value={formData.flame} onChange={(e) => setFormData({...formData, flame: parseInt(e.target.value) || 0})} className="h-8" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.flame} onChange={(e) => setFormData({...formData, flame: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px]">{t("Torch")}</Label>
-                        <Input type="number" value={formData.torch} onChange={(e) => setFormData({...formData, torch: parseInt(e.target.value) || 0})} className="h-8" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.torch} onChange={(e) => setFormData({...formData, torch: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px]">{t("Truth Seekers")}</Label>
-                        <Input type="number" value={formData.truthSeekers} onChange={(e) => setFormData({...formData, truthSeekers: parseInt(e.target.value) || 0})} className="h-8" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.truthSeekers} onChange={(e) => setFormData({...formData, truthSeekers: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px]">{t("Living God's Story")}</Label>
-                        <Input type="number" value={formData.livingGodsStory} onChange={(e) => setFormData({...formData, livingGodsStory: parseInt(e.target.value) || 0})} className="h-8" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.livingGodsStory} onChange={(e) => setFormData({...formData, livingGodsStory: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px]">{t("T&T")}</Label>
-                        <Input type="number" value={formData.tandt} onChange={(e) => setFormData({...formData, tandt: parseInt(e.target.value) || 0})} className="h-8" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.tandt} onChange={(e) => setFormData({...formData, tandt: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px]">{t("Jr. Varsity")}</Label>
-                        <Input type="number" value={formData.jrVarsity} onChange={(e) => setFormData({...formData, jrVarsity: parseInt(e.target.value) || 0})} className="h-8" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.jrVarsity} onChange={(e) => setFormData({...formData, jrVarsity: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px]">{t("Trek")}</Label>
-                        <Input type="number" value={formData.trek} onChange={(e) => setFormData({...formData, trek: parseInt(e.target.value) || 0})} className="h-8" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.trek} onChange={(e) => setFormData({...formData, trek: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px]">{t("Journey")}</Label>
-                        <Input type="number" value={formData.journey} onChange={(e) => setFormData({...formData, journey: parseInt(e.target.value) || 0})} className="h-8" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.journey} onChange={(e) => setFormData({...formData, journey: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px]">{t("Descubrelo")}</Label>
-                        <Input type="number" value={formData.descubrelo} onChange={(e) => setFormData({...formData, descubrelo: parseInt(e.target.value) || 0})} className="h-8" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.descubrelo} onChange={(e) => setFormData({...formData, descubrelo: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px]">{t("Healthy Families")}</Label>
-                        <Input type="number" value={formData.buildingHealthyFamilies} onChange={(e) => setFormData({...formData, buildingHealthyFamilies: parseInt(e.target.value) || 0})} className="h-8" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.buildingHealthyFamilies} onChange={(e) => setFormData({...formData, buildingHealthyFamilies: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px] font-bold">{t("Total")}</Label>
-                        <Input type="number" value={formData.total} onChange={(e) => setFormData({...formData, total: parseInt(e.target.value) || 0})} className="h-8 font-bold" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.total} onChange={(e) => setFormData({...formData, total: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8 font-bold" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px] font-bold">{t("Leaders")}</Label>
-                        <Input type="number" value={formData.leaders} onChange={(e) => setFormData({...formData, leaders: parseInt(e.target.value) || 0})} className="h-8 font-bold" />
+                        <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.leaders} onChange={(e) => setFormData({...formData, leaders: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8 font-bold" />
                       </div>
                     </div>
                   </div>
