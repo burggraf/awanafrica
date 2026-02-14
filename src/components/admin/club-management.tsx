@@ -347,7 +347,8 @@ export function ClubManagement() {
     );
     
     return () => {
-      setHeaderRight(null);
+      // Clear the right header on unmount so it doesn't leak to other pages
+      setTimeout(() => setHeaderRight(null), 0);
     };
   }, [setHeaderTitle, setHeaderRight, t]);
 
