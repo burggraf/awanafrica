@@ -40,7 +40,7 @@ export function useClubDiscovery() {
         const d = calculateDistance(latitude, longitude, club.lat!, club.lng!)
         return { ...club, distance: d }
       }).sort((a, b) => (a as any).distance - (b as any).distance)
-      .slice(0, 10)
+      .slice(0, 25)
 
       setNearbyClubs(sortedClubs)
       return sortedClubs

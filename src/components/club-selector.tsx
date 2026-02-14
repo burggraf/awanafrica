@@ -190,19 +190,24 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
                 <Button
                   key={club.id}
                   variant="ghost"
-                  className="w-full justify-start h-auto py-3 px-3 gap-3 rounded-lg border border-transparent hover:border-primary/30 hover:bg-background"
+                  className="w-full justify-start h-auto py-3 px-3 gap-3 rounded-lg border border-transparent hover:border-primary/30 hover:bg-background relative pr-12"
                   onClick={() => {
                     setSelectedClub(club)
                     onSelect(club)
                   }}
                 >
                   <MapPin className="h-4 w-4 shrink-0 text-primary" />
-                  <div className="flex flex-col items-start text-left">
-                    <span className="text-sm font-bold leading-tight">{club.name}</span>
+                  <div className="flex flex-col items-start text-left flex-1 min-w-0">
+                    <span className="text-sm font-bold leading-tight truncate w-full">{club.name}</span>
                     <span className="text-[0.7rem] text-muted-foreground line-clamp-1">
                       {club.address || club.location}
                     </span>
                   </div>
+                  {(club as any).distance !== undefined && (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[0.65rem] font-medium bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
+                      {Math.round((club as any).distance * 10) / 10} km
+                    </span>
+                  )}
                 </Button>
               ))}
             </div>
@@ -211,9 +216,8 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
               size="sm" 
               className="w-full text-[0.7rem] h-8"
               onClick={() => {
-                // Clear nearby clubs to go back to options
+                setNearbyClubs([])
                 setDiscoveryMethod("none") 
-                // We need a way to clear the results
               }}
             >
               {t("Clear results")}
