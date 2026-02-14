@@ -37,13 +37,14 @@ interface ClubSelectorProps {
 export function ClubSelector({ onSelect }: ClubSelectorProps) {
   const { t } = useTranslation()
   const { toast } = useToast()
-  const { isLocating, findNearbyClubs, nearbyClubs } = useClubDiscovery()
+  const { isLocating, findNearbyClubs } = useClubDiscovery()
   const { availableCountries } = useLocale()
   const [open, setOpen] = useState(false)
   const [code, setCode] = useState("")
   const [isSearchingCode, setIsSearchingCode] = useState(false)
   const [selectedClub, setSelectedClub] = useState<ClubsResponseType | null>(null)
   const [discoveryMethod, setDiscoveryMethod] = useState<"none" | "gps" | "code" | "browse">("none")
+  const [nearbyClubs, setNearbyClubs] = useState<ClubsResponseType[]>([])
   
   // Filtering state
   const [selectedCountry, setSelectedCountry] = useState<string>("")
@@ -132,28 +133,20 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
   const handleGPSDiscovery = async () => {
     try {
       const clubs = await findNearbyClubs()
+      setNearbyClubs(clubs)
+      
       if (clubs.length === 0) {
         toast({
           title: t("No clubs found"),
           description: t("No clubs with GPS coordinates were found in our database."),
         })
-      } else {
-        // Automatically select the single closest club if only one is found,
-        // or open the selection list if multiple are found.
-        if (clubs.length === 1) {
-          setSelectedClub(clubs[0])
-          onSelect(clubs[0])
-          toast({
-            title: t("Club found"),
-            description: t("Found: {{name}}", { name: clubs[0].name }),
-          })
-        } else {
-          toast({
-            title: t("Clubs found"),
-            description: t("We found {{count}} clubs near you.", { count: clubs.length }),
-          })
-          setOpen(true)
-        }
+      } else if (clubs.length === 1) {
+        setSelectedClub(clubs[0])
+        onSelect(clubs[0])
+        toast({
+          title: t("Club found"),
+          description: t("Found: {{name}}", { name: clubs[0].name }),
+        })
       }
     } catch (error: any) {
       console.error("Discovery error:", error)
@@ -187,6 +180,47 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
           </div>
         </Button>
 
+        {nearbyClubs.length > 0 && !selectedClub && (
+          <div className="border rounded-xl p-2 bg-accent/20 space-y-2 animate-in fade-in slide-in-from-top-2">
+            <p className="text-xs font-semibold px-2 text-muted-foreground uppercase tracking-wider">
+              {t("Clubs Near You")}
+            </p>
+            <div className="max-h-[200px] overflow-y-auto space-y-1 pr-1">
+              {nearbyClubs.map((club) => (
+                <Button
+                  key={club.id}
+                  variant="ghost"
+                  className="w-full justify-start h-auto py-3 px-3 gap-3 rounded-lg border border-transparent hover:border-primary/30 hover:bg-background"
+                  onClick={() => {
+                    setSelectedClub(club)
+                    onSelect(club)
+                  }}
+                >
+                  <MapPin className="h-4 w-4 shrink-0 text-primary" />
+                  <div className="flex flex-col items-start text-left">
+                    <span className="text-sm font-bold leading-tight">{club.name}</span>
+                    <span className="text-[0.7rem] text-muted-foreground line-clamp-1">
+                      {club.address || club.location}
+                    </span>
+                  </div>
+                </Button>
+              ))}
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full text-[0.7rem] h-8"
+              onClick={() => {
+                // Clear nearby clubs to go back to options
+                setDiscoveryMethod("none") 
+                // We need a way to clear the results
+              }}
+            >
+              {t("Clear results")}
+            </Button>
+          </div>
+        )}
+
         <Button 
           variant="outline" 
           className="h-16 justify-start gap-4 px-4 rounded-xl border-2 hover:bg-accent hover:border-primary transition-all"
@@ -214,47 +248,6 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
             <span className="text-xs text-muted-foreground">{t("Find your club by country and region")}</span>
           </div>
         </Button>
-
-        <div className="flex flex-col gap-2 mt-4">
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <div className="hidden" />
-            </PopoverTrigger>
-            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
-              <Command>
-                <CommandInput placeholder={t("Search results...")} />
-                <CommandList>
-                  <CommandEmpty>{t("No club found.")}</CommandEmpty>
-                  <CommandGroup>
-                    {nearbyClubs.map((club) => (
-                      <CommandItem
-                        key={club.id}
-                        value={club.name}
-                        onSelect={() => {
-                          setSelectedClub(club)
-                          onSelect(club)
-                          setOpen(false)
-                          // We don't set discovery method here so they can see details
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            selectedClub?.id === club.id ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        <div className="flex flex-col">
-                          <span>{club.name}</span>
-                          <span className="text-xs text-muted-foreground">{club.address || club.location}</span>
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        </div>
 
         {selectedClub && (
           <div className="rounded-lg border bg-muted/50 p-3 text-sm space-y-1 mt-2">
