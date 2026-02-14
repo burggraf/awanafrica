@@ -41,7 +41,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Tooltip,
   TooltipContent,
@@ -553,8 +552,8 @@ export function ClubManagement() {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-            <ScrollArea className="flex-1 w-full">
-              <div className="px-6 space-y-6 pb-6 w-full">
+            <div className="flex-1 overflow-y-auto px-6">
+              <div className="space-y-6 pb-6 pt-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-primary border-b pb-1">{t("Basic Information")}</h3>
@@ -800,7 +799,7 @@ export function ClubManagement() {
                   </div>
                 </div>
               </div>
-            </ScrollArea>
+            </div>
 
             <DialogFooter className="p-6 border-t flex-col sm:flex-row gap-2 bg-slate-50/50 dark:bg-slate-900/20">
               {editingClub && (
