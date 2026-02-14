@@ -47,14 +47,29 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious,
+  PaginationEllipsis
+} from "@/components/ui/pagination";
+import { Filter } from "lucide-react";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+
 type RegionExpanded = RegionsResponse<{
   country: CountriesResponse;
 }>;
 
 type ClubExpanded = ClubsResponse<{
   region: RegionExpanded;
+  country: CountriesResponse;
   missionary?: UsersResponse;
 }>;
+
+const ITEMS_PER_PAGE = 20;
 
 export function ClubManagement() {
   const { t } = useTranslation();
@@ -66,6 +81,17 @@ export function ClubManagement() {
   const [editingClub, setEditingClub] = useState<ClubExpanded | null>(null);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+
+  const [filters, setFilters] = useState({
+    venue: "all",
+    denomination: "",
+    missionary: "all",
+    expiration: "",
+    country: "all",
+    region: "all"
+  });
   
   const [formData, setFormData] = useState<{
     name: string;
@@ -149,7 +175,7 @@ export function ClubManagement() {
         conditions.push(managedRegionIds.map(id => `region = "${id}"`).join(" || "));
       }
       if (managedCountryIds.length > 0) {
-        conditions.push(managedCountryIds.map(id => `region.country = "${id}"`).join(" || "));
+        conditions.push(managedCountryIds.map(id => `country = "${id}"`).join(" || "));
       }
       
       if (conditions.length > 0) {
@@ -159,50 +185,63 @@ export function ClubManagement() {
       }
     }
 
-    // Combine with search query
-    let clubFilter = roleFilter;
+    // Combine with filters
+    const filterParts = [];
+    if (roleFilter) filterParts.push(`(${roleFilter})`);
+    
     if (searchQuery.trim()) {
       const s = searchQuery.trim().replace(/"/g, '\\"');
-      const searchPart = `(name ~ "${s}" || registration ~ "${s}")`;
-      clubFilter = clubFilter ? `(${clubFilter}) && ${searchPart}` : searchPart;
+      filterParts.push(`(name ~ "${s}" || registration ~ "${s}")`);
     }
 
-    // Filter regions for the dropdown
-    let regionFilter = undefined;
-    if (!isGlobalAdmin) {
-      const conditions = [];
-      if (managedRegionIds.length > 0) {
-        conditions.push(managedRegionIds.map(id => `id = "${id}"`).join(" || "));
-      }
-      if (managedCountryIds.length > 0) {
-        conditions.push(managedCountryIds.map(id => `country = "${id}"`).join(" || "));
-      }
-      
-      if (conditions.length > 0) {
-        regionFilter = conditions.map(c => `(${c})`).join(" || ");
+    if (filters.venue !== "all") {
+      filterParts.push(`venue = "${filters.venue}"`);
+    }
+
+    if (filters.denomination.trim()) {
+      const d = filters.denomination.trim().replace(/"/g, '\\"');
+      filterParts.push(`denomination ~ "${d}"`);
+    }
+
+    if (filters.missionary !== "all") {
+      if (filters.missionary === "none") {
+        filterParts.push(`missionary = null`);
       } else {
-        regionFilter = "id = 'none'";
+        filterParts.push(`missionary = "${filters.missionary}"`);
       }
     }
+
+    if (filters.expiration) {
+      filterParts.push(`expiration = "${filters.expiration} 00:00:00"`);
+    }
+
+    if (filters.country !== "all") {
+      filterParts.push(`country = "${filters.country}"`);
+    }
+
+    if (filters.region !== "all") {
+      filterParts.push(`region = "${filters.region}"`);
+    }
+
+    const clubFilter = filterParts.length > 0 ? filterParts.join(" && ") : "";
 
     // Use unique request keys for each collection to allow parallel execution
     // while still benefitting from usePBQuery's overall cancellation of stale query runs.
     const [clubRecords, regionRecords, countryRecords, missionaryRecords] = await Promise.all([
-      pb.collection("clubs").getFullList<ClubExpanded>({
+      pb.collection("clubs").getList<ClubExpanded>(currentPage, ITEMS_PER_PAGE, {
         sort: "name",
-        expand: "region.country,missionary",
+        expand: "country,region,missionary",
         filter: clubFilter,
         requestKey: `${requestKey}_clubs`,
       }),
       pb.collection("regions").getFullList<RegionExpanded>({
         sort: "name",
         expand: "country",
-        filter: regionFilter,
-        requestKey: `${requestKey}_regions`,
+        requestKey: `${requestKey}_regions_all`,
       }),
       pb.collection("countries").getFullList<CountriesResponse>({
         sort: "name",
-        requestKey: `${requestKey}_countries`,
+        requestKey: `${requestKey}_countries_all`,
       }),
       pb.collection("users").getFullList<UsersResponse>({
         sort: "name,email",
@@ -211,23 +250,37 @@ export function ClubManagement() {
       }),
     ]);
 
-    // Filter countries based on access
-    let filteredCountries = countryRecords;
+    // Filter regions based on access for the table/logic
+    let accessibleRegions = regionRecords;
     if (!isGlobalAdmin) {
-      const accessibleCountryIds = new Set(managedCountryIds);
-      regionRecords.forEach(r => {
-        if (r.country) accessibleCountryIds.add(r.country);
-      });
-      filteredCountries = countryRecords.filter(c => accessibleCountryIds.has(c.id));
+      const managedRegionIds = new Set(adminRoles
+        .filter(r => r.role === 'Region')
+        .map(r => r.region)
+        .filter(Boolean) as string[]);
+
+      const managedCountryIds = new Set(adminRoles
+        .filter(r => r.role === 'Country')
+        .map(r => r.country)
+        .filter(Boolean) as string[]);
+
+      accessibleRegions = regionRecords.filter(r => 
+        managedRegionIds.has(r.id) || (r.country && managedCountryIds.has(r.country))
+      );
     }
 
+    // Filter countries based on accessible regions
+    const uniqueAccessibleCountryIds = new Set(accessibleRegions.map(r => r.country).filter(Boolean));
+    const filteredCountries = countryRecords.filter(c => uniqueAccessibleCountryIds.has(c.id));
+
     return {
-      clubs: clubRecords,
-      regions: regionRecords,
-      countries: filteredCountries,
+      clubs: clubRecords.items,
+      totalPages: clubRecords.totalPages,
+      totalItems: clubRecords.totalItems,
+      regions: accessibleRegions,
+      countries: (isGlobalAdmin ? countryRecords : filteredCountries).filter((v, i, a) => a.findIndex(t => t.id === v.id) === i),
       missionaries: missionaryRecords
     };
-  }, [adminRoles, isGlobalAdmin, searchQuery], {
+  }, [adminRoles, isGlobalAdmin, searchQuery, filters, currentPage], {
     enabled: !isAdminLoading,
     onError: () => {
       toast({
@@ -239,9 +292,15 @@ export function ClubManagement() {
   });
 
   const clubs = data?.clubs || [];
+  const totalPages = data?.totalPages || 0;
+  const totalItems = data?.totalItems || 0;
   const regions = data?.regions || [];
   const countries = data?.countries || [];
   const missionaries = data?.missionaries || [];
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filters]);
 
   useEffect(() => {
     setHeaderTitle(t("Club Management"));
@@ -260,7 +319,6 @@ export function ClubManagement() {
 
     try {
       const { 
-        country, 
         puggles, cubbies, sparks, flame, torch, truthSeekers, livingGodsStory, 
         tandt, jrVarsity, trek, journey, descubrelo, buildingHealthyFamilies, 
         total, leaders,
@@ -469,6 +527,15 @@ export function ClubManagement() {
               </button>
             )}
           </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setIsFilterExpanded(!isFilterExpanded)}
+            className={`h-9 w-9 shrink-0 ${isFilterExpanded ? "bg-accent" : ""}`}
+          >
+            <Filter className="h-4 w-4" />
+            <span className="sr-only">{t("Filters")}</span>
+          </Button>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button onClick={() => openDialog()} size="icon" className="h-9 w-9 shrink-0">
@@ -483,28 +550,129 @@ export function ClubManagement() {
         </div>
       </div>
 
+      <Collapsible open={isFilterExpanded} onOpenChange={setIsFilterExpanded}>
+        <CollapsibleContent className="space-y-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 p-4 border rounded-md bg-muted/20">
+            <div className="space-y-2">
+              <Label className="text-xs">{t("Venue")}</Label>
+              <Select value={filters.venue} onValueChange={(v) => setFilters({ ...filters, venue: v })}>
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("All Venues")}</SelectItem>
+                  <SelectItem value="Church">{t("Church")}</SelectItem>
+                  <SelectItem value="School">{t("School")}</SelectItem>
+                  <SelectItem value="Community Center">{t("Community Center")}</SelectItem>
+                  <SelectItem value="Christian Camp">{t("Christian Camp")}</SelectItem>
+                  <SelectItem value="Other">{t("Other")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs">{t("Denomination")}</Label>
+              <Input
+                className="h-8"
+                value={filters.denomination}
+                onChange={(e) => setFilters({ ...filters, denomination: e.target.value })}
+                placeholder={t("Filter by...")}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs">{t("Missionary")}</Label>
+              <Select value={filters.missionary} onValueChange={(v) => setFilters({ ...filters, missionary: v })}>
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("All Missionaries")}</SelectItem>
+                  <SelectItem value="none">{t("None")}</SelectItem>
+                  {missionaries.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.name || m.displayName || m.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs">{t("Expiration")}</Label>
+              <Input
+                type="date"
+                className="h-8"
+                value={filters.expiration}
+                onChange={(e) => setFilters({ ...filters, expiration: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs">{t("Country")}</Label>
+              <Select value={filters.country} onValueChange={(v) => setFilters({ ...filters, country: v, region: "all" })}>
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("All Countries")}</SelectItem>
+                  {countries.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs">{t("Region")}</Label>
+              <Select 
+                value={filters.region} 
+                onValueChange={(v) => setFilters({ ...filters, region: v })}
+                disabled={filters.country === "all"}
+              >
+                <SelectTrigger className="h-8">
+                  <SelectValue placeholder={filters.country === "all" ? t("Select country first") : t("All Regions")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("All Regions")}</SelectItem>
+                  {regions
+                    .filter(r => r.country === filters.country)
+                    .map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
       <div className="border rounded-md overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>{t("Registration")}</TableHead>
               <TableHead>{t("Name")}</TableHead>
-              <TableHead>{t("Type")}</TableHead>
               <TableHead>{t("Venue")}</TableHead>
-              <TableHead>{t("Region/Country")}</TableHead>
+              <TableHead>{t("Region")}</TableHead>
+              <TableHead>{t("Country")}</TableHead>
               <TableHead>{t("Status")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+                <TableCell colSpan={6} className="text-center py-8">
                   {t("Loading...")}
                 </TableCell>
               </TableRow>
             ) : clubs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                   {t("No clubs found")}
                 </TableCell>
               </TableRow>
@@ -526,14 +694,9 @@ export function ClubManagement() {
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell className="capitalize">{t(club.type)}</TableCell>
                   <TableCell className="capitalize">{t(club.venue)}</TableCell>
-                  <TableCell>
-                    {club.expand?.region?.name} 
-                    <span className="text-muted-foreground text-xs ml-1">
-                      ({club.expand?.region?.expand?.country?.name})
-                    </span>
-                  </TableCell>
+                  <TableCell>{club.expand?.region?.name || "—"}</TableCell>
+                  <TableCell>{club.expand?.country?.name || "—"}</TableCell>
                   <TableCell>
                     {club.active ? (
                       <span className="text-green-600 dark:text-green-400 font-medium">{t("Active")}</span>
@@ -547,6 +710,66 @@ export function ClubManagement() {
           </TableBody>
         </Table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-2">
+          <p className="text-sm text-muted-foreground">
+            {t("Showing {{count}} of {{total}} clubs", { 
+              count: clubs.length, 
+              total: totalItems 
+            })}
+          </p>
+          <Pagination className="justify-end">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              
+              {[...Array(totalPages)].map((_, i) => {
+                const page = i + 1;
+                // Simple pagination logic: show current, first, last, and neighbors
+                if (
+                  page === 1 || 
+                  page === totalPages || 
+                  (page >= currentPage - 1 && page <= currentPage + 1)
+                ) {
+                  return (
+                    <PaginationItem key={page}>
+                      <PaginationLink 
+                        onClick={() => setCurrentPage(page)}
+                        isActive={currentPage === page}
+                        className="cursor-pointer"
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                } else if (
+                  page === currentPage - 2 || 
+                  page === currentPage + 2
+                ) {
+                  return (
+                    <PaginationItem key={page}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  );
+                }
+                return null;
+              })}
+
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
