@@ -88,7 +88,8 @@ export const LocaleProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Fetch countries from PocketBase to populate selection
-    pb.collection('countries').getFullList({ sort: 'name' })
+    // We use requestKey: null to prevent auto-cancellation issues during strict mode/concurrent renders
+    pb.collection('countries').getFullList({ sort: 'name', requestKey: null })
       .then(records => {
         setAvailableCountries(records.map(r => ({
           id: r.id,
@@ -96,7 +97,11 @@ export const LocaleProvider = ({ children }: { children: React.ReactNode }) => {
           isoCode: r.isoCode
         })));
       })
-      .catch(err => console.error('Failed to fetch countries:', err));
+      .catch(err => {
+        if (!err.isAbort) {
+          console.error('Failed to fetch countries:', err);
+        }
+      });
   }, []);
 
   const setCountry = (newCountry: string) => {

@@ -36,15 +36,17 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { StudentWizard } from "./onboarding/student-wizard"
 import { PendingStatus } from "./onboarding/pending-status"
 
-// The inner component contains all the state and the actual Dialog.
-// It is ONLY rendered when the parent OnboardingModal determines it is necessary.
-function OnboardingModalInner() {
+interface OnboardingModalInnerProps {
+  initialStep?: "onboarding" | "student" | "pending"
+}
+
+function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInnerProps) {
   const { t } = useTranslation()
   const { user, logout } = useAuth()
   
   const [isOpen, setIsOpen] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [step, setStep] = useState<"onboarding" | "student" | "pending">("onboarding")
+  const [step, setStep] = useState(initialStep)
   
   // Selection State
   const [selectedRole, setSelectedRole] = useState<"Guardian" | "Leader" | "Admin" | "">("Guardian")
@@ -61,12 +63,11 @@ function OnboardingModalInner() {
   const [clubs, setClubs] = useState<any[]>([])
   const [clubSearch, setClubSearch] = useState("")
   
-  // Alert State
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   // Fetch Countries
   useEffect(() => {
-    pb.collection("countries").getFullList({ sort: "name" })
+    pb.collection("countries").getFullList({ sort: "name", requestKey: null })
       .then(setCountries)
       .catch(console.error)
   }, [])
@@ -76,7 +77,8 @@ function OnboardingModalInner() {
     if (selectedCountry) {
       pb.collection("regions").getFullList({ 
         filter: `country = "${selectedCountry}"`,
-        sort: "name" 
+        sort: "name",
+        requestKey: null
       })
         .then(setRegions)
         .catch(console.error)
@@ -92,7 +94,8 @@ function OnboardingModalInner() {
     if (selectedRegion) {
       pb.collection("clubs").getFullList({ 
         filter: `region = "${selectedRegion}"`,
-        sort: "name" 
+        sort: "name",
+        requestKey: null
       })
         .then(setClubs)
         .catch(console.error)
@@ -101,18 +104,6 @@ function OnboardingModalInner() {
       setClubs([])
     }
   }, [selectedRegion])
-
-  // Admin Context Fetching (for regions)
-  useEffect(() => {
-    if (selectedRole === "Admin" && adminCountry && adminCountry !== "global") {
-      pb.collection("regions").getFullList({ 
-        filter: `country = "${adminCountry}"`,
-        sort: "name" 
-      })
-        .then(setRegions)
-        .catch(console.error)
-    }
-  }, [selectedRole, adminCountry])
 
   const filteredClubs = clubs.filter(c => 
     c.name.toLowerCase().includes(clubSearch.toLowerCase())
@@ -160,7 +151,6 @@ function OnboardingModalInner() {
         if (roleValue === "Pending") {
           setStep("pending")
         } else {
-          // Success for Guardian - go to student wizard
           setStep("student")
         }
       }
@@ -175,8 +165,11 @@ function OnboardingModalInner() {
   const handleStudentComplete = async (data: any) => {
     setIsSubmitting(true)
     try {
+      // Find the club ID (might be from selectedClub or from existing membership)
+      const clubId = selectedClub?.id || (await pb.collection("club_memberships").getFirstListItem(`user = "${user?.id}"`)).club;
+      
       await pb.collection("students").create({
-        club: selectedClub.id,
+        club: clubId,
         guardian: user?.id,
         firstName: data.firstName,
         lastName: data.lastName,
@@ -194,13 +187,7 @@ function OnboardingModalInner() {
 
   const handleSkip = () => {
     setIsOpen(false)
-    window.location.reload() // Refresh to update context
-  }
-
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      setShowLogoutConfirm(true)
-    }
+    window.location.reload()
   }
 
   const handleLogout = () => {
@@ -211,7 +198,7 @@ function OnboardingModalInner() {
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && setShowLogoutConfirm(true)}>
         <DialogContent className="sm:max-w-[425px] flex flex-col max-h-[90vh]" onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => {
           e.preventDefault()
           setShowLogoutConfirm(true)
@@ -459,42 +446,48 @@ export function OnboardingModal() {
   const { memberships, isLoading: isClubsLoading } = useClubs()
   const { adminRoles, isLoading: isAdminLoading } = useAdmin()
   
-  // CRITICAL TIMING FIX:
-  // Even if loading is false, memberships/adminRoles can be empty for ONE render
-  // while the state propagates from the context providers.
-  // We use a local state to delay the appearance of the modal until 
-  // we've had a chance to see the data for more than one render frame.
   const [hasSettled, setHasSettled] = useState(false)
+  const [studentCount, setStudentCount] = useState<number | null>(null)
+  const [isStudentsLoading, setIsStudentsLoading] = useState(false)
 
   useEffect(() => {
     if (!isClubsLoading && !isAdminLoading) {
-      // Defer to next tick to ensure state has fully propagated
-      const timer = setTimeout(() => setHasSettled(true), 50)
+      const timer = setTimeout(() => setHasSettled(true), 100)
       return () => clearTimeout(timer)
     } else {
       setHasSettled(false)
     }
   }, [isClubsLoading, isAdminLoading])
 
-  // If the user is definitely NOT logged in, we shouldn't even be here.
-  if (!user) return null
+  useEffect(() => {
+    if (user && hasSettled) {
+      setIsStudentsLoading(true)
+      pb.collection("students").getList(1, 1, { filter: `guardian = "${user.id}"`, requestKey: null })
+        .then(res => setStudentCount(res.totalItems))
+        .catch(() => setStudentCount(0))
+        .finally(() => setIsStudentsLoading(false))
+    }
+  }, [user, hasSettled])
 
-  // 1. If we are still loading data, we render nothing.
-  if (isClubsLoading || isAdminLoading) return null
+  if (!user || isClubsLoading || isAdminLoading || isStudentsLoading || !hasSettled) return null
 
-  // 2. Data is loaded. Check if the user is verified.
-  const isVerified = user.verified || !user.email
-  if (!isVerified) return null
-
-  // 3. Check for existing club memberships or approved admin roles.
   const hasMemberships = memberships.length > 0
   const hasApprovedAdminRoles = adminRoles.some(role => role.role !== "Pending")
+  const isPending = memberships.some(m => m.roles.includes("Pending")) || adminRoles.some(r => r.role === "Pending")
+  
+  // 1. If they have approved admin roles, they are done.
+  if (hasApprovedAdminRoles) return null
 
-  // 4. If they have either, they definitely DON'T need onboarding.
-  if (hasMemberships || hasApprovedAdminRoles) return null
+  // 2. If they are pending, show the pending screen.
+  if (isPending) return <OnboardingModalInner initialStep="pending" />
 
-  // 5. Final check for settling
-  if (!hasSettled) return null
+  // 3. If they are a Guardian but have no students, show the student wizard.
+  const isGuardian = memberships.some(m => m.roles.includes("Guardian"))
+  if (isGuardian && studentCount === 0) return <OnboardingModalInner initialStep="student" />
 
+  // 4. If they have memberships and are NOT pending and NOT a student-less guardian, they are done.
+  if (hasMemberships) return null
+
+  // 5. Otherwise, show the full onboarding.
   return <OnboardingModalInner />
 }

@@ -13,6 +13,7 @@ interface ClubContextType {
   setCurrentYear: (year: ClubYearsResponse | null) => void;
   memberships: ClubMembershipExpanded[];
   isLoading: boolean;
+  refreshMemberships: () => Promise<void>;
 }
 
 const ClubContext = createContext<ClubContextType | undefined>(undefined);
@@ -29,32 +30,32 @@ export function ClubProvider({ children }: { children: ReactNode }) {
   const [memberships, setMemberships] = useState<ClubMembershipExpanded[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchMemberships = async () => {
-      if (pb.authStore.isValid) {
-        setIsLoading(true);
-        try {
-          // Disable auto-cancellation for this global fetch
-          const list = await pb.collection('club_memberships').getFullList<ClubMembershipExpanded>({ 
-            expand: 'club',
-            requestKey: 'global_memberships_fetch'
-          });
-          setMemberships(list);
-        } catch (error: any) {
-          if (error.isAbort) return;
-          console.error('Failed to fetch memberships:', error);
-          setMemberships([]);
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
+  const fetchMemberships = async () => {
+    if (pb.authStore.isValid) {
+      setIsLoading(true);
+      try {
+        // Disable auto-cancellation for this global fetch
+        const list = await pb.collection('club_memberships').getFullList<ClubMembershipExpanded>({ 
+          expand: 'club',
+          requestKey: 'global_memberships_fetch'
+        });
+        setMemberships(list);
+      } catch (error: any) {
+        if (error.isAbort) return;
+        console.error('Failed to fetch memberships:', error);
         setMemberships([]);
-        setCurrentClub(null);
-        setCurrentYear(null);
+      } finally {
         setIsLoading(false);
       }
-    };
+    } else {
+      setMemberships([]);
+      setCurrentClub(null);
+      setCurrentYear(null);
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchMemberships();
 
     return pb.authStore.onChange(() => {
@@ -99,7 +100,15 @@ export function ClubProvider({ children }: { children: ReactNode }) {
   }, [currentYear]);
 
   return (
-    <ClubContext.Provider value={{ currentClub, currentYear, setCurrentClub, setCurrentYear, memberships, isLoading }}>
+    <ClubContext.Provider value={{ 
+      currentClub, 
+      currentYear, 
+      setCurrentClub, 
+      setCurrentYear, 
+      memberships, 
+      isLoading,
+      refreshMemberships: fetchMemberships
+    }}>
       {children}
     </ClubContext.Provider>
   );

@@ -31,6 +31,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { useTheme } from "@/components/theme-provider"
 import { useLocale, countryMetadata } from "@/lib/locale-context"
+import { useClubs } from "@/lib/club-context"
 import { Languages, Sun, Moon, Monitor, User, ShieldCheck } from "lucide-react"
 import { ClubSelector } from "./club-selector"
 import type { ClubsResponse as ClubsResponseType } from "@/types/pocketbase-types"
@@ -46,6 +47,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const { i18n, t } = useTranslation()
   const { theme, setTheme } = useTheme()
   const { country, setCountry, availableCountries } = useLocale()
+  const { refreshMemberships } = useClubs()
   const [activeTab, setActiveTab] = useState<"login" | "register" | "forgot">("login")
   const [selectedClub, setSelectedClub] = useState<ClubsResponseType | null>(null)
   const { toast } = useToast()
@@ -135,22 +137,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   }
 
-  async function onGoogleLogin() {
-    try {
-      const authData = await pb.collection("users").authWithOAuth2({ provider: "google" })
-      await applyUserPreferences(authData.record)
-      await syncPreferences(authData.record.id, authData.record)
-      toast({ title: t("Logged in with Google") })
-      onClose()
-    } catch (error: any) {
-      toast({
-        title: t("Login failed"),
-        description: error.message,
-        variant: "destructive",
-      })
-    }
-  }
-
   async function onRegister(data: any) {
     if (!selectedClub) {
       toast({
@@ -199,6 +185,9 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         roles: [membershipRole]
       })
 
+      // 3b. Refresh global memberships list so OnboardingModal sees the new record
+      await refreshMemberships()
+
       // 4. Verification Email
       try {
         await pb.collection("users").requestVerification(data.email)
@@ -206,18 +195,31 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         console.warn("Verification email request failed:", verifyError)
       }
       
-      // Clear auth store because they still need to verify their email
-      pb.authStore.clear()
-      
       toast({ 
         title: t("Account created"), 
-        description: t("Please check your email to verify your account before logging in.") 
+        description: t("Welcome to AwanAfrica!") 
       })
       
-      setActiveTab("login")
+      onClose()
     } catch (error: any) {
       toast({
         title: t("Registration failed"),
+        description: error.message,
+        variant: "destructive",
+      })
+    }
+  }
+
+  async function onGoogleLogin() {
+    try {
+      const authData = await pb.collection("users").authWithOAuth2({ provider: "google" })
+      await applyUserPreferences(authData.record)
+      await syncPreferences(authData.record.id, authData.record)
+      toast({ title: t("Logged in with Google") })
+      onClose()
+    } catch (error: any) {
+      toast({
+        title: t("Login failed"),
         description: error.message,
         variant: "destructive",
       })

@@ -55,9 +55,14 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
       setRegions([])
       return
     }
-    pb.collection("regions").getFullList({ filter: `country = "${selectedCountry}"` })
+    pb.collection("regions").getFullList({ 
+      filter: `country = "${selectedCountry}"`,
+      requestKey: null 
+    })
       .then(setRegions)
-      .catch(console.error)
+      .catch(err => {
+        if (!err.isAbort) console.error(err)
+      })
   }, [selectedCountry])
 
   // Fetch clubs when region changes
@@ -69,9 +74,13 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
     setIsLoadingClubs(true)
     pb.collection("clubs").getFullList<ClubsResponseType>({ 
       filter: `region = "${selectedRegion}"`,
-      sort: "name"
+      sort: "name",
+      requestKey: null
     })
       .then(setClubs)
+      .catch(err => {
+        if (!err.isAbort) console.error(err)
+      })
       .finally(() => setIsLoadingClubs(false))
   }, [selectedRegion])
 
