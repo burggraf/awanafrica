@@ -37,7 +37,7 @@ interface ClubSelectorProps {
 export function ClubSelector({ onSelect }: ClubSelectorProps) {
   const { t } = useTranslation()
   const { toast } = useToast()
-  const { isLocating, findNearbyClubs, findByCode, nearbyClubs } = useClubDiscovery()
+  const { isLocating, findNearbyClubs, nearbyClubs } = useClubDiscovery()
   const { availableCountries } = useLocale()
   const [open, setOpen] = useState(false)
   const [code, setCode] = useState("")
@@ -77,6 +77,7 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
     pb.collection("clubs").getFullList<ClubsResponseType>({ 
       filter: `region = "${selectedRegion}"`,
       sort: "name",
+      expand: "region,region.country",
       requestKey: null
     })
       .then(setClubs)
@@ -90,11 +91,30 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
     if (!code) return
     setIsSearchingCode(true)
     try {
-      const club = await findByCode(code)
+      const club = await pb.collection("clubs").getFirstListItem<ClubsResponseType>(
+        `registration = "${code}" || joinCode = "${code}"`,
+        {
+          expand: "region,region.country",
+          requestKey: null
+        }
+      )
+      
       if (club) {
-        setSelectedClub(club as ClubsResponseType)
-        onSelect(club as ClubsResponseType)
+        setSelectedClub(club)
+        onSelect(club)
+      } else {
+        toast({
+          title: t("Invalid Code"),
+          description: t("We couldn't find a club with that registration number. Please check and try again."),
+          variant: "destructive",
+        })
       }
+    } catch (error) {
+      toast({
+        title: t("Invalid Code"),
+        description: t("We couldn't find a club with that registration number. Please check and try again."),
+        variant: "destructive",
+      })
     } finally {
       setIsSearchingCode(false)
     }
@@ -106,7 +126,7 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Input 
-            placeholder={t("Enter Club Code (e.g. AW1234)")} 
+            placeholder={t("Registration # (e.g. TZ001234)")} 
             value={code} 
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             className="pr-10"
@@ -116,7 +136,7 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
           )}
         </div>
         <Button variant="secondary" onClick={handleCodeSubmit} disabled={isSearchingCode || !code}>
-          {t("Join")}
+          {t("Search")}
         </Button>
       </div>
 
@@ -243,11 +263,25 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
       </div>
       
       {selectedClub && (
-        <div className="rounded-lg border bg-muted/50 p-3 text-sm">
-          <p className="font-medium text-primary">{t("Selected Club:")}</p>
-          <p className="font-bold">{selectedClub.name}</p>
-          <p className="text-xs text-muted-foreground">{selectedClub.address || selectedClub.location}</p>
-          <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => {
+        <div className="rounded-lg border bg-muted/50 p-3 text-sm space-y-1">
+          <p className="font-medium text-primary text-xs uppercase tracking-wider">{t("Selected Club")}</p>
+          <p className="font-bold text-base">{selectedClub.name}</p>
+          <div className="text-xs text-muted-foreground space-y-0.5">
+            <p>{selectedClub.address || selectedClub.location}</p>
+            <p className="flex items-center gap-1">
+              <span className="font-semibold">{t("Region")}:</span> 
+              {(selectedClub.expand as any)?.region?.name || t("Unknown")}
+            </p>
+            <p className="flex items-center gap-1">
+              <span className="font-semibold">{t("Country")}:</span> 
+              {(selectedClub.expand as any)?.region?.expand?.country?.name || t("Unknown")}
+            </p>
+            <p className="flex items-center gap-1">
+              <span className="font-semibold">{t("Registration #")}:</span> 
+              {selectedClub.registration}
+            </p>
+          </div>
+          <Button variant="link" size="sm" className="h-auto p-0 text-xs mt-2" onClick={() => {
             setSelectedClub(null)
             onSelect(null)
           }}>

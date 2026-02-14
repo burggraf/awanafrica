@@ -27,6 +27,7 @@ export function useClubDiscovery() {
       // Fetch all clubs with coordinates
       const clubs = await pb.collection("clubs").getFullList<ClubsResponseType>({
         filter: "lat != null && lng != null",
+        expand: "region,region.country",
         requestKey: "nearby_clubs_discovery"
       })
 

@@ -32,7 +32,7 @@ import { Label } from "@/components/ui/label"
 import { useTheme } from "@/components/theme-provider"
 import { useLocale, countryMetadata } from "@/lib/locale-context"
 import { useClubs } from "@/lib/club-context"
-import { Languages, Sun, Moon, Monitor, User, ShieldCheck } from "lucide-react"
+import { Languages, Sun, Moon, Monitor, User, ShieldCheck, ChevronLeft, Building, Mail, Lock, Phone, UserCircle } from "lucide-react"
 import { ClubSelector } from "./club-selector"
 import type { ClubsResponse as ClubsResponseType } from "@/types/pocketbase-types"
 
@@ -49,6 +49,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const { country, setCountry, availableCountries } = useLocale()
   const { refreshMemberships } = useClubs()
   const [activeTab, setActiveTab] = useState<"login" | "register" | "forgot">("login")
+  const [regStep, setRegStep] = useState<"role" | "club" | "details">("role")
   const [selectedClub, setSelectedClub] = useState<ClubsResponseType | null>(null)
   const { toast } = useToast()
 
@@ -66,7 +67,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       passwordConfirm: "",
       name: "",
       phone: "",
-      role: "Guardian" as "Guardian" | "Leader",
+      role: "" as "Guardian" | "Leader" | "Admin",
       leaderSecret: "",
     },
   })
@@ -138,7 +139,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   }
 
   async function onRegister(data: any) {
-    if (!selectedClub) {
+    if (data.role !== "Admin" && !selectedClub) {
       toast({
         title: t("Registration failed"),
         description: t("Please select a club first"),
@@ -158,7 +159,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       }
 
       // 1. Create User
-      await pb.collection("users").create({
+      const user = await pb.collection("users").create({
         ...data,
         emailVisibility: false,
         language: i18n.language,
@@ -166,24 +167,32 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         theme: theme,
       })
 
-      // 1b. Authenticate temporarily to create membership
+      // 1b. Authenticate temporarily to create membership/role
       await pb.collection("users").authWithPassword(data.email, data.password)
       
-      // 2. Determine Membership Status & Roles
-      let membershipRole = data.role
-      if (data.role === "Leader") {
-        const isSecretCorrect = selectedClub.leaderSecret && data.leaderSecret === selectedClub.leaderSecret
-        if (!isSecretCorrect) {
-          membershipRole = "Pending"
+      if (data.role === "Admin") {
+        // Create Admin Role (Pending)
+        await pb.collection("admin_roles").create({
+          user: user.id,
+          role: "Pending"
+        })
+      } else if (selectedClub) {
+        // 2. Determine Membership Status & Roles
+        let membershipRole = data.role
+        if (data.role === "Leader") {
+          const isSecretCorrect = selectedClub.leaderSecret && data.leaderSecret === selectedClub.leaderSecret
+          if (!isSecretCorrect) {
+            membershipRole = "Pending"
+          }
         }
-      }
 
-      // 3. Create Club Membership
-      await pb.collection("club_memberships").create({
-        user: pb.authStore.record?.id,
-        club: selectedClub.id,
-        roles: [membershipRole]
-      })
+        // 3. Create Club Membership
+        await pb.collection("club_memberships").create({
+          user: user.id,
+          club: selectedClub.id,
+          roles: [membershipRole]
+        })
+      }
 
       // 3b. Refresh global memberships list so OnboardingModal sees the new record
       await refreshMemberships()
@@ -306,7 +315,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           </Select>
         </div>
 
-        <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)}>
+        <Tabs value={activeTab} onValueChange={(v: any) => {
+          setActiveTab(v)
+          if (v === "register") setRegStep("role")
+        }}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">{t("Log in")}</TabsTrigger>
             <TabsTrigger value="register">{t("Register")}</TabsTrigger>
@@ -381,55 +393,240 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
           <TabsContent value="register">
             <DialogHeader>
-              <DialogTitle>{t("Join a Club")}</DialogTitle>
+              <DialogTitle>
+                {regStep === "role" && t("Create Account")}
+                {regStep === "club" && t("Find Your Club")}
+                {regStep === "details" && t("Your Details")}
+              </DialogTitle>
               <DialogDescription>
-                {t("Find your club and select your role to get started.")}
+                {regStep === "role" && t("First, tell us who you are.")}
+                {regStep === "club" && t("Search by code, GPS, or location.")}
+                {regStep === "details" && t("Complete your registration.")}
               </DialogDescription>
             </DialogHeader>
             
-            <div className="py-4 space-y-6">
-              <ClubSelector onSelect={setSelectedClub} />
-              
-              {selectedClub && (
+            <div className="py-4">
+              {regStep === "role" && (
+                <div className="space-y-6">
+                  <Form {...registerForm}>
+                    <form className="space-y-6">
+                      <FormField
+                        control={registerForm.control}
+                        name="role"
+                        render={() => (
+                          <FormItem className="space-y-3">
+                            <FormLabel className="text-center block text-lg font-semibold">{t("I am registering as a...")}</FormLabel>
+                            <FormControl>
+                                <RadioGroup
+                                  onValueChange={(val) => {
+                                    registerForm.setValue("role", val as any)
+                                    setRegStep("club")
+                                  }}
+                                  value={registerForm.watch("role")}
+                                  className="grid grid-cols-2 gap-4"
+                                >
+                                  <div>
+                                    <RadioGroupItem value="Guardian" id="guardian" className="peer sr-only" />
+                                    <Label
+                                      htmlFor="guardian"
+                                      className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary transition-all cursor-pointer"
+                                      onClick={() => {
+                                        registerForm.setValue("role", "Guardian")
+                                        setRegStep("club")
+                                      }}
+                                    >
+                                      <User className="mb-3 h-10 w-10 text-primary" />
+                                      <span className="text-base font-bold">{t("Guardian")}</span>
+                                      <span className="text-xs text-muted-foreground mt-1 text-center">{t("Registering my children")}</span>
+                                    </Label>
+                                  </div>
+                                  <div>
+                                    <RadioGroupItem value="Leader" id="leader" className="peer sr-only" />
+                                    <Label
+                                      htmlFor="leader"
+                                      className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary transition-all cursor-pointer"
+                                      onClick={() => {
+                                        registerForm.setValue("role", "Leader")
+                                        setRegStep("club")
+                                      }}
+                                    >
+                                    <ShieldCheck className="mb-3 h-10 w-10 text-primary" />
+                                    <span className="text-base font-bold">{t("Leader")}</span>
+                                    <span className="text-xs text-muted-foreground mt-1 text-center">{t("Serving at a club")}</span>
+                                  </Label>
+                                </div>
+                              </RadioGroup>
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </form>
+                  </Form>
+                  
+                  <div className="flex justify-center">
+                    <Button 
+                      variant="link" 
+                      className="text-xs text-muted-foreground"
+                      onClick={() => {
+                        registerForm.setValue("role", "Admin")
+                        setRegStep("details")
+                      }}
+                    >
+                      {t("I'm an Awana administrator")}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {regStep === "club" && (
+                <div className="space-y-4">
+                  <ClubSelector onSelect={(club) => {
+                    setSelectedClub(club)
+                    if (club) setRegStep("details")
+                  }} />
+                  <Button 
+                    variant="ghost" 
+                    className="w-full gap-2" 
+                    onClick={() => setRegStep("role")}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    {t("Back")}
+                  </Button>
+                </div>
+              )}
+
+              {regStep === "details" && (
                 <Form {...registerForm}>
                   <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
+                    <div className="rounded-xl border bg-muted/30 p-4 mb-6">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          {role === "Admin" ? (
+                            <ShieldCheck className="h-5 w-5 text-primary" />
+                          ) : (
+                            <Building className="h-5 w-5 text-primary" />
+                          )}
+                          <span className="font-bold text-base">
+                            {role === "Admin" ? t("Awana Administrator") : selectedClub?.name}
+                          </span>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 text-xs underline decoration-dotted"
+                          onClick={() => setRegStep(role === "Admin" ? "role" : "club")}
+                        >
+                          {t("Change")}
+                        </Button>
+                      </div>
+
+                      {role !== "Admin" && selectedClub && (
+                        <div className="text-xs text-muted-foreground space-y-1 ml-7">
+                          <p>{selectedClub.address || selectedClub.location}</p>
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1 border-t border-muted-foreground/10 mt-1">
+                            <p className="flex items-center gap-1">
+                              <span className="opacity-70">{t("Region")}:</span> 
+                              <span className="font-medium text-foreground">{(selectedClub.expand as any)?.region?.name || t("Unknown")}</span>
+                            </p>
+                            <p className="flex items-center gap-1">
+                              <span className="opacity-70">{t("Country")}:</span> 
+                              <span className="font-medium text-foreground">{(selectedClub.expand as any)?.region?.expand?.country?.name || t("Unknown")}</span>
+                            </p>
+                            <p className="flex items-center gap-1">
+                              <span className="opacity-70">{t("Registration #")}:</span> 
+                              <span className="font-medium text-foreground">{selectedClub.registration}</span>
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                      <FormField
+                        control={registerForm.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("Full Name")}</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <UserCircle className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input className="pl-9" placeholder="John Doe" {...field} />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={registerForm.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("Phone Number")}</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input className="pl-9" placeholder="+255..." {...field} />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
                     <FormField
                       control={registerForm.control}
-                      name="role"
+                      name="email"
                       render={({ field }) => (
-                        <FormItem className="space-y-3">
-                          <FormLabel>{t("I am registering as a...")}</FormLabel>
+                        <FormItem>
+                          <FormLabel>{t("Email")}</FormLabel>
                           <FormControl>
-                            <RadioGroup
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                              className="grid grid-cols-2 gap-4"
-                            >
-                              <div>
-                                <RadioGroupItem value="Guardian" id="guardian" className="peer sr-only" />
-                                <Label
-                                  htmlFor="guardian"
-                                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                                >
-                                  <User className="mb-3 h-6 w-6" />
-                                  <span className="text-sm font-medium">{t("Guardian")}</span>
-                                </Label>
-                              </div>
-                              <div>
-                                <RadioGroupItem value="Leader" id="leader" className="peer sr-only" />
-                                <Label
-                                  htmlFor="leader"
-                                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                                >
-                                  <ShieldCheck className="mb-3 h-6 w-6" />
-                                  <span className="text-sm font-medium">{t("Leader")}</span>
-                                </Label>
-                              </div>
-                            </RadioGroup>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                              <Input className="pl-9" placeholder="email@example.com" {...field} />
+                            </div>
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={registerForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("Password")}</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input className="pl-9" type="password" {...field} />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={registerForm.control}
+                        name="passwordConfirm"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("Confirm")}</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input className="pl-9" type="password" {...field} />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
                     {role === "Leader" && (
                       <FormField
@@ -447,96 +644,48 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                       />
                     )}
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={registerForm.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("Full Name")}</FormLabel>
-                            <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={registerForm.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("Phone Number")}</FormLabel>
-                            <FormControl><Input placeholder="+255..." {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <div className="flex gap-2 pt-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        className="flex-1" 
+                        onClick={() => setRegStep(role === "Admin" ? "role" : "club")}
+                      >
+                        {t("Back")}
+                      </Button>
+                      <Button type="submit" className="flex-[2]">{t("Create Account")}</Button>
                     </div>
-
-                    <FormField
-                      control={registerForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("Email")}</FormLabel>
-                          <FormControl><Input placeholder="email@example.com" {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={registerForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("Password")}</FormLabel>
-                            <FormControl><Input type="password" {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={registerForm.control}
-                        name="passwordConfirm"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("Confirm")}</FormLabel>
-                            <FormControl><Input type="password" {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <Button type="submit" className="w-full">{t("Create Account")}</Button>
                   </form>
                 </Form>
               )}
             </div>
 
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  {t("Or continue with")}
-                </span>
-              </div>
-            </div>
+            {regStep === "role" && (
+              <>
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      {t("Or continue with")}
+                    </span>
+                  </div>
+                </div>
 
-            <Button 
-              variant="outline" 
-              type="button" 
-              className="w-full" 
-              onClick={onGoogleLogin}
-            >
-              <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
-                <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
-              </svg>
-              Google
-            </Button>
+                <Button 
+                  variant="outline" 
+                  type="button" 
+                  className="w-full" 
+                  onClick={onGoogleLogin}
+                >
+                  <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                    <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
+                  </svg>
+                  Google
+                </Button>
+              </>
+            )}
           </TabsContent>
 
           <TabsContent value="forgot">
