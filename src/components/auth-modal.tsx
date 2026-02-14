@@ -107,7 +107,50 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       console.error("Login error:", error)
       
       let description = error.message
-      if (error.message?.includes('Failed to fetch') || error.status === 0) {
+      
+      // PocketBase 400 error on auth usually means invalid credentials
+      if (error.status === 400) {
+        description = t("Invalid email or password. Please try again.")
+      } else if (error.status === 403) {
+        // 403 usually means the user is not verified if the collection requires it
+        description = t("Please verify your email address before logging in. Check your inbox for the verification link.")
+        
+        // Offer to resend verification
+        toast({
+          title: t("Verification required"),
+          description,
+          variant: "destructive",
+          action: (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={async () => {
+                try {
+                  await pb.collection("users").requestVerification(data.email)
+                  toast({ title: t("Verification email sent") })
+                } catch (err: any) {
+                  if (err.status === 429) {
+                    toast({ 
+                      title: t("Too many requests"), 
+                      description: t("Please wait a few minutes before trying again."),
+                      variant: "destructive" 
+                    })
+                  } else {
+                    toast({ 
+                      title: t("Error"), 
+                      description: err.message,
+                      variant: "destructive" 
+                    })
+                  }
+                }
+              }}
+            >
+              {t("Resend")}
+            </Button>
+          )
+        })
+        return // Exit early as we handled this specifically
+      } else if (error.message?.includes('Failed to fetch') || error.status === 0) {
         description = t("Network error: Could not connect to the server. Please check your connection or browser settings.")
       }
 

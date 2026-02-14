@@ -259,7 +259,6 @@ function MainContent() {
 
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
       <OnboardingModal />
-      <Toaster />
     </div>
   )
 }
@@ -284,4 +283,13 @@ function App() {
   )
 }
 
-export default App
+function AppWithToaster() {
+  return (
+    <>
+      <App />
+      <Toaster />
+    </>
+  )
+}
+
+export default AppWithToaster
