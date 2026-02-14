@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select"
 import { useLocale } from "@/lib/locale-context"
 import { pb } from "@/lib/pb"
+import { useToast } from "@/hooks/use-toast"
 
 interface ClubSelectorProps {
   onSelect: (club: ClubsResponseType | null) => void
@@ -35,6 +36,7 @@ interface ClubSelectorProps {
 
 export function ClubSelector({ onSelect }: ClubSelectorProps) {
   const { t } = useTranslation()
+  const { toast } = useToast()
   const { isLocating, findNearbyClubs, findByCode, nearbyClubs } = useClubDiscovery()
   const { availableCountries } = useLocale()
   const [open, setOpen] = useState(false)
@@ -205,7 +207,34 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
           variant="ghost" 
           size="sm"
           className="w-full gap-2 text-xs font-normal" 
-          onClick={() => findNearbyClubs()}
+          onClick={async () => {
+            try {
+              const clubs = await findNearbyClubs()
+              if (clubs.length === 0) {
+                toast({
+                  title: t("No clubs found"),
+                  description: t("No clubs with GPS coordinates were found in our database."),
+                })
+              } else {
+                toast({
+                  title: t("Clubs found"),
+                  description: t("We found {{count}} clubs near you.", { count: clubs.length }),
+                })
+                setOpen(true) // Automatically open the list
+              }
+            } catch (error: any) {
+              console.error("Discovery error:", error)
+              let message = t("Could not get your location")
+              if (error.code === 1) message = t("Location permission denied")
+              else if (error.code === 3) message = t("Location request timed out")
+              
+              toast({
+                title: t("Location Error"),
+                description: message,
+                variant: "destructive"
+              })
+            }
+          }}
           disabled={isLocating}
         >
           {isLocating ? <Loader2 className="h-3 w-3 animate-spin" /> : <MapPin className="h-3 w-3" />}

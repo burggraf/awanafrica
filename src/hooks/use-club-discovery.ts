@@ -16,17 +16,23 @@ export function useClubDiscovery() {
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
-          timeout: 5000,
+          timeout: 10000, // Increased timeout to 10s
           maximumAge: 0,
         })
       })
 
       const { latitude, longitude } = position.coords
+      console.log(`Searching for clubs near ${latitude}, ${longitude}`)
 
       // Fetch all clubs with coordinates
       const clubs = await pb.collection("clubs").getFullList<ClubsResponseType>({
         filter: "lat != null && lng != null",
+        requestKey: "nearby_clubs_discovery"
       })
+
+      if (clubs.length === 0) {
+        console.warn("No clubs found with coordinates in the database")
+      }
 
       // Calculate distance using Haversine formula and sort
       const sortedClubs = clubs.map(club => {
