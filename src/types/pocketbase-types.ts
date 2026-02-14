@@ -55,6 +55,8 @@ export interface ClubsRecord {
 	denomination?: string
 	location?: string
 	missionary?: string
+	expiration?: string
+	metadata?: any
 	region: string
 	address?: string
 	timezone?: string
