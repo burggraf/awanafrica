@@ -138,11 +138,22 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
           description: t("No clubs with GPS coordinates were found in our database."),
         })
       } else {
-        toast({
-          title: t("Clubs found"),
-          description: t("We found {{count}} clubs near you.", { count: clubs.length }),
-        })
-        setOpen(true)
+        // Automatically select the single closest club if only one is found,
+        // or open the selection list if multiple are found.
+        if (clubs.length === 1) {
+          setSelectedClub(clubs[0])
+          onSelect(clubs[0])
+          toast({
+            title: t("Club found"),
+            description: t("Found: {{name}}", { name: clubs[0].name }),
+          })
+        } else {
+          toast({
+            title: t("Clubs found"),
+            description: t("We found {{count}} clubs near you.", { count: clubs.length }),
+          })
+          setOpen(true)
+        }
       }
     } catch (error: any) {
       console.error("Discovery error:", error)
@@ -206,6 +217,9 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
 
         <div className="flex flex-col gap-2 mt-4">
           <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <div className="hidden" />
+            </PopoverTrigger>
             <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
               <Command>
                 <CommandInput placeholder={t("Search results...")} />
