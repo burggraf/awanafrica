@@ -196,7 +196,11 @@ export function ImportClubsModal({ isOpen, onOpenChange, onImportComplete }: Imp
           const regionKey = `${country.id}:${locationName}`;
           if (!regionsCache[regionKey]) {
             try {
-              const region = await pb.collection("regions").getFirstListItem<RegionsResponse>(`country = "${country.id}" && name = "${locationName}"`);
+              // Properly escape quotes for the filter string
+              const escapedLocation = locationName.replace(/"/g, '\\"');
+              const region = await pb.collection("regions").getFirstListItem<RegionsResponse>(
+                `country = "${country.id}" && name = "${escapedLocation}"`
+              );
               regionsCache[regionKey] = region;
             } catch (err) {
               // Create region if not found
