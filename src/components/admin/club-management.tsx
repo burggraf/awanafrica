@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
+import { 
   Dialog,
   DialogContent,
   DialogHeader,
@@ -545,259 +545,264 @@ export function ClubManagement() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="p-6 pb-2">
             <DialogTitle>{editingClub ? t("Edit Club") : t("Add Club")}</DialogTitle>
             <DialogDescription>
               {editingClub ? t("Update the details for this club.") : t("Create a new club by filling out the information below.")}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-            <ScrollArea className="max-h-[60vh] pr-4 -mr-4">
-              <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2 col-span-1">
-                    <Label htmlFor="registration">{t("Registration #")}</Label>
-                    <Input
-                      id="registration"
-                      value={formData.registration}
-                      onChange={(e) => setFormData({ ...formData, registration: e.target.value })}
-                      placeholder="TZ000001"
-                    />
-                  </div>
-                  <div className="space-y-2 col-span-2">
-                    <Label htmlFor="name">{t("Club Name")}</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="type">{t("Type")}</Label>
-                    <Select
-                      value={formData.type}
-                      onValueChange={(value: any) => setFormData({ ...formData, type: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Leader Based">{t("Leader Based")}</SelectItem>
-                        <SelectItem value="Other">{t("Other")}</SelectItem>
-                      </SelectContent>
-                    </Select>
+          <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+            <ScrollArea className="flex-1 px-6">
+              <div className="space-y-6 pb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold text-primary border-b pb-1">{t("Basic Information")}</h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2 col-span-1">
+                        <Label htmlFor="registration">{t("Registration #")}</Label>
+                        <Input
+                          id="registration"
+                          value={formData.registration}
+                          onChange={(e) => setFormData({ ...formData, registration: e.target.value })}
+                          placeholder="TZ000001"
+                        />
+                      </div>
+                      <div className="space-y-2 col-span-2">
+                        <Label htmlFor="name">{t("Club Name")}</Label>
+                        <Input
+                          id="name"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="type">{t("Type")}</Label>
+                        <Select
+                          value={formData.type}
+                          onValueChange={(value: any) => setFormData({ ...formData, type: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Leader Based">{t("Leader Based")}</SelectItem>
+                            <SelectItem value="Other">{t("Other")}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="venue">{t("Venue")}</Label>
+                        <Select
+                          value={formData.venue}
+                          onValueChange={(value: any) => setFormData({ ...formData, venue: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Church">{t("Church")}</SelectItem>
+                            <SelectItem value="School">{t("School")}</SelectItem>
+                            <SelectItem value="Community Center">{t("Community Center")}</SelectItem>
+                            <SelectItem value="Christian Camp">{t("Christian Camp")}</SelectItem>
+                            <SelectItem value="Other">{t("Other")}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="denomination">{t("Denomination")}</Label>
+                        <Input
+                          id="denomination"
+                          value={formData.denomination}
+                          onChange={(e) => setFormData({ ...formData, denomination: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="location">{t("Location")}</Label>
+                        <Input
+                          id="location"
+                          value={formData.location}
+                          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="missionary">{t("Missionary")}</Label>
+                        <Select
+                          value={formData.missionary}
+                          onValueChange={(value) => setFormData({ ...formData, missionary: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={t("Select Missionary")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">{t("None")}</SelectItem>
+                            {missionaries.map((user) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.name || user.displayName || user.email}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="expiration">{t("Expiration Date")}</Label>
+                        <Input
+                          id="expiration"
+                          type="date"
+                          value={formData.expiration}
+                          onChange={(e) => setFormData({ ...formData, expiration: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="country">{t("Country")}</Label>
+                        <Select
+                          value={formData.country}
+                          onValueChange={(value) => {
+                            setFormData({ ...formData, country: value, region: "" });
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={t("Select Country")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {countries.map((country) => (
+                              <SelectItem key={country.id} value={country.id}>
+                                {country.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="region">{t("Region")}</Label>
+                        <Select
+                          value={formData.region}
+                          onValueChange={(value) => setFormData({ ...formData, region: value })}
+                          disabled={!formData.country}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={t("Select Region")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {filteredRegions.map((region) => (
+                              <SelectItem key={region.id} value={region.id}>
+                                {region.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="address">{t("Address")}</Label>
+                      <Input
+                        id="address"
+                        value={formData.address}
+                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between border p-3 rounded-md bg-slate-50 dark:bg-slate-900/50 mt-4">
+                      <div className="space-y-0.5">
+                        <Label className="text-base">{t("Active Status")}</Label>
+                        <div className="text-sm text-muted-foreground">
+                          {formData.active ? t("Club is active") : t("Club is inactive")}
+                        </div>
+                      </div>
+                      <Switch
+                        checked={formData.active}
+                        onCheckedChange={(checked: boolean) => setFormData({ ...formData, active: checked })}
+                        className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-slate-400"
+                      />
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="venue">{t("Venue")}</Label>
-                    <Select
-                      value={formData.venue}
-                      onValueChange={(value: any) => setFormData({ ...formData, venue: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Church">{t("Church")}</SelectItem>
-                        <SelectItem value="School">{t("School")}</SelectItem>
-                        <SelectItem value="Community Center">{t("Community Center")}</SelectItem>
-                        <SelectItem value="Christian Camp">{t("Christian Camp")}</SelectItem>
-                        <SelectItem value="Other">{t("Other")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="denomination">{t("Denomination")}</Label>
-                    <Input
-                      id="denomination"
-                      value={formData.denomination}
-                      onChange={(e) => setFormData({ ...formData, denomination: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location">{t("Location")}</Label>
-                    <Input
-                      id="location"
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="missionary">{t("Missionary")}</Label>
-                    <Select
-                      value={formData.missionary}
-                      onValueChange={(value) => setFormData({ ...formData, missionary: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("Select Missionary")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">{t("None")}</SelectItem>
-                        {missionaries.map((user) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.name || user.displayName || user.email}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="expiration">{t("Expiration Date")}</Label>
-                    <Input
-                      id="expiration"
-                      type="date"
-                      value={formData.expiration}
-                      onChange={(e) => setFormData({ ...formData, expiration: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="country">{t("Country")}</Label>
-                    <Select
-                      value={formData.country}
-                      onValueChange={(value) => {
-                        setFormData({ ...formData, country: value, region: "" });
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("Select Country")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {countries.map((country) => (
-                          <SelectItem key={country.id} value={country.id}>
-                            {country.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="region">{t("Region")}</Label>
-                    <Select
-                      value={formData.region}
-                      onValueChange={(value) => setFormData({ ...formData, region: value })}
-                      disabled={!formData.country}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("Select Region")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredRegions.map((region) => (
-                          <SelectItem key={region.id} value={region.id}>
-                            {region.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="address">{t("Address")}</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-4 pt-2 border-t mt-4">
-                  <h3 className="text-sm font-semibold text-primary">{t("Curriculum Counts")}</h3>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="space-y-1">
-                      <Label className="text-[10px]">{t("Puggles")}</Label>
-                      <Input type="number" value={formData.puggles} onChange={(e) => setFormData({...formData, puggles: parseInt(e.target.value) || 0})} className="h-8" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px]">{t("Cubbies")}</Label>
-                      <Input type="number" value={formData.cubbies} onChange={(e) => setFormData({...formData, cubbies: parseInt(e.target.value) || 0})} className="h-8" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px]">{t("Sparks")}</Label>
-                      <Input type="number" value={formData.sparks} onChange={(e) => setFormData({...formData, sparks: parseInt(e.target.value) || 0})} className="h-8" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px]">{t("Flame")}</Label>
-                      <Input type="number" value={formData.flame} onChange={(e) => setFormData({...formData, flame: parseInt(e.target.value) || 0})} className="h-8" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px]">{t("Torch")}</Label>
-                      <Input type="number" value={formData.torch} onChange={(e) => setFormData({...formData, torch: parseInt(e.target.value) || 0})} className="h-8" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px]">{t("Truth Seekers")}</Label>
-                      <Input type="number" value={formData.truthSeekers} onChange={(e) => setFormData({...formData, truthSeekers: parseInt(e.target.value) || 0})} className="h-8" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px]">{t("Living God's Story")}</Label>
-                      <Input type="number" value={formData.livingGodsStory} onChange={(e) => setFormData({...formData, livingGodsStory: parseInt(e.target.value) || 0})} className="h-8" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px]">{t("T&T")}</Label>
-                      <Input type="number" value={formData.tandt} onChange={(e) => setFormData({...formData, tandt: parseInt(e.target.value) || 0})} className="h-8" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px]">{t("Jr. Varsity")}</Label>
-                      <Input type="number" value={formData.jrVarsity} onChange={(e) => setFormData({...formData, jrVarsity: parseInt(e.target.value) || 0})} className="h-8" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px]">{t("Trek")}</Label>
-                      <Input type="number" value={formData.trek} onChange={(e) => setFormData({...formData, trek: parseInt(e.target.value) || 0})} className="h-8" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px]">{t("Journey")}</Label>
-                      <Input type="number" value={formData.journey} onChange={(e) => setFormData({...formData, journey: parseInt(e.target.value) || 0})} className="h-8" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px]">{t("Descubrelo")}</Label>
-                      <Input type="number" value={formData.descubrelo} onChange={(e) => setFormData({...formData, descubrelo: parseInt(e.target.value) || 0})} className="h-8" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px]">{t("Healthy Families")}</Label>
-                      <Input type="number" value={formData.buildingHealthyFamilies} onChange={(e) => setFormData({...formData, buildingHealthyFamilies: parseInt(e.target.value) || 0})} className="h-8" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px] font-bold">{t("Total")}</Label>
-                      <Input type="number" value={formData.total} onChange={(e) => setFormData({...formData, total: parseInt(e.target.value) || 0})} className="h-8 font-bold" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px] font-bold">{t("Leaders")}</Label>
-                      <Input type="number" value={formData.leaders} onChange={(e) => setFormData({...formData, leaders: parseInt(e.target.value) || 0})} className="h-8 font-bold" />
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold text-primary border-b pb-1">{t("Curriculum Counts")}</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">{t("Puggles")}</Label>
+                        <Input type="number" value={formData.puggles} onChange={(e) => setFormData({...formData, puggles: parseInt(e.target.value) || 0})} className="h-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">{t("Cubbies")}</Label>
+                        <Input type="number" value={formData.cubbies} onChange={(e) => setFormData({...formData, cubbies: parseInt(e.target.value) || 0})} className="h-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">{t("Sparks")}</Label>
+                        <Input type="number" value={formData.sparks} onChange={(e) => setFormData({...formData, sparks: parseInt(e.target.value) || 0})} className="h-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">{t("Flame")}</Label>
+                        <Input type="number" value={formData.flame} onChange={(e) => setFormData({...formData, flame: parseInt(e.target.value) || 0})} className="h-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">{t("Torch")}</Label>
+                        <Input type="number" value={formData.torch} onChange={(e) => setFormData({...formData, torch: parseInt(e.target.value) || 0})} className="h-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">{t("Truth Seekers")}</Label>
+                        <Input type="number" value={formData.truthSeekers} onChange={(e) => setFormData({...formData, truthSeekers: parseInt(e.target.value) || 0})} className="h-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">{t("Living God's Story")}</Label>
+                        <Input type="number" value={formData.livingGodsStory} onChange={(e) => setFormData({...formData, livingGodsStory: parseInt(e.target.value) || 0})} className="h-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">{t("T&T")}</Label>
+                        <Input type="number" value={formData.tandt} onChange={(e) => setFormData({...formData, tandt: parseInt(e.target.value) || 0})} className="h-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">{t("Jr. Varsity")}</Label>
+                        <Input type="number" value={formData.jrVarsity} onChange={(e) => setFormData({...formData, jrVarsity: parseInt(e.target.value) || 0})} className="h-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">{t("Trek")}</Label>
+                        <Input type="number" value={formData.trek} onChange={(e) => setFormData({...formData, trek: parseInt(e.target.value) || 0})} className="h-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">{t("Journey")}</Label>
+                        <Input type="number" value={formData.journey} onChange={(e) => setFormData({...formData, journey: parseInt(e.target.value) || 0})} className="h-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">{t("Descubrelo")}</Label>
+                        <Input type="number" value={formData.descubrelo} onChange={(e) => setFormData({...formData, descubrelo: parseInt(e.target.value) || 0})} className="h-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">{t("Healthy Families")}</Label>
+                        <Input type="number" value={formData.buildingHealthyFamilies} onChange={(e) => setFormData({...formData, buildingHealthyFamilies: parseInt(e.target.value) || 0})} className="h-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] font-bold">{t("Total")}</Label>
+                        <Input type="number" value={formData.total} onChange={(e) => setFormData({...formData, total: parseInt(e.target.value) || 0})} className="h-8 font-bold" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] font-bold">{t("Leaders")}</Label>
+                        <Input type="number" value={formData.leaders} onChange={(e) => setFormData({...formData, leaders: parseInt(e.target.value) || 0})} className="h-8 font-bold" />
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between border p-3 rounded-md bg-slate-50 dark:bg-slate-900/50 mt-4">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">{t("Active Status")}</Label>
-                    <div className="text-sm text-muted-foreground">
-                      {formData.active ? t("Club is active") : t("Club is inactive")}
-                    </div>
-                  </div>
-                  <Switch
-                    checked={formData.active}
-                    onCheckedChange={(checked: boolean) => setFormData({ ...formData, active: checked })}
-                    className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-slate-400"
-                  />
                 </div>
               </div>
             </ScrollArea>
 
-            <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
+            <DialogFooter className="p-6 border-t flex-col sm:flex-row gap-2 bg-slate-50/50 dark:bg-slate-900/20">
               {editingClub && (
                 <Button 
                   type="button" 
