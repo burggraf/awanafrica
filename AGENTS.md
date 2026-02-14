@@ -85,8 +85,9 @@ Use the `useLayout()` hook in page components to customize the header and footer
 - The UI should provide separate settings for Language and Locale, both using flags for selection.
 
 #### Translation Requirements
-- **MANDATORY**: When adding new features or UI text, you **MUST** provide translations for **ALL** supported languages currently in `src/lib/i18n.ts` (e.g., English, Swahili, Sesotho, Malagasy, French).
+- **MANDATORY**: When adding new features or UI text, you **MUST** provide translations for **ALL** supported languages currently defined in `src/lib/i18n.ts`.
 - Do not mark a task as complete if any language has missing tokens.
+- Check the `resources` object in `src/lib/i18n.ts` to identify the current list of active languages before implementing.
 - If you are unsure of a translation, use a translation tool/service to provide a high-quality placeholder and mark it for review.
 
 ### 7. PocketBase Migrations
