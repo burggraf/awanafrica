@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Trash2, Building2, Search, X, MapPin } from "lucide-react";
+import { Plus, Trash2, Building2, Search, X, MapPin, MoreVertical } from "lucide-react";
 import { pb } from "@/lib/pb";
 import { useLayout } from "@/lib/layout-context";
 import { useAdmin } from "@/lib/admin-context";
@@ -65,6 +65,15 @@ import {
 import { Filter } from "lucide-react";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 
+import { ImportClubsModal } from "./import-clubs-modal";
+
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+
 type RegionExpanded = RegionsResponse<{
   country: CountriesResponse;
 }>;
@@ -79,7 +88,7 @@ const ITEMS_PER_PAGE = 20;
 
 export function ClubManagement() {
   const { t } = useTranslation();
-  const { setHeaderTitle } = useLayout();
+  const { setHeaderTitle, setHeaderRight } = useLayout();
   const { toast } = useToast();
   const { isGlobalAdmin, adminRoles, isLoading: isAdminLoading } = useAdmin();
   
@@ -99,6 +108,8 @@ export function ClubManagement() {
     region: "all"
   });
   
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
   const [formData, setFormData] = useState<{
     name: string;
     registration: string;
@@ -318,7 +329,27 @@ export function ClubManagement() {
 
   useEffect(() => {
     setHeaderTitle(t("Club Management"));
-  }, [setHeaderTitle, t]);
+    
+    // Set up the "More" menu with Import option
+    setHeaderRight(
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <MoreVertical className="h-5 w-5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setIsImportModalOpen(true)}>
+            {t("Import Clubs")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+    
+    return () => {
+      setHeaderRight(null);
+    };
+  }, [setHeaderTitle, setHeaderRight, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1206,6 +1237,12 @@ export function ClubManagement() {
         onOpenChange={setIsAlertOpen}
         onConfirm={confirmDelete}
         confirmText={t("Delete")}
+      />
+
+      <ImportClubsModal 
+        isOpen={isImportModalOpen} 
+        onOpenChange={setIsImportModalOpen}
+        onImportComplete={() => refetch()}
       />
     </div>
   );
