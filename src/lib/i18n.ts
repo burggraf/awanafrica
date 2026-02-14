@@ -670,7 +670,9 @@ const resources = {
       "Invalid Code": "Msimbo Sio Sahihi",
       "We couldn't find a club with that registration number. Please check and try again.": "Hatukuweza kupata klabu yenye namba hiyo ya usajili. Tafadhali kagua na ujaribu tena.",
       "Awana Administrator": "Msimamizi wa Awana",
-      "Change": "Badili"
+      "Change": "Badili",
+      "Clubs Near You": "Klabu Zilizo Karibu Nawe",
+      "Clear results": "Futa matokeo"
     }
   },
   st: {
@@ -985,7 +987,15 @@ const resources = {
       "Invalid Code": "Khoutu e fosahetseng",
       "We couldn't find a club with that registration number. Please check and try again.": "Ha rea khona ho fumana klapa ka nomoro eo ea ho ngolisa. Ka kopo hlahloba 'me u leke hape.",
       "Awana Administrator": "Molaoli oa Awana",
-      "Change": "Fetola"
+      "Change": "Fetola",
+      "Use your location to see nearby clubs": "Sebelisa sebaka sa hau ho bona diklapa tse haufi",
+      "Enter Club Registration #": "Kenya # ea ho Ngolisa ea Klapa",
+      "If you have your club's code": "Haeba u na le khoutu ea klapa ea hau",
+      "Search for my Club": "Batla Klapa ea ka",
+      "Find your club by country and region": "Fumana klapa ea hau ka naha le sebaka",
+      "Back to search options": "Khutlela ho dikgetho tsa ho batla",
+      "Clubs Near You": "Diklapa tse Haufi le Uena",
+      "Clear results": "Hlakola liphetho"
     }
   },
   mg: {
@@ -1299,7 +1309,7 @@ const resources = {
       "Invalid Code": "Kaody tsy manan-kery",
       "We couldn't find a club with that registration number. Please check and try again.": "Tsy nahita klioba tamin'io laharana fisoratana anarana io izahay. Jereo tsara ary avereno indray.",
       "Awana Administrator": "Mpandrindra Awana",
-      "Change": "Ovaina"
+      "Change": "Ovaina",
     }
   },
   fr: {
@@ -1613,7 +1623,7 @@ const resources = {
       "Invalid Code": "Code invalide",
       "We couldn't find a club with that registration number. Please check and try again.": "Nous n'avons pas trouvé de club avec ce numéro d'enregistrement. Veuillez vérifier et réessayer.",
       "Awana Administrator": "Administrateur Awana",
-      "Change": "Modifier"
+      "Change": "Modifier",
     }
   }
 };
