@@ -27,3 +27,4 @@ dist-ssr
 pocketbase
 pb_data
 .env.production
+.worktrees/
