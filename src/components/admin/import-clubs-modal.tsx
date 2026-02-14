@@ -230,6 +230,7 @@ export function ImportClubsModal({ isOpen, onOpenChange, onImportComplete }: Imp
             missionary: missionaryId !== "none" ? missionaryId : null,
             expiration: parseExpirationDate(rowData["Expiration Date"]),
             region: region.id,
+            country: country.id,
             active: true,
             metadata: metadata,
           };
