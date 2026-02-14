@@ -220,7 +220,18 @@ export function ImportClubsModal({ isOpen, onOpenChange, onImportComplete }: Imp
           }
 
           const venue = rowData["Venue"];
-          const validVenues = ["Church", "School", "Community Center", "Christian Camp", "Other"];
+          const validVenues = [
+            "Church", 
+            "School", 
+            "Community Center", 
+            "Christian Camp", 
+            "Children's Ministry Office",
+            "Mission Compound",
+            "Refugee Camp",
+            "Youth Center",
+            "Orphanage",
+            "Other"
+          ];
 
           const clubData: any = {
             name: rowData["Name"],
