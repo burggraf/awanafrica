@@ -234,7 +234,13 @@ export function ImportClubsModal({ isOpen, onOpenChange, onImportComplete }: Imp
             metadata: metadata,
           };
 
-          batchRequests.push(pb.collection("clubs").create(clubData, { requestKey: null }));
+          batchRequests.push(
+            pb.collection("clubs").create(clubData, { requestKey: null })
+              .catch(err => {
+                console.error("Failed to create club:", clubData.name, err.data);
+                throw err;
+              })
+          );
           existingRegs.add(registration); // Prevent duplicates within the same import
         }
 
