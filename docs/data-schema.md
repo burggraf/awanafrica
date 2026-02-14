@@ -11,6 +11,7 @@ The primary user record.
 - `email` (email, required, unique)
 - `name` (text): Full name (legacy field).
 - `displayName` (text): Preferred display name.
+- `phone` (text): User's phone number.
 - `avatar` (file): User profile picture (max 5MB).
 - `bio` (text): Short user biography.
 - `language` (text): Preferred UI language (e.g., "en", "sw").

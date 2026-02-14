@@ -58,6 +58,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       password: "",
       passwordConfirm: "",
       name: "",
+      phone: "",
     },
   })
 
@@ -436,6 +437,19 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                       <FormLabel>{t("Full Name")}</FormLabel>
                       <FormControl>
                         <Input placeholder="John Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={registerForm.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("Phone Number")}</FormLabel>
+                      <FormControl>
+                        <Input placeholder="+255..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

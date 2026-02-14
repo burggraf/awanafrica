@@ -42,6 +42,7 @@ export function ProfileScreen() {
     defaultValues: {
       name: user?.name || "",
       displayName: user?.displayName || "",
+      phone: user?.phone || "",
       bio: user?.bio || "",
       language: user?.language || i18n.language,
       locale: user?.locale || country,
@@ -55,6 +56,7 @@ export function ProfileScreen() {
       form.reset({
         name: user.name || "",
         displayName: user.displayName || "",
+        phone: user.phone || "",
         bio: user.bio || "",
         language: user.language || i18n.language,
         locale: user.locale || country,
@@ -213,6 +215,19 @@ export function ProfileScreen() {
                     <Input {...field} />
                   </FormControl>
                   <FormDescription>{t("This is how others will see you.")}</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("Phone Number")}</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="+255..." />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

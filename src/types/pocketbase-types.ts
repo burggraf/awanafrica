@@ -109,6 +109,7 @@ export interface UsersRecord {
 	verified: boolean
 	name?: string
 	displayName?: string
+	phone?: string
 	avatar?: string
 	bio?: string
 	language?: string
