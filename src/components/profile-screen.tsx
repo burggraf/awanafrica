@@ -25,7 +25,7 @@ import {
   SelectValue 
 } from "@/components/ui/select"
 import { useTheme } from "@/components/theme-provider"
-import { useLocale, countries, type Country } from "@/lib/locale-context"
+import { useLocale, countryMetadata } from "@/lib/locale-context"
 
 import { useTranslation } from "react-i18next"
 
@@ -34,7 +34,7 @@ export function ProfileScreen() {
   const { toast } = useToast()
   const { i18n, t } = useTranslation()
   const { theme, setTheme } = useTheme()
-  const { country, setCountry } = useLocale()
+  const { country, setCountry, availableCountries } = useLocale()
   const [loading, setLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -84,7 +84,7 @@ export function ProfileScreen() {
       
       // Apply preferences immediately
       if (data.language) i18n.changeLanguage(data.language)
-      if (data.locale) setCountry(data.locale as Country)
+      if (data.locale) setCountry(data.locale)
       if (data.theme) setTheme(data.theme as any)
 
       toast({ title: t("Profile updated") })
@@ -290,11 +290,11 @@ export function ProfileScreen() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.entries(countries).map(([code, info]) => (
-                        <SelectItem key={code} value={code}>
+                      {availableCountries.map((c) => (
+                        <SelectItem key={c.isoCode} value={c.isoCode}>
                           <span className="flex items-center gap-2">
-                            <span>{info.flag}</span>
-                            <span>{t(info.name)}</span>
+                            <span>{countryMetadata[c.isoCode]?.flag || '🌍'}</span>
+                            <span>{t(c.name)}</span>
                           </span>
                         </SelectItem>
                       ))}

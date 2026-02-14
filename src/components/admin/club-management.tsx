@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Trash2, Building2, Search, X } from "lucide-react";
+import { Plus, Trash2, Building2, Search, X, MapPin } from "lucide-react";
 import { pb } from "@/lib/pb";
 import { useLayout } from "@/lib/layout-context";
 import { useAdmin } from "@/lib/admin-context";
@@ -129,6 +129,10 @@ export function ClubManagement() {
     salesforce: string;
     timezone: string;
     active: boolean;
+    lat: number | "";
+    lng: number | "";
+    joinCode: string;
+    leaderSecret: string;
   }>({
     name: "",
     registration: "",
@@ -159,6 +163,10 @@ export function ClubManagement() {
     salesforce: "",
     timezone: "UTC",
     active: true,
+    lat: "",
+    lng: "",
+    joinCode: "",
+    leaderSecret: "",
   });
 
   const { data, isLoading, refetch } = usePBQuery(async ({ requestKey }) => {
@@ -327,11 +335,15 @@ export function ClubManagement() {
       const { 
         puggles, cubbies, sparks, flame, torch, truthSeekers, livingGodsStory, 
         tandt, jrVarsity, trek, journey, descubrelo, buildingHealthyFamilies, 
-        total, leaders,
+        total, leaders, lat, lng,
         ...rest 
       } = formData;
       
-      const submitData: any = { ...rest };
+      const submitData: any = { 
+        ...rest,
+        lat: lat === "" ? null : Number(lat),
+        lng: lng === "" ? null : Number(lng)
+      };
       
       if (submitData.missionary === "none" || !submitData.missionary) {
         submitData.missionary = null;
@@ -398,6 +410,10 @@ export function ClubManagement() {
         salesforce: "",
         timezone: "UTC",
         active: true,
+        lat: "",
+        lng: "",
+        joinCode: "",
+        leaderSecret: "",
       });
       refetch();
     } catch (error: any) {
@@ -466,6 +482,10 @@ export function ClubManagement() {
         salesforce: club.salesforce || "",
         timezone: club.timezone || "UTC",
         active: !!club.active,
+        lat: club.lat ?? "",
+        lng: club.lng ?? "",
+        joinCode: club.joinCode || "",
+        leaderSecret: club.leaderSecret || "",
       });
     } else {
       setEditingClub(null);
@@ -499,6 +519,10 @@ export function ClubManagement() {
         salesforce: "",
         timezone: "UTC",
         active: true,
+        lat: "",
+        lng: "",
+        joinCode: "",
+        leaderSecret: "",
       });
     }
     setIsDialogOpen(true);
@@ -801,6 +825,12 @@ export function ClubManagement() {
                   >
                     {t("Curriculum Counts")}
                   </TabsTrigger>
+                  <TabsTrigger 
+                    value="onboarding" 
+                    className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full px-1"
+                  >
+                    {t("Onboarding & Geo")}
+                  </TabsTrigger>
                 </TabsList>
               </div>
               
@@ -1058,6 +1088,90 @@ export function ClubManagement() {
                         <Label className="text-[10px] font-bold">{t("Leaders")}</Label>
                         <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.leaders} onChange={(e) => setFormData({...formData, leaders: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8 font-bold" />
                       </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="onboarding" className="space-y-6 pb-6 pt-4 mt-0">
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-semibold border-b pb-2">{t("Registration & Access")}</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="joinCode">{t("Join Code")}</Label>
+                          <Input
+                            id="joinCode"
+                            value={formData.joinCode}
+                            onChange={(e) => setFormData({ ...formData, joinCode: e.target.value.toUpperCase() })}
+                            placeholder="AW1234"
+                          />
+                          <p className="text-[10px] text-muted-foreground">
+                            {t("Short code for users to find the club manually.")}
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="leaderSecret">{t("Leader Secret")}</Label>
+                          <Input
+                            id="leaderSecret"
+                            value={formData.leaderSecret}
+                            onChange={(e) => setFormData({ ...formData, leaderSecret: e.target.value })}
+                            placeholder="SECRET PIN"
+                          />
+                          <p className="text-[10px] text-muted-foreground">
+                            {t("Secret code for instant leader approval.")}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-semibold border-b pb-2">{t("Geolocation")}</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="lat">{t("Latitude")}</Label>
+                          <Input
+                            id="lat"
+                            type="number"
+                            step="any"
+                            value={formData.lat}
+                            onChange={(e) => setFormData({ ...formData, lat: e.target.value === "" ? "" : Number(e.target.value) })}
+                            placeholder="-6.7924"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="lng">{t("Longitude")}</Label>
+                          <Input
+                            id="lng"
+                            type="number"
+                            step="any"
+                            value={formData.lng}
+                            onChange={(e) => setFormData({ ...formData, lng: e.target.value === "" ? "" : Number(e.target.value) })}
+                            placeholder="39.2083"
+                          />
+                        </div>
+                      </div>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => {
+                          if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition((pos) => {
+                              setFormData({
+                                ...formData,
+                                lat: pos.coords.latitude,
+                                lng: pos.coords.longitude
+                              });
+                              toast({ title: t("Success"), description: t("Location captured") });
+                            }, (err) => {
+                              toast({ title: t("Error"), description: err.message, variant: "destructive" });
+                            });
+                          }
+                        }}
+                      >
+                        <MapPin className="h-4 w-4 mr-2" />
+                        {t("Capture Current GPS Location")}
+                      </Button>
                     </div>
                   </div>
                 </TabsContent>

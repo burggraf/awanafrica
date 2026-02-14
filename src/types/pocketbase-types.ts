@@ -50,6 +50,10 @@ export interface ClubYearsRecord {
 export interface ClubsRecord {
 	name: string
 	registration: string
+	joinCode?: string
+	leaderSecret?: string
+	lat?: number
+	lng?: number
 	venue: "Church" | "School" | "Community Center" | "Christian Camp" | "Other"
 	type: "Leader Based" | "Other"
 	denomination?: string

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { pb } from "@/lib/pb"
 import { Button } from "@/components/ui/button"
@@ -27,9 +27,13 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
 import { useTheme } from "@/components/theme-provider"
-import { useLocale, countries, type Country } from "@/lib/locale-context"
-import { Languages, Sun, Moon, Monitor } from "lucide-react"
+import { useLocale, countryMetadata } from "@/lib/locale-context"
+import { Languages, Sun, Moon, Monitor, User, ShieldCheck } from "lucide-react"
+import { ClubSelector } from "./club-selector"
+import type { ClubsResponse as ClubsResponseType } from "@/types/pocketbase-types"
 
 import { useTranslation } from "react-i18next"
 
@@ -41,8 +45,9 @@ interface AuthModalProps {
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const { i18n, t } = useTranslation()
   const { theme, setTheme } = useTheme()
-  const { country, setCountry } = useLocale()
+  const { country, setCountry, availableCountries } = useLocale()
   const [activeTab, setActiveTab] = useState<"login" | "register" | "forgot">("login")
+  const [selectedClub, setSelectedClub] = useState<ClubsResponseType | null>(null)
   const { toast } = useToast()
 
   const loginForm = useForm({
@@ -59,14 +64,29 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       passwordConfirm: "",
       name: "",
       phone: "",
+      role: "Guardian" as "Guardian" | "Leader",
+      leaderSecret: "",
     },
   })
+
+  const role = registerForm.watch("role")
 
   const forgotForm = useForm({
     defaultValues: {
       email: "",
     },
   })
+
+  useEffect(() => {
+    // Check URL for club context
+    const params = new URLSearchParams(window.location.search)
+    const clubId = params.get("club")
+    if (clubId) {
+      pb.collection("clubs").getOne(clubId)
+        .then((record) => setSelectedClub(record as unknown as ClubsResponseType))
+        .catch(console.error)
+    }
+  }, [])
 
   async function syncPreferences(userId: string, currentPrefs?: any) {
     try {
@@ -88,7 +108,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       i18n.changeLanguage(user.language)
     }
     if (user.locale && user.locale !== country) {
-      setCountry(user.locale as Country)
+      setCountry(user.locale)
     }
     if (user.theme && user.theme !== theme) {
       setTheme(user.theme as any)
@@ -97,64 +117,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   async function onLogin(data: any) {
     try {
-      console.log("Attempting login to:", pb.baseUrl)
       const authData = await pb.collection("users").authWithPassword(data.email, data.password)
       await applyUserPreferences(authData.record)
-      // Sync current local preferences to DB in case they were changed on login screen
       await syncPreferences(authData.record.id, authData.record)
       toast({ title: t("Logged in successfully") })
       onClose()
     } catch (error: any) {
-      console.error("Login error:", error)
-      
       let description = error.message
-      
-      // PocketBase 400 error on auth usually means invalid credentials
       if (error.status === 400) {
         description = t("Invalid email or password. Please try again.")
-      } else if (error.status === 403) {
-        // 403 usually means the user is not verified if the collection requires it
-        description = t("Please verify your email address before logging in. Check your inbox for the verification link.")
-        
-        // Offer to resend verification
-        toast({
-          title: t("Verification required"),
-          description,
-          variant: "destructive",
-          action: (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={async () => {
-                try {
-                  await pb.collection("users").requestVerification(data.email)
-                  toast({ title: t("Verification email sent") })
-                } catch (err: any) {
-                  if (err.status === 429) {
-                    toast({ 
-                      title: t("Too many requests"), 
-                      description: t("Please wait a few minutes before trying again."),
-                      variant: "destructive" 
-                    })
-                  } else {
-                    toast({ 
-                      title: t("Error"), 
-                      description: err.message,
-                      variant: "destructive" 
-                    })
-                  }
-                }
-              }}
-            >
-              {t("Resend")}
-            </Button>
-          )
-        })
-        return // Exit early as we handled this specifically
-      } else if (error.message?.includes('Failed to fetch') || error.status === 0) {
-        description = t("Network error: Could not connect to the server. Please check your connection or browser settings.")
       }
-
       toast({
         title: t("Login failed"),
         description,
@@ -180,8 +152,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   }
 
   async function onRegister(data: any) {
+    if (!selectedClub) {
+      toast({
+        title: t("Registration failed"),
+        description: t("Please select a club first"),
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
-      // Validate passwords match before sending to API
       if (data.password !== data.passwordConfirm) {
         toast({
           title: t("Registration failed"),
@@ -191,6 +171,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         return
       }
 
+      // 1. Create User
       await pb.collection("users").create({
         ...data,
         emailVisibility: false,
@@ -198,48 +179,46 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         locale: country,
         theme: theme,
       })
+
+      // 1b. Authenticate temporarily to create membership
+      await pb.collection("users").authWithPassword(data.email, data.password)
       
-      // Request verification email immediately after registration
+      // 2. Determine Membership Status & Roles
+      let membershipRole = data.role
+      if (data.role === "Leader") {
+        const isSecretCorrect = selectedClub.leaderSecret && data.leaderSecret === selectedClub.leaderSecret
+        if (!isSecretCorrect) {
+          membershipRole = "Pending"
+        }
+      }
+
+      // 3. Create Club Membership
+      await pb.collection("club_memberships").create({
+        user: pb.authStore.record?.id,
+        club: selectedClub.id,
+        roles: [membershipRole]
+      })
+
+      // 4. Verification Email
       try {
         await pb.collection("users").requestVerification(data.email)
       } catch (verifyError: any) {
-        console.warn("Verification email request failed (possibly rate limited):", verifyError)
-        // We don't fail the whole registration if just the email trigger fails, 
-        // as the user can always request it again from the login screen if we added a button.
+        console.warn("Verification email request failed:", verifyError)
       }
+      
+      // Clear auth store because they still need to verify their email
+      pb.authStore.clear()
       
       toast({ 
         title: t("Account created"), 
         description: t("Please check your email to verify your account before logging in.") 
       })
       
-      // Switch to login tab since they can't auto-login yet
       setActiveTab("login")
     } catch (error: any) {
-      console.error("Registration error details:", error.data)
-      
-      // Check for unique constraint violation (email already exists)
-      if (error.data?.data?.email?.code === 'validation_not_unique') {
-        toast({
-          title: t("Registration failed"),
-          description: t("Email already registered. Please log in or reset your password."),
-          variant: "destructive",
-        })
-        return
-      }
-
-      // Extract specific field errors if available
-      let errorMessage = error.message
-      if (error.data?.data) {
-        const fieldErrors = Object.entries(error.data.data)
-          .map(([field, detail]: [string, any]) => `${field}: ${detail.message || detail.code || JSON.stringify(detail)}`)
-          .join(", ")
-        if (fieldErrors) errorMessage = fieldErrors
-      }
-
       toast({
         title: t("Registration failed"),
-        description: errorMessage,
+        description: error.message,
         variant: "destructive",
       })
     }
@@ -261,13 +240,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] [&>button]:hidden">
+      <DialogContent className="sm:max-w-[450px] max-h-[90vh] overflow-y-auto [&>button]:hidden">
         <DialogTitle className="sr-only">{t("Authentication")}</DialogTitle>
         <DialogDescription className="sr-only">
           {t("Sign in or create an account to access AwanAfrica.")}
         </DialogDescription>
         
-        {/* Preference Selectors */}
         <div className="grid grid-cols-3 gap-2 mb-4">
           <Select value={i18n.language} onValueChange={(v) => i18n.changeLanguage(v)}>
             <SelectTrigger className="h-9 px-2">
@@ -282,13 +260,13 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </SelectContent>
           </Select>
 
-          <Select value={country} onValueChange={(v) => setCountry(v as Country)}>
+          <Select value={country} onValueChange={(v) => setCountry(v)}>
             <SelectTrigger className="h-9 px-2">
               <SelectValue>
-                {country && countries[country as Country] ? (
+                {country && countryMetadata[country] ? (
                   <span className="flex items-center gap-2">
-                    <span>{countries[country as Country].flag}</span>
-                    <span>{t(countries[country as Country].name)}</span>
+                    <span>{countryMetadata[country].flag}</span>
+                    <span>{t(countryMetadata[country].name)}</span>
                   </span>
                 ) : (
                   t("Country")
@@ -296,11 +274,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {Object.entries(countries).map(([code, info]) => (
-                <SelectItem key={code} value={code}>
+              {availableCountries.map((c) => (
+                <SelectItem key={c.isoCode} value={c.isoCode}>
                   <span className="flex items-center gap-2">
-                    <span>{info.flag}</span>
-                    <span>{t(info.name)}</span>
+                    <span>{countryMetadata[c.isoCode]?.flag || '🌍'}</span>
+                    <span>{t(c.name)}</span>
                   </span>
                 </SelectItem>
               ))}
@@ -319,24 +297,9 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="light">
-                <span className="flex items-center gap-2">
-                  <Sun className="h-4 w-4" />
-                  {t("Light")}
-                </span>
-              </SelectItem>
-              <SelectItem value="dark">
-                <span className="flex items-center gap-2">
-                  <Moon className="h-4 w-4" />
-                  {t("Dark")}
-                </span>
-              </SelectItem>
-              <SelectItem value="system">
-                <span className="flex items-center gap-2">
-                  <Monitor className="h-4 w-4" />
-                  {t("System")}
-                </span>
-              </SelectItem>
+              <SelectItem value="light">{t("Light")}</SelectItem>
+              <SelectItem value="dark">{t("Dark")}</SelectItem>
+              <SelectItem value="system">{t("System")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -362,9 +325,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("Email")}</FormLabel>
-                      <FormControl>
-                        <Input placeholder="email@example.com" {...field} />
-                      </FormControl>
+                      <FormControl><Input placeholder="email@example.com" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -375,24 +336,20 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("Password")}</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
+                      <FormControl><Input type="password" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <div className="flex flex-col gap-2">
-                  <Button type="submit" className="w-full">{t("Log in")}</Button>
-                  <Button 
-                    type="button" 
-                    variant="link" 
-                    className="px-0 font-normal"
-                    onClick={() => setActiveTab("forgot")}
-                  >
-                    {t("Forgot password?")}
-                  </Button>
-                </div>
+                <Button type="submit" className="w-full">{t("Log in")}</Button>
+                <Button 
+                  type="button" 
+                  variant="link" 
+                  className="w-full text-xs"
+                  onClick={() => setActiveTab("forgot")}
+                >
+                  {t("Forgot password?")}
+                </Button>
               </form>
             </Form>
 
@@ -422,81 +379,139 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
           <TabsContent value="register">
             <DialogHeader>
-              <DialogTitle>{t("Create an account")}</DialogTitle>
+              <DialogTitle>{t("Join a Club")}</DialogTitle>
               <DialogDescription>
-                {t("Fill in the details below to create your account.")}
+                {t("Find your club and select your role to get started.")}
               </DialogDescription>
             </DialogHeader>
-            <Form {...registerForm}>
-              <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4 py-4">
-                <FormField
-                  control={registerForm.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("Full Name")}</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={registerForm.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("Phone Number")}</FormLabel>
-                      <FormControl>
-                        <Input placeholder="+255..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={registerForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("Email")}</FormLabel>
-                      <FormControl>
-                        <Input placeholder="email@example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={registerForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("Password")}</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={registerForm.control}
-                  name="passwordConfirm"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("Confirm Password")}</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full">{t("Register")}</Button>
-              </form>
-            </Form>
+            
+            <div className="py-4 space-y-6">
+              <ClubSelector onSelect={setSelectedClub} />
+              
+              {selectedClub && (
+                <Form {...registerForm}>
+                  <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
+                    <FormField
+                      control={registerForm.control}
+                      name="role"
+                      render={({ field }) => (
+                        <FormItem className="space-y-3">
+                          <FormLabel>{t("I am registering as a...")}</FormLabel>
+                          <FormControl>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              className="grid grid-cols-2 gap-4"
+                            >
+                              <div>
+                                <RadioGroupItem value="Guardian" id="guardian" className="peer sr-only" />
+                                <Label
+                                  htmlFor="guardian"
+                                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                                >
+                                  <User className="mb-3 h-6 w-6" />
+                                  <span className="text-sm font-medium">{t("Guardian")}</span>
+                                </Label>
+                              </div>
+                              <div>
+                                <RadioGroupItem value="Leader" id="leader" className="peer sr-only" />
+                                <Label
+                                  htmlFor="leader"
+                                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                                >
+                                  <ShieldCheck className="mb-3 h-6 w-6" />
+                                  <span className="text-sm font-medium">{t("Leader")}</span>
+                                </Label>
+                              </div>
+                            </RadioGroup>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    {role === "Leader" && (
+                      <FormField
+                        control={registerForm.control}
+                        name="leaderSecret"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("Leader Access Code (Optional)")}</FormLabel>
+                            <FormControl><Input placeholder={t("Enter secret code for instant approval")} {...field} /></FormControl>
+                            <p className="text-[0.7rem] text-muted-foreground">
+                              {t("If you don't have a code, your account will require manual approval by a Director.")}
+                            </p>
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={registerForm.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("Full Name")}</FormLabel>
+                            <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={registerForm.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("Phone Number")}</FormLabel>
+                            <FormControl><Input placeholder="+255..." {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={registerForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("Email")}</FormLabel>
+                          <FormControl><Input placeholder="email@example.com" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={registerForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("Password")}</FormLabel>
+                            <FormControl><Input type="password" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={registerForm.control}
+                        name="passwordConfirm"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("Confirm")}</FormLabel>
+                            <FormControl><Input type="password" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <Button type="submit" className="w-full">{t("Create Account")}</Button>
+                  </form>
+                </Form>
+              )}
+            </div>
 
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
@@ -525,9 +540,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           <TabsContent value="forgot">
             <DialogHeader>
               <DialogTitle>{t("Reset password")}</DialogTitle>
-              <DialogDescription>
-                {t("Enter your email address and we'll send you a link to reset your password.")}
-              </DialogDescription>
             </DialogHeader>
             <Form {...forgotForm}>
               <form onSubmit={forgotForm.handleSubmit(onForgot)} className="space-y-4 py-4">
@@ -537,23 +549,15 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("Email")}</FormLabel>
-                      <FormControl>
-                        <Input placeholder="email@example.com" {...field} />
-                      </FormControl>
+                      <FormControl><Input placeholder="email@example.com" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <div className="flex flex-col gap-2">
-                  <Button type="submit" className="w-full">{t("Send Reset Link")}</Button>
-                  <Button 
-                    type="button" 
-                    variant="link" 
-                    onClick={() => setActiveTab("login")}
-                  >
-                    {t("Back to login")}
-                  </Button>
-                </div>
+                <Button type="submit" className="w-full">{t("Send Reset Link")}</Button>
+                <Button type="button" variant="link" className="w-full text-xs" onClick={() => setActiveTab("login")}>
+                  {t("Back to login")}
+                </Button>
               </form>
             </Form>
           </TabsContent>
