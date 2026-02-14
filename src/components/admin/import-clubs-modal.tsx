@@ -219,11 +219,14 @@ export function ImportClubsModal({ isOpen, onOpenChange, onImportComplete }: Imp
             }
           }
 
+          const venue = rowData["Venue"];
+          const validVenues = ["Church", "School", "Community Center", "Christian Camp", "Other"];
+
           const clubData: any = {
             name: rowData["Name"],
             registration: registration,
             salesforce: rowData["Salesforce #"],
-            venue: rowData["Venue"] || "Other",
+            venue: validVenues.includes(venue) ? venue : "Other",
             type: rowData["Type"] === "Leader based" ? "Leader Based" : "Other",
             denomination: rowData["Denomination"],
             location: rowData["Location"],
