@@ -331,24 +331,26 @@ export function ClubManagement() {
     setHeaderTitle(t("Club Management"));
     
     // Set up the "More" menu with Import option
-    setHeaderRight(
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <MoreVertical className="h-5 w-5" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setIsImportModalOpen(true)}>
-            {t("Import Clubs")}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
+    const timer = setTimeout(() => {
+      setHeaderRight(
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MoreVertical className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setIsImportModalOpen(true)}>
+              {t("Import Clubs")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }, 100);
     
     return () => {
-      // Clear the right header on unmount so it doesn't leak to other pages
-      setTimeout(() => setHeaderRight(null), 0);
+      clearTimeout(timer);
+      setHeaderRight(null);
     };
   }, [setHeaderTitle, setHeaderRight, t]);
 
