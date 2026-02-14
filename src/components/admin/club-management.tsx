@@ -552,9 +552,9 @@ export function ClubManagement() {
               {editingClub ? t("Update the details for this club.") : t("Create a new club by filling out the information below.")}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
-            <ScrollArea className="flex-1 px-6">
-              <div className="space-y-6 pb-6">
+          <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <ScrollArea className="flex-1 w-full">
+              <div className="px-6 space-y-6 pb-6 w-full">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-primary border-b pb-1">{t("Basic Information")}</h3>
