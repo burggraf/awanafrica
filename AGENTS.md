@@ -84,6 +84,11 @@ Use the `useLayout()` hook in page components to customize the header and footer
   - Numeric formatting (decimal separators, etc.).
 - The UI should provide separate settings for Language and Locale, both using flags for selection.
 
+#### Translation Requirements
+- **MANDATORY**: When adding new features or UI text, you **MUST** provide translations for **ALL** supported languages currently in `src/lib/i18n.ts` (e.g., English, Swahili, Sesotho, Malagasy, French).
+- Do not mark a task as complete if any language has missing tokens.
+- If you are unsure of a translation, use a translation tool/service to provide a high-quality placeholder and mark it for review.
+
 ### 7. PocketBase Migrations
 When adding new collections or fields, create a new file in `/pb_migrations/`.
 Note: PocketBase Go-based migrations (used in this project) require explicit `new Field()` and `new Collection()` constructors for adding elements to schema collections.
