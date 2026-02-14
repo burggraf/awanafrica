@@ -57,6 +57,7 @@ export interface ClubsRecord {
 	missionary?: string
 	expiration?: string
 	metadata?: any
+	salesforce?: string
 	region: string
 	address?: string
 	timezone?: string

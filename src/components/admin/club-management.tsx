@@ -94,6 +94,7 @@ export function ClubManagement() {
     country: string;
     region: string;
     address: string;
+    salesforce: string;
     timezone: string;
     active: boolean;
   }>({
@@ -123,6 +124,7 @@ export function ClubManagement() {
     country: "",
     region: "",
     address: "",
+    salesforce: "",
     timezone: "UTC",
     active: true,
   });
@@ -329,6 +331,7 @@ export function ClubManagement() {
         country: "",
         region: "",
         address: "",
+        salesforce: "",
         timezone: "UTC",
         active: true,
       });
@@ -396,6 +399,7 @@ export function ClubManagement() {
         country: club.expand?.region?.country || "",
         region: club.region,
         address: club.address || "",
+        salesforce: club.salesforce || "",
         timezone: club.timezone || "UTC",
         active: !!club.active,
       });
@@ -428,6 +432,7 @@ export function ClubManagement() {
         country: "",
         region: "",
         address: "",
+        salesforce: "",
         timezone: "UTC",
         active: true,
       });
@@ -708,13 +713,24 @@ export function ClubManagement() {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="address">{t("Address")}</Label>
-                      <Input
-                        id="address"
-                        value={formData.address}
-                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="address">{t("Address")}</Label>
+                        <Input
+                          id="address"
+                          value={formData.address}
+                          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="salesforce">{t("Salesforce ID")}</Label>
+                        <Input
+                          id="salesforce"
+                          value={formData.salesforce}
+                          onChange={(e) => setFormData({ ...formData, salesforce: e.target.value })}
+                          placeholder="SF-000000"
+                        />
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between border p-3 rounded-md bg-slate-50 dark:bg-slate-900/50 mt-4">
