@@ -190,7 +190,7 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
                 <Button
                   key={club.id}
                   variant="ghost"
-                  className="w-full justify-start h-auto py-3 px-3 gap-3 rounded-lg border border-transparent hover:border-primary/30 hover:bg-background relative pr-12"
+                  className="w-full justify-start h-auto py-3 px-3 gap-3 rounded-lg border border-transparent hover:border-primary/30 hover:bg-background"
                   onClick={() => {
                     setSelectedClub(club)
                     onSelect(club)
@@ -199,15 +199,17 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
                   <MapPin className="h-4 w-4 shrink-0 text-primary" />
                   <div className="flex flex-col items-start text-left flex-1 min-w-0">
                     <span className="text-sm font-bold leading-tight truncate w-full">{club.name}</span>
-                    <span className="text-[0.7rem] text-muted-foreground line-clamp-1">
-                      {club.address || club.location}
-                    </span>
+                    <div className="flex items-center justify-between w-full text-[0.7rem] text-muted-foreground mt-0.5">
+                      <span className="line-clamp-1 flex-1 pr-2">
+                        {club.address || club.location}
+                      </span>
+                      {(club as any).distance !== undefined && (
+                        <span className="shrink-0 font-medium">
+                          {Math.round((club as any).distance * 10) / 10} km
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  {(club as any).distance !== undefined && (
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[0.65rem] font-medium bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
-                      {Math.round((club as any).distance * 10) / 10} km
-                    </span>
-                  )}
                 </Button>
               ))}
             </div>
