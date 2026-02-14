@@ -46,6 +46,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 import { 
   Pagination, 
@@ -780,11 +786,27 @@ export function ClubManagement() {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-            <div className="flex-1 overflow-y-auto px-6">
-              <div className="space-y-6 pb-6 pt-2">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Tabs defaultValue="basic" className="flex-1 flex flex-col min-h-0">
+              <div className="px-6 border-b">
+                <TabsList className="w-full justify-start h-12 bg-transparent p-0 gap-6">
+                  <TabsTrigger 
+                    value="basic" 
+                    className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full px-1"
+                  >
+                    {t("Basic Information")}
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="curriculum" 
+                    className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full px-1"
+                  >
+                    {t("Curriculum Counts")}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto px-6">
+                <TabsContent value="basic" className="space-y-6 pb-6 pt-4 mt-0">
                   <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-primary border-b pb-1">{t("Basic Information")}</h3>
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-2 col-span-1">
                         <Label htmlFor="registration">{t("Registration #")}</Label>
@@ -970,10 +992,11 @@ export function ClubManagement() {
                       />
                     </div>
                   </div>
+                </TabsContent>
 
+                <TabsContent value="curriculum" className="space-y-6 pb-6 pt-4 mt-0">
                   <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-primary border-b pb-1">{t("Curriculum Counts")}</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                       <div className="space-y-1">
                         <Label className="text-[10px]">{t("Puggles")}</Label>
                         <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.puggles} onChange={(e) => setFormData({...formData, puggles: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
@@ -1026,6 +1049,7 @@ export function ClubManagement() {
                         <Label className="text-[10px]">{t("Healthy Families")}</Label>
                         <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.buildingHealthyFamilies} onChange={(e) => setFormData({...formData, buildingHealthyFamilies: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8" />
                       </div>
+                      <div className="space-y-1 border-t pt-2 mt-2 col-span-full"></div>
                       <div className="space-y-1">
                         <Label className="text-[10px] font-bold">{t("Total")}</Label>
                         <Input type="text" inputMode="numeric" pattern="[0-9]*" value={formData.total} onChange={(e) => setFormData({...formData, total: parseInt(e.target.value.replace(/\D/g, '')) || 0})} className="h-8 font-bold" />
@@ -1036,9 +1060,9 @@ export function ClubManagement() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </TabsContent>
               </div>
-            </div>
+            </Tabs>
 
             <DialogFooter className="p-6 border-t flex-col sm:flex-row gap-2 bg-slate-50/50 dark:bg-slate-900/20">
               {editingClub && (
