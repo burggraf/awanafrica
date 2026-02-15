@@ -7,12 +7,17 @@ import {
   Map,
   School,
   Users,
+  Baby,
+  UserCog,
+  UsersRound,
+  GraduationCap,
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 import { NavUser } from "@/components/nav-user"
 import { useAdmin } from "@/lib/admin-context"
+import { useClubs } from "@/lib/club-context"
 import { ModeToggle } from "@/components/mode-toggle"
 import { LanguageToggle } from "@/components/language-toggle"
 import { CountryToggle } from "@/components/country-toggle"
@@ -40,7 +45,9 @@ const APP_NAME = __APP_NAME__
 export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, className, ...props }: AppSidebarProps) {
   const { t } = useTranslation()
   const { isAdmin, isGlobalAdmin, isCountryAdmin } = useAdmin()
+  const { currentClub, isGuardian, isActiveLeader, isPendingLeader, isLoading: isClubsLoading } = useClubs()
 
+  // Main navigation - always visible
   const navMain = [
     {
       title: t("Dashboard"),
@@ -49,11 +56,39 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, classNam
       isActive: true,
     },
     {
+      title: t("My Clubbers"),
+      url: "/my-clubbers",
+      icon: Baby,
+      visible: !!isGuardian,
+    },
+    {
       title: t("Settings"),
       url: "/settings",
       icon: Settings2,
     },
-  ]
+  ].filter(item => item.visible !== false)
+
+  // Club context navigation - only visible when a club is selected and user is an active leader
+  const navClubContext = [
+    {
+      title: t("Leaders"),
+      url: "/leaders",
+      icon: UserCog,
+      visible: !!isActiveLeader && !!currentClub,
+    },
+    {
+      title: t("Guardians"),
+      url: "/guardians",
+      icon: UsersRound,
+      visible: !!isActiveLeader && !!currentClub,
+    },
+    {
+      title: t("Clubbers"),
+      url: "/clubbers",
+      icon: GraduationCap,
+      visible: !!isActiveLeader && !!currentClub,
+    },
+  ].filter(item => item.visible !== false)
 
   const navAdmin = [
     {
@@ -108,6 +143,7 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, classNam
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        {!isClubsLoading && (
         <SidebarMenu>
           {navMain.map((item) => (
             <SidebarMenuItem key={item.title}>
@@ -121,6 +157,42 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, classNam
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
+        )}
+
+        {navClubContext.length > 0 && currentClub && (
+          <>
+            <SidebarSeparator />
+            <div className="px-4 py-2 text-[10px] text-muted-foreground uppercase tracking-wider font-medium flex items-center gap-2">
+              <School className="size-3" />
+              <span>{currentClub.name}</span>
+            </div>
+            <SidebarMenu>
+              {navClubContext.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton 
+                    tooltip={item.title} 
+                    onClick={() => onPageChange(item.url.substring(1))}
+                  >
+                    {item.icon && <item.icon />}
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </>
+        )}
+
+        {isPendingLeader && (
+          <>
+            <SidebarSeparator />
+            <div className="px-4 py-2 text-[10px] text-amber-600 dark:text-amber-400 uppercase tracking-wider font-medium">
+              {t("Pending Approval")}
+            </div>
+            <div className="px-4 py-2 text-xs text-muted-foreground">
+              {t("Your leader request is pending verification.")}
+            </div>
+          </>
+        )}
 
         {navAdmin.length > 0 && (
           <>

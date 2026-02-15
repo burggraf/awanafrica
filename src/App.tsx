@@ -24,6 +24,10 @@ import { CountryManagement } from "@/components/admin/country-management"
 import { RegionManagement } from "@/components/admin/region-management"
 import { ClubManagement } from "@/components/admin/club-management"
 import { UserManagement } from "@/components/admin/user-management"
+import { LeadersPage } from "@/components/leaders-page"
+import { ClubbersPage } from "@/components/clubbers-page"
+import { GuardiansPage } from "@/components/guardians-page"
+import { MyClubbersPage } from "@/components/my-clubbers-page"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LocaleProvider } from "@/lib/locale-context"
 import { ClubProvider } from "@/lib/club-context"
@@ -49,6 +53,7 @@ import { useTranslation } from "react-i18next"
 
 import { LayoutProvider, useLayout } from "@/lib/layout-context"
 import { useAdmin } from "@/lib/admin-context"
+import { useClubs } from "@/lib/club-context"
 
 import { 
   AuthVerifyPage, 
@@ -82,6 +87,7 @@ function MainContent() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const { isGlobalAdmin, isCountryAdmin } = useAdmin()
+  const { isGuardian, isActiveLeader } = useClubs()
 
   // Derive active page title from location for the header
   const activePageTitle = useMemo(() => {
@@ -195,6 +201,20 @@ function MainContent() {
           <Route path="/auth/reset-password" element={<AuthResetPasswordPage />} />
           <Route path="/auth/confirm-email-change" element={<AuthConfirmEmailChangePage />} />
           
+          {/* Club Context Routes - for Leaders */}
+          {(isActiveLeader || isGlobalAdmin) && (
+            <>
+              <Route path="/leaders" element={<LeadersPage />} />
+              <Route path="/clubbers" element={<ClubbersPage />} />
+              <Route path="/guardians" element={<GuardiansPage />} />
+            </>
+          )}
+
+          {/* Guardian Routes */}
+          {isGuardian && (
+            <Route path="/my-clubbers" element={<MyClubbersPage />} />
+          )}
+
           {/* Admin Routes */}
           {isGlobalAdmin && (
             <Route path="/admin/countries" element={<CountryManagement />} />

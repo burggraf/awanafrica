@@ -1,4 +1,5 @@
 import { ChevronDown, School } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { useClubs } from "@/lib/club-context"
 import { useAdmin } from "@/lib/admin-context"
 import { 
@@ -10,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 
 export function ClubSwitcher() {
+  const { t } = useTranslation()
   const { currentClub, setCurrentClub, memberships } = useClubs()
   const { isAdmin, adminRoles } = useAdmin()
 
@@ -17,25 +19,34 @@ export function ClubSwitcher() {
   const getAdminScopeLabel = () => {
     // Check for Global/Missionary first (highest precedence)
     const globalRole = adminRoles.find(r => r.role === 'Global' || r.role === 'Missionary')
-    if (globalRole) return "All Clubs"
+    if (globalRole) return t("All Clubs")
     
     // Check for Country admin
     const countryRole = adminRoles.find(r => r.role === 'Country')
     if (countryRole?.expand?.country) {
-      return `${countryRole.expand.country.name} Clubs`
+      return `${countryRole.expand.country.name} ${t("Clubs")}`
     }
     
     // Check for Region admin
     const regionRole = adminRoles.find(r => r.role === 'Region')
     if (regionRole?.expand?.region) {
-      return `${regionRole.expand.region.name} Clubs`
+      return `${regionRole.expand.region.name} ${t("Clubs")}`
     }
     
     // Check for Pending admin
     const pendingRole = adminRoles.find(r => r.role === 'Pending')
-    if (pendingRole) return "Pending Approval"
+    if (pendingRole) return t("Pending Approval")
     
-    return "All Clubs"
+    return t("All Clubs")
+  }
+
+  // Helper to check if membership has only pending role
+  const getMembershipLabel = (membership: typeof memberships[0]) => {
+    const hasOnlyPending = membership.roles?.length === 1 && membership.roles[0] === 'Pending'
+    if (hasOnlyPending) {
+      return `${membership.expand?.club?.name} (${t("Pending")})`
+    }
+    return membership.expand?.club?.name || t("My Club")
   }
 
   // CASE 1: Admins always see a static scope label (never a dropdown)
@@ -58,7 +69,7 @@ export function ClubSwitcher() {
           <Button variant="outline" className="w-full justify-between gap-2 px-3">
             <div className="flex items-center gap-2 truncate">
               <School className="h-4 w-4 shrink-0" />
-              <span className="truncate">{currentClub?.name || "Select Club"}</span>
+              <span className="truncate">{currentClub?.name || t("Select Club")}</span>
             </div>
             <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -69,7 +80,7 @@ export function ClubSwitcher() {
               key={m.id} 
               onClick={() => m.expand?.club && setCurrentClub(m.expand.club)}
             >
-              {m.expand?.club.name}
+              {getMembershipLabel(m)}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -79,11 +90,12 @@ export function ClubSwitcher() {
 
   // CASE 3: Non-admin with exactly one membership - show as label
   if (memberships.length === 1) {
-    const clubName = memberships[0].expand?.club?.name || "My Club"
+    const membership = memberships[0]
+    const clubLabel = getMembershipLabel(membership)
     return (
       <Button variant="ghost" disabled className="w-full justify-start gap-2 px-3 opacity-100 cursor-default">
         <School className="h-4 w-4 shrink-0" />
-        <span className="truncate">{clubName}</span>
+        <span className="truncate">{clubLabel}</span>
       </Button>
     )
   }
