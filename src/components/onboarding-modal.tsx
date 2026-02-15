@@ -187,7 +187,6 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
 
   const handleSkip = () => {
     setIsOpen(false)
-    window.location.reload()
   }
 
   const handleLogout = () => {
@@ -483,7 +482,8 @@ export function OnboardingModal() {
 
   // 3. If they are a Guardian but have no students, show the student wizard.
   const isGuardian = memberships.some(m => m.roles.includes("Guardian"))
-  if (isGuardian && studentCount === 0) return <OnboardingModalInner initialStep="student" />
+  const isStaff = memberships.some(m => m.roles.some(r => ["Director", "Secretary", "Treasurer", "Leader"].includes(r)))
+  if (isGuardian && !isStaff && studentCount === 0) return <OnboardingModalInner initialStep="student" />
 
   // 4. If they have memberships and are NOT pending and NOT a student-less guardian, they are done.
   if (hasMemberships) return null
