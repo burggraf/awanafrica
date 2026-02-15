@@ -58,6 +58,14 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const isRegionAdmin = adminRoles.some(r => r.role === 'Region');
   const isAdmin = adminRoles.length > 0;
 
+  // Expose context for Admin Management pages to use without hook dependency issues
+  useEffect(() => {
+    (window as any)._adminContext = { isGlobalAdmin, isCountryAdmin, isRegionAdmin, isAdmin };
+    return () => {
+      delete (window as any)._adminContext;
+    };
+  }, [isGlobalAdmin, isCountryAdmin, isRegionAdmin, isAdmin]);
+
   return (
     <AdminContext.Provider value={{ 
       adminRoles, 

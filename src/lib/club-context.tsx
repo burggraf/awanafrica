@@ -138,6 +138,14 @@ export function ClubProvider({ children }: { children: ReactNode }) {
     else localStorage.removeItem('active-year');
   }, [currentYear]);
 
+  // Expose setCurrentClub for Admin Management pages to use
+  useEffect(() => {
+    (window as any)._clubContextHelpers = { setCurrentClub };
+    return () => {
+      delete (window as any)._clubContextHelpers;
+    };
+  }, [setCurrentClub]);
+
   return (
     <ClubContext.Provider value={{ 
       currentClub, 

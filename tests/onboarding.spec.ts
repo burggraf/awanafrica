@@ -16,27 +16,30 @@ test.describe('Onboarding Flow', () => {
     // Switch to Register tab
     await page.getByRole('tab', { name: /Register/i }).click();
 
-    // Select Country in Club Selector
-    // The top bar has one, and the selector has one. We want the one in the form.
-    const countryTrigger = page.locator('button').filter({ hasText: 'Country' }).first();
-    await countryTrigger.click();
-    await page.getByRole('option', { name: /Tanzania/i }).click();
-
-    // Select Region
-    const regionTrigger = page.locator('button').filter({ hasText: 'Region' }).first();
-    await regionTrigger.click();
-    await page.getByRole('option', { name: /Arusha/i }).click();
+    // Choose Guardian Role
+    await page.locator('label').filter({ hasText: 'Guardian' }).click();
 
     // Select Club
     // Use locator with text since getByRole might be ambiguous or failing on the name
-    const clubTrigger = page.locator('button').filter({ hasText: /Select your club/i });
-    await clubTrigger.click();
-    
-    // The club list is in a Command component
+    await page.getByRole('button', { name: /Search for my Club/i }).click();
+
+    // Select Country - Look for the trigger within the browse section
+    await page.getByRole('button', { name: 'Country' }).click();
+    await page.getByRole('option', { name: 'Tanzania', exact: true }).click();
+
+    // Select Region
+    await page.getByRole('button', { name: 'Region' }).click();
+    await page.getByRole('option', { name: 'Arusha', exact: true }).click();
+
+    // Select specific club from combobox
+    await page.getByRole('button', { name: /Select your club/i }).click();
     await page.getByRole('option', { name: /Test Club Arusha/i }).click();
 
-    // Verify club is selected
-    await expect(page.locator('text=Selected Club:')).toBeVisible();
+    // Verify club is selected (ClubSelector shows "Selected Club" in a label)
+    await expect(page.getByText(/Selected Club/i)).toBeVisible();
+
+    // Verify club name specifically (Test Club Arusha)
+    await expect(page.getByText(/Test Club Arusha/i)).toBeVisible();
 
     // Choose Guardian Role
     await page.locator('label').filter({ hasText: 'Guardian' }).click();
@@ -71,15 +74,16 @@ test.describe('Onboarding Flow', () => {
     await page.getByRole('button', { name: /Get Started/i }).first().click();
     await page.getByRole('tab', { name: /Register/i }).click();
 
-    // Use a join code (we seeded AW1234)
-    await page.fill('input[placeholder*="Club Code"]', 'AW1234');
-    await page.getByRole('button', { name: 'Join' }).click();
-
-    // Verify club is selected
-    await expect(page.locator('text=Selected Club:')).toBeVisible();
-
     await page.locator('label').filter({ hasText: 'Leader' }).click();
-    
+
+    // Use a join code (we seeded AW1234)
+    await page.getByRole('button', { name: /Enter Club Registration #/i }).click();
+    await page.fill('input[placeholder*="Registration #"]', 'AW1234');
+    await page.getByRole('button', { name: 'Search', exact: true }).click();
+
+    // Verify club is selected (AW1234 registration)
+    await expect(page.getByText(/Selected Club/i)).toBeVisible();
+
     // Fill basic details
     const email = `test-leader-${Date.now()}@example.com`;
     await page.fill('input[placeholder="John Doe"]', 'Test Leader');

@@ -485,6 +485,21 @@ export function ClubManagement() {
 
   const openDialog = (club?: ClubExpanded) => {
     if (club) {
+      // If user clicks a club, optionally set it as the current context for viewing leaders/clubbers
+      const { isGlobalAdmin, isCountryAdmin, isRegionAdmin } = (window as any)._adminContext || {};
+      const isAdminUser = isGlobalAdmin || isCountryAdmin || isRegionAdmin;
+      
+      if (isAdminUser) {
+        // Just set the current club in context so the admin can see "Leaders", "Clubbers" etc. in the sidebar
+        // Note: setCurrentClub expects ClubsResponse, which ClubExpanded is a subtype of.
+        try {
+          const { setCurrentClub } = (window as any)._clubContextHelpers || {};
+          if (setCurrentClub) setCurrentClub(club);
+        } catch (e) {
+          console.error("Failed to set current club context", e);
+        }
+      }
+
       const meta = club.metadata || {};
       setEditingClub(club);
       setFormData({

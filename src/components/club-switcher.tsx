@@ -1,4 +1,4 @@
-import { ChevronDown, School } from "lucide-react"
+import { ChevronDown, School, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useClubs } from "@/lib/club-context"
 import { useAdmin } from "@/lib/admin-context"
@@ -54,10 +54,23 @@ export function ClubSwitcher() {
   if (isAdmin) {
     const scopeLabel = getAdminScopeLabel()
     return (
-      <Button variant="ghost" disabled className="w-full justify-start gap-2 px-3 opacity-100 cursor-default">
-        <School className="h-4 w-4 shrink-0" />
-        <span className="truncate">{scopeLabel}</span>
-      </Button>
+      <div className="flex flex-col gap-1 w-full">
+        <Button variant="ghost" disabled className="w-full justify-start gap-2 px-3 opacity-100 cursor-default">
+          <School className="h-4 w-4 shrink-0" />
+          <span className="truncate">{scopeLabel}</span>
+        </Button>
+        {currentClub && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="mx-3 justify-between h-7 text-[10px] font-medium"
+            onClick={() => setCurrentClub(null)}
+          >
+            <span className="truncate">{currentClub.name}</span>
+            <X className="h-3 w-3 shrink-0 opacity-50" />
+          </Button>
+        )}
+      </div>
     )
   }
 
