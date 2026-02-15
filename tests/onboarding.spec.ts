@@ -9,7 +9,7 @@ test.describe('Onboarding Flow', () => {
     await page.goto(`${BASE_URL}/landing`);
   });
 
-  test('Guardian registration via manual search and student wizard', async ({ page }) => {
+  test('Guardian registration via manual search and clubber wizard', async ({ page }) => {
     // Click Get Started to open Auth Modal
     await page.getByRole('button', { name: /Get Started/i }).first().click();
     
@@ -55,13 +55,13 @@ test.describe('Onboarding Flow', () => {
     // Register
     await page.getByRole('button', { name: 'Create Account' }).click();
 
-    // Post-registration: Should see Student Wizard (Onboarding Modal)
-    await expect(page.locator('h3:has-text("Add your first student")')).toBeVisible({ timeout: 15000 });
+    // Post-registration: Should see Clubber Wizard (Onboarding Modal)
+    await expect(page.locator('h3:has-text("Add your first clubber")')).toBeVisible({ timeout: 15000 });
 
-    // Add Student
+    // Add Clubber
     await page.fill('input[name="firstName"]', 'Little');
-    await page.fill('input[name="lastName"]', 'Student');
-    await page.getByRole('button', { name: 'Register Student' }).click();
+    await page.fill('input[name="lastName"]', 'Clubber');
+    await page.getByRole('button', { name: 'Register Clubber' }).click();
 
     // Should be on dashboard
     await expect(page).toHaveURL(/.*dashboard/, { timeout: 10000 });

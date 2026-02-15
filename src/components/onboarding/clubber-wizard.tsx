@@ -12,13 +12,13 @@ import { Input } from "@/components/ui/input"
 import { useTranslation } from "react-i18next"
 import { Loader2 } from "lucide-react"
 
-interface StudentWizardProps {
+interface ClubberWizardProps {
   onComplete: (data: any) => void
   onSkip: () => void
   isSubmitting?: boolean
 }
 
-export function StudentWizard({ onComplete, onSkip, isSubmitting }: StudentWizardProps) {
+export function ClubberWizard({ onComplete, onSkip, isSubmitting }: ClubberWizardProps) {
   const { t } = useTranslation()
   const form = useForm({
     defaultValues: {
@@ -31,7 +31,7 @@ export function StudentWizard({ onComplete, onSkip, isSubmitting }: StudentWizar
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <h3 className="text-lg font-bold">{t("Add your first student")}</h3>
+        <h3 className="text-lg font-bold">{t("Add your first clubber")}</h3>
         <p className="text-sm text-muted-foreground">
           {t("Get started by adding a child to your club.")}
         </p>
@@ -75,7 +75,7 @@ export function StudentWizard({ onComplete, onSkip, isSubmitting }: StudentWizar
           <div className="flex flex-col gap-2 pt-4">
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t("Register Student")}
+              {t("Register Clubber")}
             </Button>
             <Button type="button" variant="ghost" className="w-full text-xs" onClick={onSkip} disabled={isSubmitting}>
               {t("I'll do this later")}

@@ -5,7 +5,7 @@ AwanAfrica is a management system designed for tracking Awana Clubs in Africa. I
 
 ## Core Goals
 - **Accessibility**: Provide a system that works effectively for churches and schools in various African regions.
-- **Tailored Tracking**: Support multi-year discipleship tracking for Administrators, Leaders, Parents, and Students.
+- **Tailored Tracking**: Support multi-year discipleship tracking for Administrators, Leaders, Parents, and Clubbers.
 - **End-to-End Management**: Handle everything from registration to regional competitions.
 
 ## Organizational Structure
@@ -14,7 +14,7 @@ The system is built around a hierarchical structure to mirror how Awana operates
 
 ### 1. Clubs
 - A **Club** is the top-level entity, managed by either a **Local Church** or a **Local School**.
-- Each Club maintains its own roster of Administrators, Leaders, and Students.
+- Each Club maintains its own roster of Administrators, Leaders, and Clubbers.
 
 ### 2. Programs
 Clubs are subdivided into age-specific **Programs**:
@@ -26,7 +26,7 @@ Clubs are subdivided into age-specific **Programs**:
 
 ### 3. Handbook Groups
 Programs are further divided into **Handbook Groups**:
-- Typically consists of **2 to 10 students**.
+- Typically consists of **2 to 10 clubbers**.
 - Assigned **one or more Leaders** per group.
 - This is the primary level where discipleship, handbook recitation, and individual tracking occur.
 
@@ -36,13 +36,13 @@ Programs are further divided into **Handbook Groups**:
 - **Role-Based Access**: Specialized views and permissions for:
   - **Administrators**: Overall club management and reporting.
   - **Leaders**: Attendance tracking and achievement logging.
-  - **Parents/Guardians**: Viewing student progress and registration.
-  - **Students**: Achievement tracking and personal milestones.
+  - **Parents/Guardians**: Viewing clubber progress and registration.
+  - **Clubbers**: Achievement tracking and personal milestones.
 - **Profile Management**: Support for avatars, bios, and regional localization.
 
 ### 2. Registration & Enrollment
-- **Digital Registration**: Streamlined onboarding for students and leaders.
-- **Parent/Guardian Linking**: Connecting students to their respective guardians.
+- **Digital Registration**: Streamlined onboarding for clubbers and leaders.
+- **Parent/Guardian Linking**: Connecting clubbers to their respective guardians.
 - **Annual Re-enrollment**: Managing transitions between club years.
 
 ### 3. Attendance & Scheduling
@@ -53,10 +53,10 @@ Programs are further divided into **Handbook Groups**:
 ### 4. Curriculum & Achievement Tracking
 - **Discipleship Milestones**: Tracking progress through Awana handbooks and modules.
 - **Awards & Honors**: Automating the tracking of earned patches, pins, and trophies.
-- **Multi-Year History**: Persistent records of a student's journey through the entire program.
+- **Multi-Year History**: Persistent records of a clubber's journey through the entire program.
 
 ### 5. Games & Points System
-- **Team Management**: Assigning students to color teams.
+- **Team Management**: Assigning clubbers to color teams.
 - **Points Logging**: Real-time tracking of points for games, handbook progress, and attendance.
 - **Leaderboards**: Encouraging healthy competition within the club.
 

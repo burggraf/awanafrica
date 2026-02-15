@@ -93,7 +93,7 @@ async function importClubs(filePath, countryName, missionaryId) {
                 journey: parseInt(row.Journey) || 0,
                 descubrelo: parseInt(row.Descubrelo) || 0,
                 building_healthy_families: parseInt(row['Building Healthy Families']) || 0,
-                total_students: parseInt(row.Total) || 0,
+                total_clubbers: parseInt(row.Total) || 0,
                 total_leaders: parseInt(row.Leaders) || 0,
                 csv_missionary: row.Missionary,
                 csv_created_date: row['Created Date']

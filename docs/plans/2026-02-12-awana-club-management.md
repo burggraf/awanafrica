@@ -2,13 +2,13 @@
 
 > **REQUIRED SUB-SKILL:** Use the executing-plans skill to implement this plan task-by-task.
 
-**Goal:** Implement a multi-tenant system for managing Awana Clubs, including users with roles, programs, operational years, students, and events.
+**Goal:** Implement a multi-tenant system for managing Awana Clubs, including users with roles, programs, operational years, clubbers, and events.
 
 **Architecture:**
-- **Multi-tenancy**: Uses a `clubs` collection as the root tenant. All operational data (years, students, events) links back to a club.
+- **Multi-tenancy**: Uses a `clubs` collection as the root tenant. All operational data (years, clubbers, events) links back to a club.
 - **Roles & Memberships**: A `club_memberships` junction collection connects users to clubs with specific roles (Director, Secretary, etc.).
 - **Context Management**: A `ClubContext` in the React frontend will manage the "Active Club" and "Active Year" state, persisting selections to local storage.
-- **Hierarchical Data**: Students are registered to specific `club_years` and `programs`, allowing tracking over multiple years.
+- **Hierarchical Data**: Clubbers are registered to specific `club_years` and `programs`, allowing tracking over multiple years.
 
 **Tech Stack:** PocketBase (Backend), React 19 (Frontend), TypeScript, Tailwind CSS, Shadcn UI.
 
@@ -115,7 +115,7 @@ git commit -m "db: add core club management collections with geography"
 **Files:**
 - Create: `pb_migrations/1770931300_create_operational_collections.js`
 
-**Step 1: Write migration for years, students, and events**
+**Step 1: Write migration for years, clubbers, and events**
 
 ```javascript
 migrate((app) => {
@@ -131,8 +131,8 @@ migrate((app) => {
     listRule: "@request.auth.id != '' && club.club_memberships_via_club.user.id ?= @request.auth.id",
   });
 
-  const students = new Collection({
-    name: "students",
+  const clubbers = new Collection({
+    name: "clubbers",
     type: "base",
     fields: [
       { name: "club", type: "relation", collectionId: "clubs", required: true, cascadeDelete: true },
@@ -145,14 +145,14 @@ migrate((app) => {
   });
 
   const registrations = new Collection({
-    name: "student_registrations",
+    name: "clubber_registrations",
     type: "base",
     fields: [
-      { name: "student", type: "relation", collectionId: "students", required: true, cascadeDelete: true },
+      { name: "clubber", type: "relation", collectionId: "clubbers", required: true, cascadeDelete: true },
       { name: "club_year", type: "relation", collectionId: "club_years", required: true, cascadeDelete: true },
       { name: "program", type: "relation", collectionId: "programs", required: true, cascadeDelete: true }
     ],
-    listRule: "@request.auth.id != '' && student.club.club_memberships_via_club.user.id ?= @request.auth.id",
+    listRule: "@request.auth.id != '' && clubber.club.club_memberships_via_club.user.id ?= @request.auth.id",
   });
 
   const events = new Collection({
@@ -174,19 +174,19 @@ migrate((app) => {
     type: "base",
     fields: [
       { name: "event", type: "relation", collectionId: "events", required: true, cascadeDelete: true },
-      { name: "student", type: "relation", collectionId: "students", required: true, cascadeDelete: true },
+      { name: "clubber", type: "relation", collectionId: "clubbers", required: true, cascadeDelete: true },
       { name: "status", type: "select", values: ["Present", "Absent", "Excused"], required: true }
     ],
     listRule: "@request.auth.id != '' && event.club.club_memberships_via_club.user.id ?= @request.auth.id",
   });
 
   app.saveCollection(years);
-  app.saveCollection(students);
+  app.saveCollection(clubbers);
   app.saveCollection(registrations);
   app.saveCollection(events);
   app.saveCollection(attendance);
 }, (app) => {
-  const collections = ["attendance", "events", "student_registrations", "students", "club_years"];
+  const collections = ["attendance", "events", "clubber_registrations", "clubbers", "club_years"];
   for (const name of collections) {
     const collection = app.findCollectionByNameOrId(name);
     if (collection) app.deleteCollection(collection);
@@ -197,7 +197,7 @@ migrate((app) => {
 **Step 2: Commit**
 ```bash
 git add pb_migrations/1770931300_create_operational_collections.js
-git commit -m "db: add operational collections (years, students, events, attendance)"
+git commit -m "db: add operational collections (years, clubbers, events, attendance)"
 ```
 
 ---
@@ -375,6 +375,6 @@ git commit -m "feat: auto-select default club on login"
 ---
 
 ### Future Phases (To be expanded)
-- **Phase 4**: Student Directory & Registration.
+- **Phase 4**: Clubber Directory & Registration.
 - **Phase 5**: Event Scheduling & Attendance.
 - **Phase 6**: Achievements & Records.

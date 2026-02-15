@@ -13,8 +13,8 @@ export const Collections = {
 	Events: "events",
 	Programs: "programs",
 	Regions: "regions",
-	StudentRegistrations: "student_registrations",
-	Students: "students",
+	ClubberRegistrations: "clubber_registrations",
+	Clubbers: "clubbers",
 	Users: "users",
 } as const
 
@@ -29,7 +29,7 @@ export interface AdminRolesRecord {
 
 export interface AttendanceRecord {
 	event: string
-	student: string
+	clubber: string
 	club: string
 	status: "Present" | "Absent" | "Excused"
 }
@@ -93,14 +93,14 @@ export interface RegionsRecord {
 	country: string
 }
 
-export interface StudentRegistrationsRecord {
-	student: string
+export interface ClubberRegistrationsRecord {
+	clubber: string
 	club: string
 	club_year: string
 	program: string
 }
 
-export interface StudentsRecord {
+export interface ClubbersRecord {
 	club: string
 	firstName: string
 	lastName: string
@@ -138,8 +138,8 @@ export type CountriesResponse<Texpand = unknown> = CountriesRecord & BaseRecord 
 export type EventsResponse<Texpand = unknown> = EventsRecord & BaseRecord & { expand?: Texpand }
 export type ProgramsResponse<Texpand = unknown> = ProgramsRecord & BaseRecord & { expand?: Texpand }
 export type RegionsResponse<Texpand = unknown> = RegionsRecord & BaseRecord & { expand?: Texpand }
-export type StudentRegistrationsResponse<Texpand = unknown> = StudentRegistrationsRecord & BaseRecord & { expand?: Texpand }
-export type StudentsResponse<Texpand = unknown> = StudentsRecord & BaseRecord & { expand?: Texpand }
+export type ClubberRegistrationsResponse<Texpand = unknown> = ClubberRegistrationsRecord & BaseRecord & { expand?: Texpand }
+export type ClubbersResponse<Texpand = unknown> = ClubbersRecord & BaseRecord & { expand?: Texpand }
 export type UsersResponse<Texpand = unknown> = UsersRecord & BaseRecord & { expand?: Texpand }
 
 export type CollectionResponses = {
@@ -152,7 +152,7 @@ export type CollectionResponses = {
 	events: EventsResponse
 	programs: ProgramsResponse
 	regions: RegionsResponse
-	student_registrations: StudentRegistrationsResponse
-	students: StudentsResponse
+	clubber_registrations: ClubberRegistrationsResponse
+	clubbers: ClubbersResponse
 	users: UsersResponse
 }

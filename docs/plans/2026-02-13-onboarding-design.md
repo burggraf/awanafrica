@@ -37,10 +37,10 @@ This design aims to simplify the onboarding process for the two primary user gro
 - **Role Toggle**: A clear choice between "Parent/Guardian" and "Club Leader".
 - **Conditional Fields**:
     - If `Role === 'Leader'`, show `leaderSecret` field (labeled "Leader Access Code").
-    - If `Role === 'Guardian'`, show an optional "Add your first student" name field.
+    - If `Role === 'Guardian'`, show an optional "Add your first clubber" name field.
 
 ### Post-Registration
-- **Guardians**: Redirect to "Add Student" wizard.
+- **Guardians**: Redirect to "Add Clubber" wizard.
 - **Leaders (Auto-Approved)**: Redirect to Leader Dashboard.
 - **Leaders (Pending)**: Show "Waiting for Approval" status with access to training materials only.
 

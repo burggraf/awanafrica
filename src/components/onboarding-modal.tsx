@@ -33,11 +33,11 @@ import {
 import { useTranslation } from "react-i18next"
 import { Search, Check, AlertCircle } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { StudentWizard } from "./onboarding/student-wizard"
+import { ClubberWizard } from "./onboarding/clubber-wizard"
 import { PendingStatus } from "./onboarding/pending-status"
 
 interface OnboardingModalInnerProps {
-  initialStep?: "onboarding" | "student" | "pending"
+  initialStep?: "onboarding" | "clubber" | "pending"
 }
 
 function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInnerProps) {
@@ -151,7 +151,7 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
         if (roleValue === "Pending") {
           setStep("pending")
         } else {
-          setStep("student")
+          setStep("clubber")
         }
       }
     } catch (error) {
@@ -162,13 +162,13 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
     }
   }
 
-  const handleStudentComplete = async (data: any) => {
+  const handleClubberComplete = async (data: any) => {
     setIsSubmitting(true)
     try {
       // Find the club ID (might be from selectedClub or from existing membership)
       const clubId = selectedClub?.id || (await pb.collection("club_memberships").getFirstListItem(`user = "${user?.id}"`)).club;
       
-      await pb.collection("students").create({
+      await pb.collection("clubbers").create({
         club: clubId,
         guardian: user?.id,
         firstName: data.firstName,
@@ -179,7 +179,7 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
       window.location.reload()
     } catch (error) {
       console.error(error)
-      alert(t("Failed to register student."))
+      alert(t("Failed to register clubber."))
     } finally {
       setIsSubmitting(false)
     }
@@ -407,8 +407,8 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
             </>
           )}
 
-          {step === "student" && (
-            <StudentWizard onComplete={handleStudentComplete} onSkip={handleSkip} isSubmitting={isSubmitting} />
+          {step === "clubber" && (
+            <ClubberWizard onComplete={handleClubberComplete} onSkip={handleSkip} isSubmitting={isSubmitting} />
           )}
 
           {step === "pending" && (
@@ -446,8 +446,8 @@ export function OnboardingModal() {
   const { adminRoles, isLoading: isAdminLoading } = useAdmin()
   
   const [hasSettled, setHasSettled] = useState(false)
-  const [studentCount, setStudentCount] = useState<number | null>(null)
-  const [isStudentsLoading, setIsStudentsLoading] = useState(false)
+  const [clubberCount, setClubberCount] = useState<number | null>(null)
+  const [isClubbersLoading, setIsClubbersLoading] = useState(false)
 
   useEffect(() => {
     if (!isClubsLoading && !isAdminLoading) {
@@ -460,15 +460,15 @@ export function OnboardingModal() {
 
   useEffect(() => {
     if (user && hasSettled) {
-      setIsStudentsLoading(true)
-      pb.collection("students").getList(1, 1, { filter: `guardian = "${user.id}"`, requestKey: null })
-        .then(res => setStudentCount(res.totalItems))
-        .catch(() => setStudentCount(0))
-        .finally(() => setIsStudentsLoading(false))
+      setIsClubbersLoading(true)
+      pb.collection("clubbers").getList(1, 1, { filter: `guardian = "${user.id}"`, requestKey: null })
+        .then(res => setClubberCount(res.totalItems))
+        .catch(() => setClubberCount(0))
+        .finally(() => setIsClubbersLoading(false))
     }
   }, [user, hasSettled])
 
-  if (!user || isClubsLoading || isAdminLoading || isStudentsLoading || !hasSettled) return null
+  if (!user || isClubsLoading || isAdminLoading || isClubbersLoading || !hasSettled) return null
 
   const hasMemberships = memberships.length > 0
   const hasApprovedAdminRoles = adminRoles.some(role => role.role !== "Pending")
@@ -480,12 +480,12 @@ export function OnboardingModal() {
   // 2. If they are pending, show the pending screen.
   if (isPending) return <OnboardingModalInner initialStep="pending" />
 
-  // 3. If they are a Guardian but have no students, show the student wizard.
+  // 3. If they are a Guardian but have no clubbers, show the clubber wizard.
   const isGuardian = memberships.some(m => m.roles.includes("Guardian"))
   const isStaff = memberships.some(m => m.roles.some(r => ["Director", "Secretary", "Treasurer", "Leader"].includes(r)))
-  if (isGuardian && !isStaff && studentCount === 0) return <OnboardingModalInner initialStep="student" />
+  if (isGuardian && !isStaff && clubberCount === 0) return <OnboardingModalInner initialStep="clubber" />
 
-  // 4. If they have memberships and are NOT pending and NOT a student-less guardian, they are done.
+  // 4. If they have memberships and are NOT pending and NOT a clubber-less guardian, they are done.
   if (hasMemberships) return null
 
   // 5. Otherwise, show the full onboarding.

@@ -55,7 +55,7 @@ type ClubExpanded = ClubsResponse<{
 
 Operational data is denormalized to include a direct `club` relation.
 
-**Affected Collections**: `attendance`, `student_registrations`, `events`, `students`, `club_years`.
+**Affected Collections**: `attendance`, `clubber_registrations`, `events`, `clubbers`, `club_years`.
 
 ### Benefits
 1. **Simplified API Rules**: Rules can check `club.club_memberships_via_club` directly rather than traversing multiple levels of relations.

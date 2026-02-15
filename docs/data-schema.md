@@ -77,18 +77,18 @@ Defines the operational/academic cycle for a club.
 - `startDate` (date, required): Start of the school year.
 - `endDate` (date, required): End of the school year.
 
-### `students`
+### `clubbers`
 Master record for children (not system users).
 - `club` (relation, required): Link to `clubs`.
-- `guardian` (relation, optional): Link to `users` (the primary guardian for the student).
+- `guardian` (relation, optional): Link to `users` (the primary guardian for the clubber).
 - `firstName` (text, required)
 - `lastName` (text, required)
 - `dateOfBirth` (date)
 - `notes` (text)
 
-### `student_registrations`
-Links a student to a specific program for a specific year.
-- `student` (relation, required): Link to `students`.
+### `clubber_registrations`
+Links a clubber to a specific program for a specific year.
+- `clubber` (relation, required): Link to `clubbers`.
 - `club_year` (relation, required): Link to `club_years`.
 - `program` (relation, required): Link to `programs`.
 
@@ -106,9 +106,9 @@ Scheduled meetings or special events (Club-level).
 - `endDate` (date, required)
 
 ### `attendance`
-Recording student presence at events.
+Recording clubber presence at events.
 - `event` (relation, required): Link to `events`.
-- `student` (relation, required): Link to `students`.
+- `clubber` (relation, required): Link to `clubbers`.
 - `status` (select, required): `Present`, `Absent`, `Excused`.
 
 ---
@@ -127,7 +127,7 @@ Recording student presence at events.
                ├── [Club Membership] ↔ [User]
                ├── [Program]
                └── [Club Year]
-                     ├── [Student Registration] ↔ [Student] ↔ [Club]
+                     ├── [Clubber Registration] ↔ [Clubber] ↔ [Club]
                      └── [Club Event] (Linked to Club & Club Year)
-                           └── [Attendance] ↔ [Student]
+                           └── [Attendance] ↔ [Clubber]
 ```

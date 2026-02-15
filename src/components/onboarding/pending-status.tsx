@@ -20,7 +20,7 @@ export function PendingStatus({ onClose }: PendingStatusProps) {
       <div className="space-y-2">
         <h3 className="text-xl font-bold">{t("Registration Received!")}</h3>
         <p className="text-sm text-muted-foreground">
-          {t("The Club Director needs to verify your account before you can access student data.")}
+          {t("The Club Director needs to verify your account before you can access clubber data.")}
         </p>
       </div>
 
