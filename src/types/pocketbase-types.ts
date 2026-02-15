@@ -102,6 +102,7 @@ export interface ClubberRegistrationsRecord {
 
 export interface ClubbersRecord {
 	club: string
+	guardian?: string
 	firstName: string
 	lastName: string
 	dateOfBirth?: string
