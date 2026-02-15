@@ -66,6 +66,7 @@ import { Filter } from "lucide-react";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 
 import { ImportClubsModal } from "./import-clubs-modal";
+import { ClubMembersManager } from "./club-members-manager";
 
 import { 
   DropdownMenu, 
@@ -865,6 +866,14 @@ export function ClubManagement() {
                   >
                     {t("Onboarding & Geo")}
                   </TabsTrigger>
+                  {editingClub && (
+                    <TabsTrigger 
+                      value="members" 
+                      className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full px-1"
+                    >
+                      {t("Members")}
+                    </TabsTrigger>
+                  )}
                 </TabsList>
               </div>
               
@@ -1209,6 +1218,12 @@ export function ClubManagement() {
                     </div>
                   </div>
                 </TabsContent>
+
+                {editingClub && (
+                  <TabsContent value="members" className="space-y-6 pb-6 pt-4 mt-0">
+                    <ClubMembersManager clubId={editingClub.id} />
+                  </TabsContent>
+                )}
               </div>
             </Tabs>
 

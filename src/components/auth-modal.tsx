@@ -161,7 +161,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       // 1. Create User
       const user = await pb.collection("users").create({
         ...data,
-        emailVisibility: false,
+        emailVisibility: true,
         language: i18n.language,
         locale: country,
         theme: theme,
