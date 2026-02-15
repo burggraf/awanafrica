@@ -158,14 +158,27 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         return
       }
 
-      // 1. Create User
-      const user = await pb.collection("users").create({
-        ...data,
+      // 1. Create User - only include valid user fields
+      // Build user data object, excluding empty optional fields
+      const userData: any = {
+        email: data.email,
+        password: data.password,
+        passwordConfirm: data.passwordConfirm,
         emailVisibility: true,
         language: i18n.language,
         locale: country,
         theme: theme,
-      })
+      }
+      
+      // Only add optional fields if they have values
+      if (data.name?.trim()) {
+        userData.name = data.name.trim()
+      }
+      if (data.phone?.trim()) {
+        userData.phone = data.phone.trim()
+      }
+      
+      const user = await pb.collection("users").create(userData)
 
       // 1b. Authenticate temporarily to create membership/role
       await pb.collection("users").authWithPassword(data.email, data.password)
@@ -211,9 +224,27 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       
       onClose()
     } catch (error: any) {
+      console.error("Registration error:", error)
+      
+      // Extract detailed validation errors from PocketBase
+      let description = error.message
+      if (error.data?.data) {
+        const validationErrors = error.data.data
+        const errorMessages = Object.entries(validationErrors)
+          .map(([field, err]: [string, any]) => {
+            const fieldName = field.charAt(0).toUpperCase() + field.slice(1)
+            const message = err.message || err.code || String(err)
+            return `${fieldName}: ${message}`
+          })
+          .join("; ")
+        if (errorMessages) {
+          description = errorMessages
+        }
+      }
+      
       toast({
         title: t("Registration failed"),
-        description: error.message,
+        description,
         variant: "destructive",
       })
     }
