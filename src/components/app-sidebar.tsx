@@ -11,6 +11,7 @@ import {
   UserCog,
   UsersRound,
   GraduationCap,
+  Library,
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
@@ -61,11 +62,6 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, classNam
       icon: Baby,
       visible: !!isGuardian,
     },
-    {
-      title: t("Settings"),
-      url: "/settings",
-      icon: Settings2,
-    },
   ].filter(item => item.visible !== false)
 
   // Club context navigation - only visible when a club is selected and user is an active leader
@@ -86,6 +82,18 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, classNam
       title: t("Clubbers"),
       url: "/clubbers",
       icon: GraduationCap,
+      visible: !!isActiveLeader && !!currentClub,
+    },
+    {
+      title: t("Programs"),
+      url: "/settings",
+      icon: Library,
+      visible: !!isActiveLeader && !!currentClub,
+    },
+    {
+      title: t("Settings"),
+      url: "/settings",
+      icon: Settings2,
       visible: !!isActiveLeader && !!currentClub,
     },
   ].filter(item => item.visible !== false)

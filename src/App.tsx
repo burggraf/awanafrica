@@ -28,6 +28,7 @@ import { LeadersPage } from "@/components/leaders-page"
 import { ClubbersPage } from "@/components/clubbers-page"
 import { GuardiansPage } from "@/components/guardians-page"
 import { MyClubbersPage } from "@/components/my-clubbers-page"
+import { ClubSettingsPage } from "@/components/club-settings/club-settings-page"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LocaleProvider } from "@/lib/locale-context"
 import { ClubProvider } from "@/lib/club-context"
@@ -207,6 +208,7 @@ function MainContent() {
               <Route path="/leaders" element={<LeadersPage />} />
               <Route path="/clubbers" element={<ClubbersPage />} />
               <Route path="/guardians" element={<GuardiansPage />} />
+              <Route path="/settings" element={<ClubSettingsPage />} />
             </>
           )}
 
