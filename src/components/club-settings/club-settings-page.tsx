@@ -7,6 +7,7 @@ import { useAdmin } from "@/lib/admin-context";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProgramManagement } from "./program-management";
+import { ClubYearManagement } from "./club-year-management";
 
 export function ClubSettingsPage() {
   const { t } = useTranslation();
@@ -87,9 +88,8 @@ export function ClubSettingsPage() {
                 {t("Manage operational years and academic cycles.")}
               </CardDescription>
             </CardHeader>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              <Calendar className="mx-auto h-12 w-12 opacity-20 mb-4" />
-              <p>{t("Club year management is coming soon.")}</p>
+            <CardContent>
+              <ClubYearManagement />
             </CardContent>
           </Card>
         </TabsContent>

@@ -442,7 +442,23 @@ const resources = {
       "Failed to delete program": "Failed to delete program",
       "Delete Program": "Delete Program",
       "Are you sure you want to delete this program? This action cannot be undone.": "Are you sure you want to delete this program? This action cannot be undone.",
-      "Please select a club first.": "Please select a club first."
+      "Please select a club first.": "Please select a club first.",
+      "Club years with existing clubber registrations cannot be deleted.": "Club years with existing clubber registrations cannot be deleted.",
+      "Club year created successfully": "Club year created successfully",
+      "Club year updated successfully": "Club year updated successfully",
+      "Club year deleted successfully": "Club year deleted successfully",
+      "Failed to save club year": "Failed to save club year",
+      "Failed to delete club year": "Failed to delete club year",
+      "Delete Club Year": "Delete Club Year",
+      "Are you sure you want to delete this club year? This action cannot be undone.": "Are you sure you want to delete this club year? This action cannot be undone.",
+      "Add Year": "Add Year",
+      "Edit Club Year": "Edit Club Year",
+      "Year Label": "Year Label",
+      "Label": "Label",
+      "Start Date": "Start Date",
+      "End Date": "End Date",
+      "e.g., 2026-2027": "e.g., 2026-2027",
+      "Create Year": "Create Year"
     }
   },
   sw: {
@@ -865,7 +881,23 @@ const resources = {
       "Failed to delete program": "Imeshindwa kufuta programu",
       "Delete Program": "Futa Programu",
       "Are you sure you want to delete this program? This action cannot be undone.": "Je, una uhakika unataka kufuta programu hii? Kitendo hiki hakiwezi kubatilishwa.",
-      "Please select a club first.": "Tafadhali chagua klabu kwanza."
+      "Please select a club first.": "Tafadhali chagua klabu kwanza.",
+      "Club years with existing clubber registrations cannot be deleted.": "Miaka ya klabu yenye usajili wa wanaklabu zilizopo haziwezi kufutwa.",
+      "Club year created successfully": "Mwaka wa klabu umeundwa kwa mafanikio",
+      "Club year updated successfully": "Mwaka wa klabu umesasishwa kwa mafanikio",
+      "Club year deleted successfully": "Mwaka wa klabu umefutwa kwa mafanikio",
+      "Failed to save club year": "Imeshindwa kuhifadhi mwaka wa klabu",
+      "Failed to delete club year": "Imeshindwa kufuta mwaka wa klabu",
+      "Delete Club Year": "Futa Mwaka wa Klabu",
+      "Are you sure you want to delete this club year? This action cannot be undone.": "Je, una uhakika unataka kufuta mwaka huu wa klabu? Kitendo hiki hakiwezi kubatilishwa.",
+      "Add Year": "Ongeza Mwaka",
+      "Edit Club Year": "Hariri Mwaka wa Klabu",
+      "Year Label": "Lebo ya Mwaka",
+      "Label": "Lebo",
+      "Start Date": "Tarehe ya Kuanza",
+      "End Date": "Tarehe ya Kumaliza",
+      "e.g., 2026-2027": "mf., 2026-2027",
+      "Create Year": "Unda Mwaka"
     }
   },
   st: {
