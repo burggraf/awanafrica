@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { useClubs } from "@/lib/club-context"
 import { useAuth } from "@/lib/use-auth"
 import { usePBQuery } from "@/hooks/use-pb-query"
@@ -22,6 +23,7 @@ type RegistrationExpanded = ClubberRegistrationsResponse<{
 
 export function MyClubbersPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { isGuardian } = useClubs()
   const { user } = useAuth()
 
@@ -91,7 +93,7 @@ export function MyClubbersPage() {
             {t("Manage your registered children.")}
           </p>
         </div>
-        <Button size="sm">
+        <Button size="sm" onClick={() => navigate("/my-clubbers/new")}>
           <Plus className="h-4 w-4 mr-2" />
           {t("Register Child")}
         </Button>
@@ -122,7 +124,11 @@ export function MyClubbersPage() {
               <p className="text-sm mt-2 max-w-sm mx-auto">
                 {t("Register your children to track their progress in Awana clubs.")}
               </p>
-              <Button className="mt-4" variant="outline">
+              <Button 
+                className="mt-4" 
+                variant="outline"
+                onClick={() => navigate("/my-clubbers/new")}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 {t("Register Your First Child")}
               </Button>
@@ -138,7 +144,11 @@ export function MyClubbersPage() {
             const currentClub = clubber.expand?.club
 
             return (
-              <Card key={clubber.id}>
+              <Card 
+                key={clubber.id} 
+                className="cursor-pointer hover:bg-muted/50 transition-colors"
+                onClick={() => navigate(`/my-clubbers/${clubber.id}`)}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
@@ -167,9 +177,16 @@ export function MyClubbersPage() {
                         </CardDescription>
                       </div>
                     </div>
-                    <Badge variant={hasRegistrations ? "default" : "outline"}>
-                      {hasRegistrations ? t("Registered") : t("Unregistered")}
-                    </Badge>
+                    <div className="flex flex-col items-end gap-1">
+                      <Badge variant={hasRegistrations ? "default" : "outline"}>
+                        {hasRegistrations ? t("Registered") : t("Unregistered")}
+                      </Badge>
+                      {clubber.active === false && (
+                        <Badge variant="destructive" className="text-[10px] h-4">
+                          {t("Inactive")}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">

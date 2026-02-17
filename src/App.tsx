@@ -26,6 +26,7 @@ import { ClubManagement } from "@/components/admin/club-management"
 import { UserManagement } from "@/components/admin/user-management"
 import { LeadersPage } from "@/components/leaders-page"
 import { ClubbersPage } from "@/components/clubbers-page"
+import { ClubberDetailPage } from "@/components/clubber-detail-page"
 import { GuardiansPage } from "@/components/guardians-page"
 import { MyClubbersPage } from "@/components/my-clubbers-page"
 import { ClubSettingsPage } from "@/components/club-settings/club-settings-page"
@@ -207,6 +208,7 @@ function MainContent() {
             <>
               <Route path="/leaders" element={<LeadersPage />} />
               <Route path="/clubbers" element={<ClubbersPage />} />
+              <Route path="/clubbers/:id" element={<ClubberDetailPage />} />
               <Route path="/guardians" element={<GuardiansPage />} />
               <Route path="/settings" element={<ClubSettingsPage />} />
             </>
@@ -214,7 +216,10 @@ function MainContent() {
 
           {/* Guardian Routes */}
           {isGuardian && (
-            <Route path="/my-clubbers" element={<MyClubbersPage />} />
+            <>
+              <Route path="/my-clubbers" element={<MyClubbersPage />} />
+              <Route path="/my-clubbers/:id" element={<ClubberDetailPage />} />
+            </>
           )}
 
           {/* Admin Routes */}

@@ -107,6 +107,8 @@ export interface ClubbersRecord {
 	lastName: string
 	dateOfBirth?: string
 	notes?: string
+	active?: boolean
+	gender?: "Male" | "Female"
 }
 
 export interface UsersRecord {

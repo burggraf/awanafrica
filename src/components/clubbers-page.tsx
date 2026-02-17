@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { useClubs } from "@/lib/club-context"
 import { useAdmin } from "@/lib/admin-context"
 import { usePBQuery } from "@/hooks/use-pb-query"
@@ -23,6 +24,7 @@ type RegistrationExpanded = ClubberRegistrationsResponse<{
 
 export function ClubbersPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { currentClub, isActiveLeader } = useClubs()
   const { isAdmin } = useAdmin()
 
@@ -101,7 +103,7 @@ export function ClubbersPage() {
             </p>
           )}
         </div>
-        <Button size="sm">
+        <Button size="sm" onClick={() => navigate("/clubbers/new")}>
           <Plus className="h-4 w-4 mr-2" />
           {t("Add Clubber")}
         </Button>
@@ -150,7 +152,11 @@ export function ClubbersPage() {
                     const initials = `${clubber.firstName.charAt(0)}${clubber.lastName.charAt(0)}`.toUpperCase()
 
                     return (
-                      <TableRow key={clubber.id}>
+                      <TableRow 
+                        key={clubber.id}
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => navigate(`/clubbers/${clubber.id}`)}
+                      >
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Avatar className="h-8 w-8">
@@ -199,9 +205,16 @@ export function ClubbersPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={hasRegistrations ? "default" : "outline"} className="text-xs">
-                            {hasRegistrations ? t("Active") : t("Unregistered")}
-                          </Badge>
+                          <div className="flex flex-col gap-1">
+                            <Badge variant={hasRegistrations ? "default" : "outline"} className="text-xs w-fit">
+                              {hasRegistrations ? t("Active") : t("Unregistered")}
+                            </Badge>
+                            {clubber.active === false && (
+                              <Badge variant="destructive" className="text-[10px] h-4 w-fit">
+                                {t("Inactive")}
+                              </Badge>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     )
