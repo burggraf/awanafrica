@@ -290,8 +290,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         
         <div className="grid grid-cols-3 gap-2 mb-4">
           <Select value={i18n.language} onValueChange={(v) => i18n.changeLanguage(v)}>
-            <SelectTrigger className="h-9 px-2">
-              <Languages className="h-4 w-4 mr-2 shrink-0" />
+            <SelectTrigger className="h-9 px-2" aria-label={t("Select language")}>
+              <Languages className="h-4 w-4 mr-2 shrink-0" aria-hidden="true" />
               <SelectValue>
                 {i18n.language === 'sw' ? t('Swahili') : t('English')}
               </SelectValue>
@@ -303,11 +303,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           </Select>
 
           <Select value={country} onValueChange={(v) => setCountry(v)}>
-            <SelectTrigger className="h-9 px-2">
+            <SelectTrigger className="h-9 px-2" aria-label={t("Select country")}>
               <SelectValue>
                 {country && countryMetadata[country] ? (
                   <span className="flex items-center gap-2">
-                    <span>{countryMetadata[country].flag}</span>
+                    <span aria-hidden="true">{countryMetadata[country].flag}</span>
                     <span>{t(countryMetadata[country].name)}</span>
                   </span>
                 ) : (
@@ -319,7 +319,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               {availableCountries.map((c) => (
                 <SelectItem key={c.isoCode} value={c.isoCode}>
                   <span className="flex items-center gap-2">
-                    <span>{countryMetadata[c.isoCode]?.flag || '🌍'}</span>
+                    <span aria-hidden="true">{countryMetadata[c.isoCode]?.flag || '🌍'}</span>
                     <span>{t(c.name)}</span>
                   </span>
                 </SelectItem>
@@ -328,12 +328,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           </Select>
 
           <Select value={theme} onValueChange={(v) => setTheme(v as any)}>
-            <SelectTrigger className="h-9 px-2">
+            <SelectTrigger className="h-9 px-2" aria-label={t("Select theme")}>
               <SelectValue>
                 <span className="flex items-center gap-2">
-                  {theme === 'light' ? <Sun className="h-4 w-4" /> : 
-                   theme === 'dark' ? <Moon className="h-4 w-4" /> : 
-                   <Monitor className="h-4 w-4" />}
+                  {theme === 'light' ? <Sun className="h-4 w-4" aria-hidden="true" /> : 
+                   theme === 'dark' ? <Moon className="h-4 w-4" aria-hidden="true" /> : 
+                   <Monitor className="h-4 w-4" aria-hidden="true" />}
                   {t(theme.charAt(0).toUpperCase() + theme.slice(1))}
                 </span>
               </SelectValue>
@@ -466,7 +466,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                         setRegStep("club")
                                       }}
                                     >
-                                      <User className="mb-3 h-10 w-10 text-primary" />
+                                      <User className="mb-3 h-10 w-10 text-primary" aria-hidden="true" />
                                       <span className="text-base font-bold">{t("Guardian")}</span>
                                       <span className="text-xs text-muted-foreground mt-1 text-center">{t("Registering my children")}</span>
                                     </Label>
@@ -481,7 +481,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                         setRegStep("club")
                                       }}
                                     >
-                                    <ShieldCheck className="mb-3 h-10 w-10 text-primary" />
+                                    <ShieldCheck className="mb-3 h-10 w-10 text-primary" aria-hidden="true" />
                                     <span className="text-base font-bold">{t("Leader")}</span>
                                     <span className="text-xs text-muted-foreground mt-1 text-center">{t("Serving at a club")}</span>
                                   </Label>

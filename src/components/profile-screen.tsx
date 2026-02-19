@@ -151,7 +151,7 @@ export function ProfileScreen() {
       <div className="flex flex-col items-center gap-4">
         <div className="relative group">
           <Avatar className="w-24 h-24 border">
-            <AvatarImage src={avatarUrl} />
+            <AvatarImage src={avatarUrl} alt={user.name || t("User avatar")} />
             <AvatarFallback className="text-2xl">
               {user.name?.charAt(0) || user.email.charAt(0)}
             </AvatarFallback>
@@ -163,8 +163,9 @@ export function ProfileScreen() {
               className="rounded-full"
               onClick={() => fileInputRef.current?.click()}
               disabled={loading}
+              aria-label={t("Change profile picture")}
             >
-              <Camera className="w-4 h-4" />
+              <Camera className="w-4 h-4" aria-hidden="true" />
             </Button>
           </div>
           <input 
@@ -173,6 +174,7 @@ export function ProfileScreen() {
             className="hidden" 
             accept="image/*" 
             onChange={onAvatarChange} 
+            aria-hidden="true"
           />
         </div>
         {user.avatar && (
@@ -183,7 +185,7 @@ export function ProfileScreen() {
             onClick={removeAvatar}
             disabled={loading}
           >
-            <Trash2 className="w-4 h-4 mr-2" />
+            <Trash2 className="w-4 h-4 mr-2" aria-hidden="true" />
             {t("Remove Avatar")}
           </Button>
         )}
@@ -255,12 +257,12 @@ export function ProfileScreen() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-2">
-                    <Languages className="h-4 w-4" />
+                    <Languages className="h-4 w-4" aria-hidden="true" />
                     {t("Language")}
                   </FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger aria-label={t("Select language")}>
                         <SelectValue placeholder={t("Select language")} />
                       </SelectTrigger>
                     </FormControl>
@@ -280,12 +282,12 @@ export function ProfileScreen() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-2">
-                    <Globe className="h-4 w-4" />
+                    <Globe className="h-4 w-4" aria-hidden="true" />
                     {t("Country")}
                   </FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger aria-label={t("Select country")}>
                         <SelectValue placeholder={t("Select country")} />
                       </SelectTrigger>
                     </FormControl>
@@ -293,7 +295,7 @@ export function ProfileScreen() {
                       {availableCountries.map((c) => (
                         <SelectItem key={c.isoCode} value={c.isoCode}>
                           <span className="flex items-center gap-2">
-                            <span>{countryMetadata[c.isoCode]?.flag || '🌍'}</span>
+                            <span aria-hidden="true">{countryMetadata[c.isoCode]?.flag || '🌍'}</span>
                             <span>{t(c.name)}</span>
                           </span>
                         </SelectItem>
@@ -311,33 +313,33 @@ export function ProfileScreen() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-2">
-                    {field.value === "light" && <Sun className="h-4 w-4" />}
-                    {field.value === "dark" && <Moon className="h-4 w-4" />}
-                    {field.value === "system" && <Monitor className="h-4 w-4" />}
+                    {field.value === "light" && <Sun className="h-4 w-4" aria-hidden="true" />}
+                    {field.value === "dark" && <Moon className="h-4 w-4" aria-hidden="true" />}
+                    {field.value === "system" && <Monitor className="h-4 w-4" aria-hidden="true" />}
                     {t("Theme")}
                   </FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger aria-label={t("Select theme")}>
                         <SelectValue placeholder={t("Select theme")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="light">
                         <span className="flex items-center gap-2">
-                          <Sun className="h-4 w-4" />
+                          <Sun className="h-4 w-4" aria-hidden="true" />
                           {t("Light")}
                         </span>
                       </SelectItem>
                       <SelectItem value="dark">
                         <span className="flex items-center gap-2">
-                          <Moon className="h-4 w-4" />
+                          <Moon className="h-4 w-4" aria-hidden="true" />
                           {t("Dark")}
                         </span>
                       </SelectItem>
                       <SelectItem value="system">
                         <span className="flex items-center gap-2">
-                          <Monitor className="h-4 w-4" />
+                          <Monitor className="h-4 w-4" aria-hidden="true" />
                           {t("System")}
                         </span>
                       </SelectItem>
@@ -350,7 +352,7 @@ export function ProfileScreen() {
           </div>
 
           <Button type="submit" disabled={loading} className="w-full">
-            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />}
             {t("Save Changes")}
           </Button>
         </form>

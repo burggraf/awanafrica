@@ -47,8 +47,12 @@ export function NavUser({ onProfileClick, onAuthClick }: NavUserProps) {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" onClick={onAuthClick}>
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <SidebarMenuButton 
+            size="lg" 
+            onClick={onAuthClick}
+            aria-label={t("Sign in to your account")}
+          >
+            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground" aria-hidden="true">
               <UserIcon className="size-4" />
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
@@ -73,9 +77,10 @@ export function NavUser({ onProfileClick, onAuthClick }: NavUserProps) {
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              aria-label={t("User menu: {{name}}", { name: user.name || user.email })}
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={avatarUrl} alt={user.name} />
+                <AvatarImage src={avatarUrl} alt={user.name || t("User avatar")} />
                 <AvatarFallback className="rounded-lg">
                   {user.name?.charAt(0) || user.email.charAt(0)}
                 </AvatarFallback>
@@ -84,7 +89,7 @@ export function NavUser({ onProfileClick, onAuthClick }: NavUserProps) {
                 <span className="truncate font-semibold">{user.name || user.email}</span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              <ChevronsUpDown className="ml-auto size-4" aria-hidden="true" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent

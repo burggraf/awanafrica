@@ -130,13 +130,13 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, classNam
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
+            <SidebarMenuButton size="lg" asChild aria-label={t("Go to Dashboard")}>
               <a href="/dashboard" onClick={(e) => {
                 e.preventDefault()
                 onPageChange("dashboard")
               }}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden bg-white">
-                  <img src="/logo.svg" alt="AwanAfrica Logo" className="size-full object-cover" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden bg-white" aria-hidden="true">
+                  <img src="/logo.svg" alt="" className="size-full object-cover" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">AwanAfrica</span>
@@ -158,8 +158,9 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, classNam
               <SidebarMenuButton 
                 tooltip={item.title} 
                 onClick={() => onPageChange(item.url.substring(1))}
+                aria-label={item.title}
               >
-                {item.icon && <item.icon />}
+                {item.icon && <item.icon aria-hidden="true" />}
                 <span>{item.title}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -170,8 +171,12 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, classNam
         {navClubContext.length > 0 && currentClub && (
           <>
             <SidebarSeparator />
-            <div className="px-4 py-2 text-[10px] text-muted-foreground uppercase tracking-wider font-medium flex items-center gap-2">
-              <School className="size-3" />
+            <div 
+              className="px-4 py-2 text-[10px] text-muted-foreground uppercase tracking-wider font-medium flex items-center gap-2"
+              role="heading"
+              aria-level={3}
+            >
+              <School className="size-3" aria-hidden="true" />
               <span>{currentClub.name}</span>
             </div>
             <SidebarMenu>
@@ -180,8 +185,9 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, classNam
                   <SidebarMenuButton 
                     tooltip={item.title} 
                     onClick={() => onPageChange(item.url.substring(1))}
+                    aria-label={item.title}
                   >
-                    {item.icon && <item.icon />}
+                    {item.icon && <item.icon aria-hidden="true" />}
                     <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -193,7 +199,10 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, classNam
         {isPendingLeader && (
           <>
             <SidebarSeparator />
-            <div className="px-4 py-2 text-[10px] text-amber-600 dark:text-amber-400 uppercase tracking-wider font-medium">
+            <div 
+              className="px-4 py-2 text-[10px] text-amber-600 dark:text-amber-400 uppercase tracking-wider font-medium"
+              role="alert"
+            >
               {t("Pending Approval")}
             </div>
             <div className="px-4 py-2 text-xs text-muted-foreground">
@@ -205,8 +214,12 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, classNam
         {navAdmin.length > 0 && (
           <>
             <SidebarSeparator />
-            <div className="px-4 py-2 text-[10px] text-muted-foreground uppercase tracking-wider font-medium flex items-center gap-2">
-              <Shield className="size-3" />
+            <div 
+              className="px-4 py-2 text-[10px] text-muted-foreground uppercase tracking-wider font-medium flex items-center gap-2"
+              role="heading"
+              aria-level={3}
+            >
+              <Shield className="size-3" aria-hidden="true" />
               <span>{t("Administration")}</span>
             </div>
             <SidebarMenu>
@@ -215,8 +228,9 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, classNam
                   <SidebarMenuButton 
                     tooltip={item.title} 
                     onClick={() => onPageChange(item.url.substring(1))}
+                    aria-label={item.title}
                   >
-                    {item.icon && <item.icon />}
+                    {item.icon && <item.icon aria-hidden="true" />}
                     <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -227,7 +241,11 @@ export function AppSidebar({ onProfileClick, onAuthClick, onPageChange, classNam
       </SidebarContent>
       <SidebarFooter>
         <div className="px-2 mb-2">
-          <div className="flex items-center justify-around bg-muted/50 rounded-lg p-1 gap-1">
+          <div 
+            className="flex items-center justify-around bg-muted/50 rounded-lg p-1 gap-1"
+            role="group"
+            aria-label={t("Display settings")}
+          >
             <ModeToggle />
             <LanguageToggle />
             <CountryToggle />

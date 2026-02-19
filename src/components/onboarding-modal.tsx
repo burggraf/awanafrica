@@ -220,6 +220,7 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
                       size="sm"
                       className="flex-1 min-w-[120px]"
                       onClick={() => setSelectedRole("Guardian")}
+                      aria-pressed={selectedRole === "Guardian"}
                     >
                       {t("Parent/Guardian")}
                     </Button>
@@ -228,6 +229,7 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
                       size="sm"
                       className="flex-1 min-w-[100px]"
                       onClick={() => setSelectedRole("Leader")}
+                      aria-pressed={selectedRole === "Leader"}
                     >
                       {t("Leader")}
                     </Button>
@@ -236,6 +238,7 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
                       size="sm"
                       className="flex-1 min-w-[120px]"
                       onClick={() => setSelectedRole("Admin")}
+                      aria-pressed={selectedRole === "Admin"}
                     >
                       {t("Administrator")}
                     </Button>
@@ -253,7 +256,11 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
                           value={registrationNumber} 
                           onChange={(e) => setRegistrationNumber(e.target.value)}
                         />
-                        <Button onClick={handleRegistrationLookup} disabled={!registrationNumber || isSubmitting}>
+                        <Button 
+                          onClick={handleRegistrationLookup} 
+                          disabled={!registrationNumber || isSubmitting}
+                          aria-label={t("Search by registration number")}
+                        >
                           {t("Find")}
                         </Button>
                       </div>
@@ -270,9 +277,9 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
 
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label>{t("Country")}</Label>
+                        <Label id="country-label">{t("Country")}</Label>
                         <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                          <SelectTrigger>
+                          <SelectTrigger aria-labelledby="country-label">
                             <SelectValue placeholder={t("Select Country")} />
                           </SelectTrigger>
                           <SelectContent>
@@ -285,9 +292,9 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
 
                       {selectedCountry && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
-                          <Label>{t("Region")}</Label>
+                          <Label id="region-label">{t("Region")}</Label>
                           <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-                            <SelectTrigger>
+                            <SelectTrigger aria-labelledby="region-label">
                               <SelectValue placeholder={t("Select Region")} />
                             </SelectTrigger>
                             <SelectContent>
@@ -301,10 +308,11 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
 
                       {selectedRegion && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
-                          <Label>{t("Select Club")}</Label>
+                          <Label htmlFor="club-search">{t("Select Club")}</Label>
                           <div className="relative">
-                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                             <Input 
+                              id="club-search"
                               placeholder={t("Search clubs...")} 
                               className="pl-8" 
                               value={clubSearch}
@@ -313,19 +321,21 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
                           </div>
                           <ScrollArea className="h-40 border rounded-md p-2">
                             {filteredClubs.length > 0 ? (
-                              <div className="space-y-1">
+                              <div className="space-y-1" role="listbox" aria-label={t("Clubs in this region")}>
                                 {filteredClubs.map(c => (
                                   <Button 
                                     key={c.id} 
                                     variant={selectedClub?.id === c.id ? "secondary" : "ghost"} 
                                     className="w-full justify-start font-normal h-auto py-2 px-3 text-wrap text-left"
                                     onClick={() => setSelectedClub(c)}
+                                    role="option"
+                                    aria-selected={selectedClub?.id === c.id}
                                   >
                                     <div>
                                       <div className="font-medium">{c.name}</div>
                                       <div className="text-[10px] text-muted-foreground">Registration: {c.registration}</div>
                                     </div>
-                                    {selectedClub?.id === c.id && <Check className="ml-auto h-4 w-4 shrink-0" />}
+                                    {selectedClub?.id === c.id && <Check className="ml-auto h-4 w-4 shrink-0" aria-hidden="true" />}
                                   </Button>
                                 ))}
                               </div>
@@ -338,7 +348,7 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
                     </div>
 
                     {selectedClub && (
-                      <div className="p-3 border rounded-lg bg-primary/5 border-primary/20 animate-in zoom-in-95">
+                      <div className="p-3 border rounded-lg bg-primary/5 border-primary/20 animate-in zoom-in-95" aria-live="polite">
                         <p className="text-[10px] uppercase font-bold text-primary/70 tracking-wider mb-1">{t("Selected Club")}</p>
                         <p className="text-lg font-bold leading-tight">{selectedClub.name}</p>
                         <p className="text-xs text-muted-foreground mt-1">
@@ -351,8 +361,8 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
 
                 {selectedRole === "Admin" && (
                   <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="flex items-center gap-2 p-3 border rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-200">
-                      <AlertCircle className="h-5 w-5 shrink-0" />
+                    <div className="flex items-center gap-2 p-3 border rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-200" role="alert">
+                      <AlertCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
                       <p className="text-xs">
                         {t("Requesting administrative access. This will require manual verification by an existing Global Administrator.")}
                       </p>
@@ -360,9 +370,9 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
 
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label>{t("Target Country (Optional)")}</Label>
+                        <Label id="admin-country-label">{t("Target Country (Optional)")}</Label>
                         <Select value={adminCountry} onValueChange={setAdminCountry}>
-                          <SelectTrigger>
+                          <SelectTrigger aria-labelledby="admin-country-label">
                             <SelectValue placeholder={t("Global Scope")} />
                           </SelectTrigger>
                           <SelectContent>
@@ -376,9 +386,9 @@ function OnboardingModalInner({ initialStep = "onboarding" }: OnboardingModalInn
 
                       {adminCountry && adminCountry !== "global" && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
-                          <Label>{t("Target Region (Optional)")}</Label>
+                          <Label id="admin-region-label">{t("Target Region (Optional)")}</Label>
                           <Select value={adminRegion} onValueChange={setAdminRegion}>
-                            <SelectTrigger>
+                            <SelectTrigger aria-labelledby="admin-region-label">
                               <SelectValue placeholder={t("Country-wide Scope")} />
                             </SelectTrigger>
                             <SelectContent>
