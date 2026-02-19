@@ -24,15 +24,29 @@ export function useClubDiscovery() {
       const { latitude, longitude } = position.coords
       console.log(`Searching for clubs near ${latitude}, ${longitude}`)
 
-      // Fetch all clubs with coordinates
-      const clubs = await pb.collection("clubs").getFullList<ClubsResponseType>({
-        filter: "lat != null && lng != null",
-        expand: "region,region.country",
+      // Bounding box for ~50km radius
+      const latRange = 0.45 
+      const lngRange = 0.45
+      
+      const filter = [
+        `lat >= ${latitude - latRange}`,
+        `lat <= ${latitude + latRange}`,
+        `lng >= ${longitude - lngRange}`,
+        `lng <= ${longitude + lngRange}`,
+        `active = true`
+      ].join(" && ")
+
+      // Fetch clubs within bounding box using pagination
+      const resultList = await pb.collection("clubs").getList<ClubsResponseType>(1, 50, {
+        filter,
+        expand: "country,region",
         requestKey: "nearby_clubs_discovery"
       })
 
+      const clubs = resultList.items
+
       if (clubs.length === 0) {
-        console.warn("No clubs found with coordinates in the database")
+        console.warn("No clubs found in this area")
       }
 
       // Calculate distance using Haversine formula and sort
@@ -40,7 +54,6 @@ export function useClubDiscovery() {
         const d = calculateDistance(latitude, longitude, club.lat!, club.lng!)
         return { ...club, distance: d }
       }).sort((a, b) => (a as any).distance - (b as any).distance)
-      .slice(0, 25)
 
       setNearbyClubs(sortedClubs)
       return sortedClubs
