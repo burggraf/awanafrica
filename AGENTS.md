@@ -56,7 +56,7 @@ Use the `useLayout()` hook in page components to customize the header and footer
 - `setFooterCenter(ReactNode)`: Override the logo/app name area.
 - `setFooterRight(ReactNode)`: Override the settings menu area.
 - `resetLayout()`: Resets all layout overrides to defaults (called automatically on page changes in `App.tsx`).
-- **Sidebar**: A Shadcn `Sheet` component with a **1s (1000ms) slow transition**.
+- **Sidebar**: A Shadcn `Sheet` component with a **0.5s (500ms) transition**.
 - **Main Content**: Scrollable container between the header and footer.
 
 ### 4. User Profile & Avatars

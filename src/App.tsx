@@ -137,7 +137,7 @@ function MainContent() {
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-72 transition-transform duration-1000 ease-in-out">
+              <SheetContent side="left" className="p-0 w-72 transition-transform duration-500 ease-in-out">
                 <SheetTitle className="sr-only">Menu</SheetTitle>
                 <SheetDescription className="sr-only">
                   Navigation menu for AwanAfrica app.
