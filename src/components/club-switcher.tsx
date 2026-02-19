@@ -55,7 +55,12 @@ export function ClubSwitcher() {
     const scopeLabel = getAdminScopeLabel()
     return (
       <div className="flex flex-col gap-1 w-full">
-        <Button variant="ghost" disabled className="w-full justify-start gap-2 px-3 opacity-100 cursor-default">
+        <Button 
+          variant="ghost" 
+          disabled 
+          className="w-full justify-start gap-2 px-3 opacity-100 cursor-default"
+          aria-label={`${t("Administrative Scope")}: ${scopeLabel}`}
+        >
           <School className="h-4 w-4 shrink-0" />
           <span className="truncate">{scopeLabel}</span>
         </Button>
@@ -65,6 +70,7 @@ export function ClubSwitcher() {
             size="sm" 
             className="mx-3 justify-between h-7 text-[10px] font-medium"
             onClick={() => setCurrentClub(null)}
+            aria-label={t("Clear current club: {{name}}", { name: currentClub.name })}
           >
             <span className="truncate">{currentClub.name}</span>
             <X className="h-3 w-3 shrink-0 opacity-50" />
@@ -76,13 +82,18 @@ export function ClubSwitcher() {
 
   // CASE 2: Non-admin with multiple memberships - show dropdown
   if (memberships.length > 1) {
+    const triggerLabel = currentClub?.name || t("Select Club")
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="w-full justify-between gap-2 px-3">
+          <Button 
+            variant="outline" 
+            className="w-full justify-between gap-2 px-3"
+            aria-label={t("Switch club: current {{name}}", { name: triggerLabel })}
+          >
             <div className="flex items-center gap-2 truncate">
               <School className="h-4 w-4 shrink-0" />
-              <span className="truncate">{currentClub?.name || t("Select Club")}</span>
+              <span className="truncate">{triggerLabel}</span>
             </div>
             <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -106,7 +117,12 @@ export function ClubSwitcher() {
     const membership = memberships[0]
     const clubLabel = getMembershipLabel(membership)
     return (
-      <Button variant="ghost" disabled className="w-full justify-start gap-2 px-3 opacity-100 cursor-default">
+      <Button 
+        variant="ghost" 
+        disabled 
+        className="w-full justify-start gap-2 px-3 opacity-100 cursor-default"
+        aria-label={`${t("My Club")}: ${clubLabel}`}
+      >
         <School className="h-4 w-4 shrink-0" />
         <span className="truncate">{clubLabel}</span>
       </Button>

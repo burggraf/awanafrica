@@ -15,13 +15,14 @@ export function CountryToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-9 px-2 gap-1">
-          <span className="text-lg leading-none shrink-0" role="img" aria-label={t('Country')}>
+        <Button variant="ghost" size="sm" className="h-9 px-2 gap-1" aria-label={t("Select country")}>
+          <span className="text-lg leading-none shrink-0" role="img" aria-hidden="true">
             {countryMetadata[country]?.flag || '🌍'}
           </span>
           <span className="text-[10px] text-muted-foreground font-mono">
             {country}
           </span>
+          <span className="sr-only">{t("Current country")}: {country}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

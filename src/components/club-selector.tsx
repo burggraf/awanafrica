@@ -170,8 +170,9 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
           className="h-16 justify-start gap-4 px-4 rounded-xl border-2 hover:bg-accent hover:border-primary transition-all"
           onClick={handleGPSDiscovery}
           disabled={isLocating}
+          aria-label={t("Find clubs near me using GPS")}
         >
-          <div className="bg-primary/10 p-2 rounded-lg">
+          <div className="bg-primary/10 p-2 rounded-lg" aria-hidden="true">
             {isLocating ? <Loader2 className="h-6 w-6 animate-spin text-primary" /> : <MapPin className="h-6 w-6 text-primary" />}
           </div>
           <div className="flex flex-col items-start text-left">
@@ -185,7 +186,7 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
             <p className="text-xs font-semibold px-2 text-muted-foreground uppercase tracking-wider">
               {t("Clubs Near You")}
             </p>
-            <div className="max-h-[200px] overflow-y-auto space-y-1 pr-1">
+            <div className="max-h-[200px] overflow-y-auto space-y-1 pr-1" role="list" aria-label={t("Nearby clubs list")}>
               {nearbyClubs.map((club) => (
                 <Button
                   key={club.id}
@@ -195,8 +196,9 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
                     setSelectedClub(club)
                     onSelect(club)
                   }}
+                  aria-label={t("Select club: {{name}}", { name: club.name })}
                 >
-                  <MapPin className="h-4 w-4 shrink-0 text-primary" />
+                  <MapPin className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                   <div className="flex flex-col items-start text-left flex-1 min-w-0">
                     <span className="text-sm font-bold leading-tight truncate w-full">{club.name}</span>
                     <div className="flex items-center justify-between w-full text-[0.7rem] text-muted-foreground mt-0.5">
@@ -221,6 +223,7 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
                 setNearbyClubs([])
                 setDiscoveryMethod("none") 
               }}
+              aria-label={t("Clear results")}
             >
               {t("Clear results")}
             </Button>
@@ -231,8 +234,9 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
           variant="outline" 
           className="h-16 justify-start gap-4 px-4 rounded-xl border-2 hover:bg-accent hover:border-primary transition-all"
           onClick={() => setDiscoveryMethod("code")}
+          aria-label={t("Enter Club Registration #")}
         >
-          <div className="bg-primary/10 p-2 rounded-lg">
+          <div className="bg-primary/10 p-2 rounded-lg" aria-hidden="true">
             <Check className="h-6 w-6 text-primary" />
           </div>
           <div className="flex flex-col items-start text-left">
@@ -245,8 +249,9 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
           variant="outline" 
           className="h-16 justify-start gap-4 px-4 rounded-xl border-2 hover:bg-accent hover:border-primary transition-all"
           onClick={() => setDiscoveryMethod("browse")}
+          aria-label={t("Search for my Club")}
         >
-          <div className="bg-primary/10 p-2 rounded-lg">
+          <div className="bg-primary/10 p-2 rounded-lg" aria-hidden="true">
             <ChevronsUpDown className="h-6 w-6 text-primary" />
           </div>
           <div className="flex flex-col items-start text-left">
@@ -274,10 +279,16 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
                 {selectedClub.registration}
               </p>
             </div>
-            <Button variant="link" size="sm" className="h-auto p-0 text-xs mt-2" onClick={() => {
-              setSelectedClub(null)
-              onSelect(null)
-            }}>
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="h-auto p-0 text-xs mt-2" 
+              onClick={() => {
+                setSelectedClub(null)
+                onSelect(null)
+              }}
+              aria-label={t("Change selected club")}
+            >
               {t("Change Club")}
             </Button>
           </div>
@@ -293,8 +304,9 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
         size="sm" 
         className="h-auto p-0 text-xs flex items-center gap-1 mb-2"
         onClick={() => setDiscoveryMethod("none")}
+        aria-label={t("Back to search options")}
       >
-        <ChevronLeft className="h-3 w-3" />
+        <ChevronLeft className="h-3 w-3" aria-hidden="true" />
         {t("Back to search options")}
       </Button>
 
@@ -306,12 +318,18 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
               value={code} 
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               className="pr-10"
+              aria-label={t("Registration number")}
             />
             {isSearchingCode && (
-              <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
+              <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />
             )}
           </div>
-          <Button variant="secondary" onClick={handleCodeSubmit} disabled={isSearchingCode || !code}>
+          <Button 
+            variant="secondary" 
+            onClick={handleCodeSubmit} 
+            disabled={isSearchingCode || !code}
+            aria-label={t("Search by registration number")}
+          >
             {t("Search")}
           </Button>
         </div>
@@ -321,7 +339,7 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
         <>
           <div className="grid grid-cols-2 gap-2">
             <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-              <SelectTrigger>
+              <SelectTrigger aria-label={t("Select country")}>
                 <SelectValue placeholder={t("Country")} />
               </SelectTrigger>
               <SelectContent>
@@ -332,7 +350,7 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
             </Select>
 
             <Select value={selectedRegion} onValueChange={setSelectedRegion} disabled={!selectedCountry}>
-              <SelectTrigger>
+              <SelectTrigger aria-label={t("Select region")}>
                 <SelectValue placeholder={t("Region")} />
               </SelectTrigger>
               <SelectContent>
@@ -352,9 +370,10 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
                   aria-expanded={open}
                   className="w-full justify-between"
                   disabled={!selectedRegion}
+                  aria-label={selectedClub ? t("Current club: {{name}}", { name: selectedClub.name }) : t("Select your club...")}
                 >
                   {selectedClub ? selectedClub.name : t("Select your club...")}
-                  {isLoadingClubs ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />}
+                  {isLoadingClubs ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
@@ -372,12 +391,14 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
                             onSelect(club)
                             setOpen(false)
                           }}
+                          aria-label={t("Select club: {{name}}", { name: club.name })}
                         >
                           <Check
                             className={cn(
                               "mr-2 h-4 w-4",
                               selectedClub?.id === club.id ? "opacity-100" : "opacity-0"
                             )}
+                            aria-hidden="true"
                           />
                           <div className="flex flex-col">
                             <span>{club.name}</span>
@@ -413,10 +434,16 @@ export function ClubSelector({ onSelect }: ClubSelectorProps) {
               {selectedClub.registration}
             </p>
           </div>
-          <Button variant="link" size="sm" className="h-auto p-0 text-xs mt-2" onClick={() => {
-            setSelectedClub(null)
-            onSelect(null)
-          }}>
+          <Button 
+            variant="link" 
+            size="sm" 
+            className="h-auto p-0 text-xs mt-2" 
+            onClick={() => {
+              setSelectedClub(null)
+              onSelect(null)
+            }}
+            aria-label={t("Change selected club")}
+          >
             {t("Change Club")}
           </Button>
         </div>

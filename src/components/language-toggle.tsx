@@ -24,13 +24,14 @@ export function LanguageToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-9 px-2 gap-1">
-          <span className="text-lg leading-none shrink-0" role="img" aria-label={t('Language')}>
+        <Button variant="ghost" size="sm" className="h-9 px-2 gap-1" aria-label={t("Select language")}>
+          <span className="text-lg leading-none shrink-0" role="img" aria-hidden="true">
             {languages[currentLanguage as keyof typeof languages]?.flag || <Languages className="h-4 w-4" />}
           </span>
           <span className="text-[10px] text-muted-foreground font-mono">
             {languages[currentLanguage as keyof typeof languages]?.short || currentLanguage.toUpperCase()}
           </span>
+          <span className="sr-only">{t("Current language")}: {languages[currentLanguage as keyof typeof languages]?.name || currentLanguage}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
