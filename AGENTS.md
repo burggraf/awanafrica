@@ -2,7 +2,7 @@
 
 This file provides instructions and context for AI agents working on this project.
 
-## Tech Stack
+## Tech Stack 
 - **Frontend**: React (v19) with TypeScript
 - **Styling**: Tailwind CSS (v3) + `lucide-react` icons
 - **UI Components**: Shadcn UI (standardized in `src/components/ui`)
